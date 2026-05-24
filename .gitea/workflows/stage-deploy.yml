@@ -223,28 +223,15 @@ jobs:
             ${WORK_DIR}/docker-compose.stage.yml \
             ${{ env.STAGE_PATH }}/docker-compose.stage.yml
 
-      - name: Wait for GHCR image (handles race with GitHub Actions)
-        run: |
-          # Gitea mirror sync can win the race against the GitHub Actions
-          # build-and-publish workflow. Poll for the expected SHA tag with a
-          # 10-minute timeout — enough for the GHCR build to complete and
-          # short enough not to wedge the deploy queue.
-          SHORT_SHA="${GITHUB_SHA:0:7}"
-          TARGET="${{ env.GHCR_IMAGE }}:sha-${SHORT_SHA}"
-          echo "Waiting for ${TARGET} to be available on GHCR..."
-          for i in $(seq 1 60); do
-            if /usr/bin/docker manifest inspect "${TARGET}" >/dev/null 2>&1; then
-              echo "✅ Image ${TARGET} is available"
-              break
-            fi
-            if [ "$i" = "60" ]; then
-              echo "❌ Timed out waiting for ${TARGET} after 10 minutes"
-              echo "Check GitHub Actions: https://github.com/${{ github.repository }}/actions"
-              exit 1
-            fi
-            echo "  attempt $i/60 — image not yet available, sleeping 10s"
-            sleep 10
-          done
+      # NOTE: no more wait-for-GHCR loop here. This workflow is now
+      # triggered by GitHub Actions only AFTER the image is successfully
+      # pushed to GHCR (see .github/workflows/build-and-publish.yml step
+      # "Trigger Gitea deploy workflow"). The image is guaranteed to exist
+      # by the time we get here.
+      #
+      # If you trigger this workflow manually via workflow_dispatch on a
+      # commit whose GitHub build hasn't completed yet, `docker compose
+      # pull` below will fail clearly — no need for a defensive poll.
 
       - name: Pull image and (re)start container
         working-directory: ${{ env.STAGE_PATH }}

@@ -5,12 +5,12 @@
 cc-fe uses a **pull-based deployment** with **secrets fetched at container startup** — never written to disk on the host:
 
 1. **GitHub** is the source of truth and the public FOSS repo.
-2. **GitHub Actions** builds the Docker image, scans it with Trivy, and pushes to **GHCR** (`ghcr.io/perpetuator-llc/cc-fe`).
-3. **Gitea** mirrors the GitHub repo (pull mirror, syncs every few minutes or on webhook).
-4. **Gitea Actions** triggers `.gitea/workflows/stage-deploy.yml` on push to `main`, which:
-   - Runs audit/lint/test gates
-   - Waits for the GHCR image (polls for the SHA tag)
-   - Pulls the image and `docker compose up -d`
+2. **GitHub Actions** builds the Docker image, scans it with Trivy, pushes to **GHCR** (`ghcr.io/perpetuator-llc/cc-fe`), then explicitly **dispatches the Gitea deploy workflow** as the last step.
+3. **Gitea** mirrors the GitHub repo (pull mirror) for source-of-truth visibility, but the deploy trigger is the GitHub-Actions-initiated dispatch, **not** the mirror sync (which doesn't fire push events in Gitea Actions).
+4. **Gitea Actions** runs `.gitea/workflows/stage-deploy.yml` on the lestrange runner:
+   - Re-runs audit/lint/test gates
+   - Pulls the image (guaranteed to exist — GitHub Actions just confirmed)
+   - `docker compose up -d`
 5. **The container itself** fetches `CC_FE_*` secrets from OpenBao at startup using AppRole credentials mounted read-only from `/etc/vault/`. Secrets are exported as env vars in-process, the AppRole token is revoked, and the SSR server starts. No `.env.stage` ever touches disk.
 
 ```
@@ -22,28 +22,29 @@ GitHub push to main
         │
         ├─→ Docker build
         ├─→ Trivy scan (blocks CRITICAL/HIGH with fixes)
-        └─→ Push to ghcr.io/perpetuator-llc/cc-fe:{latest, sha-XXX}
-
-(Gitea mirror sync, ~1–5 min)
+        ├─→ Push to ghcr.io/perpetuator-llc/cc-fe:{latest, sha-XXX}
+        └─→ POST workflow_dispatch → Gitea stage-deploy.yml
+              │
+              ↓
+git.perpetuator.io/perpetuator/cc-fe
   │
-  └─→ Gitea push to main on git.perpetuator.io
-        │
-        └─→ stage-deploy.yml
-              ├─→ audit / lint / test (gates)
-              ├─→ rsync docker-compose.stage.yml to deploy path
-              ├─→ wait for GHCR sha-XXX tag (10 min timeout)
-              ├─→ docker compose pull
-              ├─→ docker compose up -d
-              │      │
-              │      └─→ container starts → docker-entrypoint.sh:
-              │            ├─→ AppRole login (reads /etc/vault/* from
-              │            │    host, mounted ro into container)
-              │            ├─→ GET secret/services/cc-fe/staging
-              │            ├─→ export CC_FE_* env vars
-              │            ├─→ revoke vault token
-              │            └─→ exec node server/server.mjs
-              └─→ health check on /health
+  └─→ stage-deploy.yml (runs on lestrange runner)
+        ├─→ audit / lint / test (gates)
+        ├─→ rsync docker-compose.stage.yml to deploy path
+        ├─→ docker compose pull
+        ├─→ docker compose up -d
+        │      │
+        │      └─→ container starts → docker-entrypoint.sh:
+        │            ├─→ AppRole login (reads /etc/vault/* from
+        │            │    host, mounted ro into container)
+        │            ├─→ GET secret/services/cc-fe/staging
+        │            ├─→ export CC_FE_* env vars
+        │            ├─→ revoke vault token
+        │            └─→ exec node server/server.mjs
+        └─→ health check on /health
 ```
+
+(Gitea pull-mirror still runs in parallel for source visibility, but is no longer on the deploy critical path.)
 
 ---
 
@@ -81,6 +82,27 @@ Polling has a 5–10 min lag. To trigger the Gitea mirror sync on every GitHub p
 6. **Active**: ✅
 
 This makes Gitea sync within ~1 second of each GitHub push.
+
+### 1b. Gitea Dispatch Token (REQUIRED for auto-deploy)
+
+GitHub Actions calls Gitea's `workflow_dispatch` API to trigger the deploy after each successful image push. This needs a Gitea API token stored as a GitHub repo secret.
+
+**Why this instead of relying on mirror sync?** Gitea Actions does not fire push events on mirror sync — this is a documented limitation. The cleanest workaround is for GitHub Actions to explicitly dispatch the Gitea workflow once it knows the image is published, which also eliminates any race condition where the deploy could start before the image is available.
+
+**One-time setup:**
+
+1. **Create a Gitea token**: in Gitea, click your avatar → **Settings** → **Applications** → **Manage Access Tokens**.
+   - **Token Name**: `GitHub Actions dispatch — cc-fe`
+   - **Scopes**: just `write:repository` (needed to dispatch workflows)
+   - Click **Generate Token** and copy the token (Gitea shows it only once).
+
+2. **Add it as a GitHub repo secret**: in the GitHub cc-fe repo, go to **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
+   - **Name**: `GITEA_DISPATCH_TOKEN`
+   - **Value**: (paste the Gitea token)
+
+3. **Verify**: merge a trivial change to `main`. The `build-and-publish.yml` workflow's last step ("Trigger Gitea deploy workflow") should print `✅ Gitea stage-deploy dispatched for ref main` and the Gitea Actions tab should show a new run within a few seconds.
+
+If the secret is missing, the workflow emits a warning rather than failing — deploys just need to be triggered manually from the Gitea Actions UI until the secret is added.
 
 ### 2. GHCR Authentication on Lestrange
 
