@@ -5,12 +5,12 @@
 cc-fe uses a **pull-based deployment** with **secrets fetched at container startup** — never written to disk on the host:
 
 1. **GitHub** is the source of truth and the public FOSS repo.
-2. **GitHub Actions** builds the Docker image, scans it with Trivy, and pushes to **GHCR** (`ghcr.io/perpetuator-llc/cc-fe`).
-3. **Gitea** mirrors the GitHub repo (pull mirror, syncs every few minutes or on webhook).
-4. **Gitea Actions** triggers `.gitea/workflows/stage-deploy.yml` on push to `main`, which:
-   - Runs audit/lint/test gates
-   - Waits for the GHCR image (polls for the SHA tag)
-   - Pulls the image and `docker compose up -d`
+2. **GitHub Actions** builds the Docker image, scans it with Trivy, pushes to **GHCR** (`ghcr.io/perpetuator-llc/cc-fe`), then explicitly **dispatches the Gitea deploy workflow** as the last step.
+3. **Gitea** mirrors the GitHub repo (pull mirror) for source-of-truth visibility, but the deploy trigger is the GitHub-Actions-initiated dispatch, **not** the mirror sync (which doesn't fire push events in Gitea Actions).
+4. **Gitea Actions** runs `.gitea/workflows/stage-deploy.yml` on the lestrange runner:
+   - Re-runs audit/lint/test gates
+   - Pulls the image (guaranteed to exist — GitHub Actions just confirmed)
+   - `docker compose up -d`
 5. **The container itself** fetches `CC_FE_*` secrets from OpenBao at startup using AppRole credentials mounted read-only from `/etc/vault/`. Secrets are exported as env vars in-process, the AppRole token is revoked, and the SSR server starts. No `.env.stage` ever touches disk.
 
 ```
@@ -22,28 +22,29 @@ GitHub push to main
         │
         ├─→ Docker build
         ├─→ Trivy scan (blocks CRITICAL/HIGH with fixes)
-        └─→ Push to ghcr.io/perpetuator-llc/cc-fe:{latest, sha-XXX}
-
-(Gitea mirror sync, ~1–5 min)
+        ├─→ Push to ghcr.io/perpetuator-llc/cc-fe:{latest, sha-XXX}
+        └─→ POST workflow_dispatch → Gitea stage-deploy.yml
+              │
+              ↓
+git.perpetuator.io/perpetuator/cc-fe
   │
-  └─→ Gitea push to main on git.perpetuator.io
-        │
-        └─→ stage-deploy.yml
-              ├─→ audit / lint / test (gates)
-              ├─→ rsync docker-compose.stage.yml to deploy path
-              ├─→ wait for GHCR sha-XXX tag (10 min timeout)
-              ├─→ docker compose pull
-              ├─→ docker compose up -d
-              │      │
-              │      └─→ container starts → docker-entrypoint.sh:
-              │            ├─→ AppRole login (reads /etc/vault/* from
-              │            │    host, mounted ro into container)
-              │            ├─→ GET secret/services/cc-fe/staging
-              │            ├─→ export CC_FE_* env vars
-              │            ├─→ revoke vault token
-              │            └─→ exec node server/server.mjs
-              └─→ health check on /health
+  └─→ stage-deploy.yml (runs on lestrange runner)
+        ├─→ audit / lint / test (gates)
+        ├─→ rsync docker-compose.stage.yml to deploy path
+        ├─→ docker compose pull
+        ├─→ docker compose up -d
+        │      │
+        │      └─→ container starts → docker-entrypoint.sh:
+        │            ├─→ AppRole login (reads /etc/vault/* from
+        │            │    host, mounted ro into container)
+        │            ├─→ GET secret/services/cc-fe/staging
+        │            ├─→ export CC_FE_* env vars
+        │            ├─→ revoke vault token
+        │            └─→ exec node server/server.mjs
+        └─→ health check on /health
 ```
+
+(Gitea pull-mirror still runs in parallel for source visibility, but is no longer on the deploy critical path.)
 
 ---
 
@@ -82,31 +83,57 @@ Polling has a 5–10 min lag. To trigger the Gitea mirror sync on every GitHub p
 
 This makes Gitea sync within ~1 second of each GitHub push.
 
-### 2. GHCR Authentication on Lestrange
+### 1b. Gitea Dispatch Token (REQUIRED for auto-deploy)
 
-While the cc-fe GHCR package is private, the Gitea deploy runner on lestrange needs Docker auth to pull from GHCR.
+GitHub Actions calls Gitea's `workflow_dispatch` API to trigger the deploy after each successful image push. This needs a Gitea API token stored as a GitHub repo secret.
 
-1. **Create a GitHub PAT** with `read:packages` scope only (no other permissions):
+**Why this instead of relying on mirror sync?** Gitea Actions does not fire push events on mirror sync — this is a documented limitation. The cleanest workaround is for GitHub Actions to explicitly dispatch the Gitea workflow once it knows the image is published, which also eliminates any race condition where the deploy could start before the image is available.
+
+**One-time setup:**
+
+1. **Create a Gitea token**: in Gitea, click your avatar → **Settings** → **Applications** → **Manage Access Tokens**.
+   - **Token Name**: `GitHub Actions dispatch — cc-fe`
+   - **Scopes**: just `write:repository` (needed to dispatch workflows)
+   - Click **Generate Token** and copy the token (Gitea shows it only once).
+
+2. **Add it as a GitHub repo secret**: in the GitHub cc-fe repo, go to **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
+   - **Name**: `GITEA_DISPATCH_TOKEN`
+   - **Value**: (paste the Gitea token)
+
+3. **Verify**: merge a trivial change to `main`. The `build-and-publish.yml` workflow's last step ("Trigger Gitea deploy workflow") should print `✅ Gitea stage-deploy dispatched for ref main` and the Gitea Actions tab should show a new run within a few seconds.
+
+If the secret is missing, the workflow emits a warning rather than failing — deploys just need to be triggered manually from the Gitea Actions UI until the secret is added.
+
+### 2. GHCR Authentication for the Gitea Runner
+
+While the cc-fe GHCR package is private, the Gitea runner needs Docker auth to pull from GHCR.
+
+**Important — DinD isolation:** the Gitea runner on lestrange uses an isolated Docker-in-Docker daemon (see `infra/ansible/playbooks/gitea-runner.yml` in the `mcp` repo). The host's `/root/.docker/config.json` is NOT mounted into the runner. Logging in on the host with `docker login ghcr.io` therefore has NO effect on what the workflow can pull. The runner needs its own credentials, provided via a Gitea secret consumed by `docker login` inside the workflow.
+
+**One-time setup:**
+
+1. **Create a GitHub classic PAT** with `read:packages` scope only:
    - GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)** → **Generate new token (classic)**
-   - **Note**: `lestrange GHCR pull`
-   - **Expiration**: 1 year (or no expiration if you accept the risk)
-   - **Scopes**: just `read:packages`
-   - Click **Generate token** and save it.
+   - **Note**: `Gitea runner GHCR pull`
+   - **Expiration**: 1 year (set a calendar reminder to rotate before it expires)
+   - **Scopes**: ONLY check `read:packages` — nothing else
+   - Click **Generate token** and copy it (shown once).
 
-2. **On lestrange, as the user the Gitea runner runs as** (likely `root` or a `deploy` user — check with `ps aux | grep act_runner`):
-   ```bash
-   echo "ghp_YOUR_TOKEN_HERE" | docker login ghcr.io -u perpetuator-llc --password-stdin
-   ```
-   This writes `~/.docker/config.json` with the credentials.
+   > Fine-grained PATs do not yet support GHCR for organization-owned packages. Use a classic PAT.
 
-3. **Verify** (after the first `build-and-publish.yml` run completes on GitHub):
-   ```bash
-   docker pull ghcr.io/perpetuator-llc/cc-fe:latest
-   ```
-   Should succeed without prompting.
+2. **Add it as a Gitea repo secret** (in Gitea, at the cc-fe-gh mirror repo):
+   - **Repo Settings** → **Actions** → **Secrets** → **Add Secret**
+   - **Name**: `GHCR_PULL_TOKEN`
+   - **Value**: (paste the PAT)
 
-4. **After the repo is made public (Phase 5)**, you can also make the GHCR package public so no auth is needed for pulls:
-   - GitHub → Your profile → Packages → cc-fe → **Package settings** → **Change visibility** → **Public**
+3. **Verify** by triggering the deploy workflow — the "Login to GHCR" step should print `✅ Authenticated to GHCR` and the subsequent pull step should succeed.
+
+**(Optional) Make the package public** to skip auth entirely:
+
+Since cc-fe is MIT-licensed and intended to be FOSS, the container can be public too:
+
+- GitHub → your org **Packages** → `cc-fe` → **Package settings** (right sidebar) → scroll to **Danger Zone** → **Change visibility** → **Public**
+- After that the `GHCR_PULL_TOKEN` step is harmless but unnecessary; you can delete it (and the secret) when convenient.
    - At that point, you can `docker logout ghcr.io` on lestrange and pulls will still work anonymously.
 
 ### 3. OpenBao Secrets
@@ -132,12 +159,25 @@ The script prompts for a vault token (or uses an existing `vault login` session)
 
 **Update later** by running the same script again — `vault kv put` replaces the entire payload, so make sure to enter every value (or use `vault kv patch` for incremental updates).
 
-**AppRole credentials on lestrange** (for the container to authenticate at startup):
+**AppRole credentials — provided via Gitea secrets** (NOT mounted from `/etc/vault`):
 
-- `/etc/vault/vault-role-id` (mode 600, readable by the docker user)
-- `/etc/vault/vault-secret-id` (same)
+The Gitea runner uses Docker-in-Docker (see `infra/ansible/playbooks/gitea-runner.yml` in the `mcp` repo). The host's `/etc/vault` directory is invisible to the runner's DinD daemon — and therefore invisible to the deployed container. So we provide AppRole credentials as Gitea secrets that the deploy workflow passes through as env vars.
 
-`docker-compose.stage.yml` mounts `/etc/vault` read-only into the container; `docker-entrypoint.sh` reads the AppRole files, exchanges them for a short-lived token, fetches `secret/services/cc-fe/staging`, exports the values as `CC_FE_*` env vars, and revokes the token. The secrets are never on the container filesystem and never appear in `docker inspect`.
+**One-time setup:**
+
+1. **Obtain AppRole credentials** for the `cc-fe-staging` role from OpenBao (or whatever role is authorized to read `secret/services/cc-fe/staging`). If you don't have one provisioned, see the OpenBao admin in the `mcp` repo's playbooks.
+
+2. **Add them as Gitea repo secrets** at `git.perpetuator.io/perpetuator/cc-fe-gh` → Settings → Actions → Secrets:
+   - **Name**: `VAULT_ROLE_ID` — value: the role_id (typically a UUID, not very sensitive)
+   - **Name**: `VAULT_SECRET_ID` — value: the secret_id (treat as sensitive; rotate via OpenBao admin)
+
+3. The deploy workflow reads both, passes them to `docker compose up -d` as env vars, which are forwarded to the container. The container's entrypoint uses them once to fetch a short-lived OpenBao token, fetches the `CC_FE_*` config, then revokes the token. Credentials never persist on container disk.
+
+`docker-entrypoint.sh` accepts AppRole creds from any of three sources (first available wins):
+
+1. `VAULT_TOKEN` env var (e.g. from a vault-agent sidecar)
+2. `VAULT_ROLE_ID` + `VAULT_SECRET_ID` env vars ← **CI / Gitea-secrets pattern, what staging uses**
+3. `/etc/vault/vault-role-id` + `/etc/vault/vault-secret-id` files (works for non-DinD deploys that bind-mount the host's `/etc/vault`)
 
 > **Existing `scripts/generate-env-from-vault-runtime.sh`** is kept as a debugging tool — useful for verifying OpenBao access from lestrange without spinning up the container. It writes a dotenv file you can `cat`; just delete the file afterward. The deploy pipeline does NOT use it.
 
@@ -158,13 +198,16 @@ The script prompts for a vault token (or uses an existing `vault login` session)
 
 ### Rolling back
 
-To pin to a specific image tag, edit `docker-compose.stage.yml` on lestrange and change the `image:` line:
+`docker-compose.stage.yml`'s `image:` line is templated: `ghcr.io/perpetuator-llc/cc-fe:${IMAGE_TAG:-latest}`. The deploy pipeline always sets `IMAGE_TAG=sha-<commit>` so each release is pinned to a specific image — no `:latest` race. Rollback is one command:
 
-```yaml
-image: ghcr.io/perpetuator-llc/cc-fe:sha-abc1234  # or :v1.2.3
+```bash
+# On lestrange, in /mnt/storage1/stage.capitalcopilot.io/
+IMAGE_TAG=sha-abc1234 docker compose -p cc-fe-stage -f docker-compose.stage.yml up -d
 ```
 
-Then `docker compose -p cc-fe-stage -f docker-compose.stage.yml up -d` to apply.
+Replace `sha-abc1234` with whichever previous build you want to revert to (`docker images ghcr.io/perpetuator-llc/cc-fe` shows what's available locally; GHCR has the full history).
+
+`IMAGE_TAG` is environment-scoped to the `up -d` invocation — the next pipeline-driven deploy will set its own SHA and roll forward automatically. Edit nothing on disk.
 
 ### Tagged releases
 
