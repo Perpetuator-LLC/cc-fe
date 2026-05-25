@@ -1,7 +1,7 @@
 /* Copyright (c) 2026 Perpetuator LLC */
-@use 'styles/mixins' as mixins;
 
 .fundamentals-view {
+  container-type: inline-size;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -31,11 +31,17 @@
 
 .fundamentals-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+
+  // Single column by default; switch to two columns when the container is
+  // wide enough for both charts to remain readable. Capped at 2 even on
+  // very wide screens — a third column would just shrink each chart.
+  // minmax(0, 1fr) overrides the default `auto` min, so the chart canvases
+  // inside can't force the column to grow past the container width.
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 
-  @include mixins.mobile() {
-    grid-template-columns: 1fr;
+  @container (min-width: 720px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

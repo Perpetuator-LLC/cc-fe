@@ -1,0 +1,55 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="autocomplete-dropdown">
+  <div class="autocomplete-hint">
+    <span class="hint-keys"> <kbd>↓</kbd><kbd>↑</kbd> navigate <kbd>Tab</kbd> select <kbd>Enter</kbd> execute </span>
+  </div>
+  @for (suggestion of suggestions; track suggestion.fqn || suggestion.display; let i = $index) {
+    <div
+      class="suggestion-item"
+      [class.selected]="i === selectedIndex"
+      [class.ai-suggestion]="suggestion.isAiInterpreted"
+      [class.ambiguous]="suggestion.isAmbiguous"
+      tabindex="0"
+      role="option"
+      [attr.aria-selected]="i === selectedIndex"
+      (click)="selectSuggestion.emit(suggestion)"
+      (keydown.enter)="selectSuggestion.emit(suggestion)"
+      (mouseenter)="hoverIndex.emit(i)"
+    >
+      <span class="suggestion-icon" [ngClass]="'type-' + suggestion.type">
+        <mat-icon>{{ suggestion | suggestionIcon }}</mat-icon>
+      </span>
+      <span class="suggestion-text">
+        @if (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent') {
+          {{ suggestion.symbol || suggestion.display }}
+          @if (suggestion.name) {
+            <span class="suggestion-name">- {{ suggestion.name }}</span>
+          }
+        } @else {
+          {{ suggestion.display }}
+        }
+      </span>
+      @if (suggestion.displaySecondary || suggestion.description) {
+        <span class="suggestion-desc">{{ suggestion.displaySecondary || suggestion.description }}</span>
+      }
+      @if (
+        suggestion.exchange &&
+        (suggestion.type === 'symbol' || suggestion.type === 'stock' || suggestion.type === 'recent')
+      ) {
+        <span class="suggestion-exchange">{{ suggestion.exchange }}</span>
+      }
+      @if (suggestion.assetType && (suggestion.type === 'symbol' || suggestion.type === 'stock')) {
+        <span class="suggestion-asset-type">{{ suggestion.assetType }}</span>
+      }
+      @if (suggestion.category) {
+        <span class="suggestion-category">{{ suggestion.category }}</span>
+      }
+      @if (suggestion.aliasFor) {
+        <span class="suggestion-alias">→ {{ suggestion.aliasFor }}</span>
+      }
+      @if (suggestion.isAiInterpreted) {
+        <span class="ai-badge">AI</span>
+      }
+    </div>
+  }
+</div>

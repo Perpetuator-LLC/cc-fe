@@ -8,7 +8,6 @@ import { NgxEchartsDirective } from 'ngx-echarts';
 import { DCFAnalysisData } from '../../valuation.service';
 import { KpiCardComponent } from '../../shared/kpi-card/kpi-card.component';
 import { CHART_DEFINITIONS } from '../../../shared/chart-info/chart-definitions';
-import { ToFixedPipe } from '../../../shared/pipes';
 import { ValuationCharts } from '../valuation-view.component';
 
 /**
@@ -29,15 +28,7 @@ interface HistoricalStatsDisplay {
 @Component({
   selector: 'app-dcf-historical-view',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    NgxEchartsDirective,
-    KpiCardComponent,
-    ToFixedPipe,
-  ],
+  imports: [CommonModule, MatIconModule, MatSelectModule, MatFormFieldModule, NgxEchartsDirective, KpiCardComponent],
   templateUrl: './dcf-historical-view.component.html',
   styleUrl: './dcf-historical-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

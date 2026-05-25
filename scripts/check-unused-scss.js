@@ -176,6 +176,16 @@ function isClassUsed(className, htmlContent, tsContent) {
     if (dynamicClasses.includes(className)) {
       return true;
     }
+
+    // Detect string concatenation patterns like [ngClass]="'prefix-' + expr"
+    // If className starts with a prefix used in concatenation, treat it as dynamic
+    const concatPrefixRegex = /\[ngClass\]="'([a-zA-Z_-]+)-'\s*\+/g;
+    let concatMatch;
+    while ((concatMatch = concatPrefixRegex.exec(htmlContent)) !== null) {
+      if (className.startsWith(concatMatch[1] + '-')) {
+        return true;
+      }
+    }
   }
 
   // Check in TS for template strings or classList manipulation

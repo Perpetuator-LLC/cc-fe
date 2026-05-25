@@ -63,26 +63,13 @@
         />
       </mat-tab>
 
-      <!-- Voice Tab -->
       <mat-tab label="Voice">
-        <div class="tab-content">
-          <mat-card>
-            <mat-card-content>
-              <h3>Voice Selection</h3>
-              <p class="section-description">
-                Choose the voice for your pulse audio. Hover over a voice card to preview.
-              </p>
-
-              <app-voice-selector
-                [selectedVoiceUuid]="pulseConfig.voice?.uuid ?? null"
-                (voiceSelected)="onVoiceSelected($event)"
-              />
-            </mat-card-content>
-          </mat-card>
-        </div>
+        <app-pulse-voice-tab
+          [selectedVoiceUuid]="pulseConfig.voice?.uuid ?? null"
+          (voiceSelected)="onVoiceSelected($event)"
+        />
       </mat-tab>
 
-      <!-- Schedule Tab -->
       <mat-tab label="Schedule">
         <div class="tab-content">
           <app-schedule-list context="pulse" [pulseConfigUuid]="pulseConfig.uuid" />
