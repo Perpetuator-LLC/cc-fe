@@ -75,6 +75,7 @@
             }
             @for (pulse of chain().resources.pulseConfigs; track pulse.uuid) {
               <button
+                mat-button
                 type="button"
                 class="resource-link-pulse"
                 [routerLink]="['/media/pulses', pulse.uuid]"
