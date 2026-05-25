@@ -70,12 +70,8 @@
     [matMenuTriggerFor]="viewMenu"
     [matTooltip]="(currentAction()?.label || 'Select view') + ' — click to switch view'"
   >
-    @if (currentAction(); as action) {
-      <mat-icon>{{ action.icon }}</mat-icon>
-      <span>{{ action.label }}</span>
-    } @else {
-      <span>Select view</span>
-    }
+    <mat-icon>{{ currentAction()?.icon || 'visibility' }}</mat-icon>
+    <span>{{ currentAction()?.label || 'Select view' }}</span>
     <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
   </button>
   <mat-menu #viewMenu="matMenu" class="view-menu">

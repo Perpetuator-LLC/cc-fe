@@ -1,5 +1,4 @@
 /* Copyright (c) 2026 Perpetuator LLC */
-@use 'styles/mixins' as mixins;
 
 .fundamentals-view {
   overflow-y: auto;
@@ -31,12 +30,11 @@
 
 .fundamentals-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
 
-  @include mixins.mobile() {
-    grid-template-columns: 1fr;
-  }
+  // Fit as many ~360px tracks as the container width allows; collapse to 1
+  // column on narrow viewports so charts stay readable.
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
 }
 
 .fundamentals-chart {
