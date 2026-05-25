@@ -38,6 +38,7 @@
                 <span class="schedule-title">{{ schedule.name }}</span>
                 @if (getPodcastInfo(schedule); as podcastInfo) {
                   <button
+                    mat-button
                     type="button"
                     class="resource-link-podcast"
                     (click)="navigateToPodcast($event, podcastInfo.uuid)"
@@ -47,13 +48,19 @@
                   </button>
                 }
                 @if (getPulseInfo(schedule); as pulseInfo) {
-                  <button type="button" class="resource-link-pulse" (click)="navigateToPulse($event, pulseInfo.uuid)">
+                  <button
+                    mat-button
+                    type="button"
+                    class="resource-link-pulse"
+                    (click)="navigateToPulse($event, pulseInfo.uuid)"
+                  >
                     <mat-icon>graphic_eq</mat-icon>
                     {{ pulseInfo.name }}
                   </button>
                 }
                 @if (getEpisodeInfo(schedule); as episodeInfo) {
                   <button
+                    mat-button
                     type="button"
                     class="resource-link-episode"
                     (click)="navigateToEpisode($event, episodeInfo.uuid)"
