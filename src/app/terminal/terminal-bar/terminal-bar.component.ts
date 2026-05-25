@@ -326,7 +326,9 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
           // Empty input = show suggestions but don't select any
           const hasUserInput = this.currentInput().trim().length > 0;
           this.selectedSuggestionIndex.set(hasUserInput && sorted.length > 0 ? 0 : -1);
-          this.showSuggestions.set(sorted.length > 0);
+          if (this.isFocused()) {
+            this.showSuggestions.set(sorted.length > 0);
+          }
         }),
     );
 
@@ -435,6 +437,7 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.wsHistoryResults.set([]);
     this.showHistoryPreview.set(false);
     this.clearSuggestions();
+    this.commandInput?.nativeElement?.blur();
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -756,15 +759,46 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
     this.clearSuggestions();
     this.focusInput();
 
-    // Trigger suggestions for next input
-    setTimeout(() => {
+    if (this.isFocused()) {
       this.updateSuggestions('');
-    }, 50);
+    }
   }
 
   /**
    * Convert suggestion type to chip type
    */
+  private getSuggestionIcon(s: AutocompleteSuggestion): string {
+    switch (s.type) {
+      case 'command':
+        return 'terminal';
+      case 'alias':
+        return 'label';
+      case 'symbol':
+      case 'stock':
+        return s.assetType === 'ETF' ? 'analytics' : 'trending_up';
+      case 'crypto':
+        return 'currency_bitcoin';
+      case 'index':
+        return 'show_chart';
+      case 'forex':
+        return 'currency_exchange';
+      case 'recent':
+        return 'schedule';
+      case 'parameter':
+        return 'settings';
+      case 'example':
+        return 'lightbulb';
+      case 'history':
+        return 'history';
+      case 'history_ai':
+        return 'smart_toy';
+      case 'natural_language':
+        return 'chat';
+      default:
+        return 'chevron_right';
+    }
+  }
+
   private getChipType(suggestionType: string): FqnChip['type'] {
     switch (suggestionType) {
       case 'symbol':
@@ -825,38 +859,6 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
    */
   selectSuggestion(suggestion: AutocompleteSuggestion): void {
     this.addChipFromSuggestion(suggestion);
-  }
-
-  getSuggestionIcon(suggestion: AutocompleteSuggestion): string {
-    switch (suggestion.type) {
-      case 'command':
-        return 'terminal';
-      case 'alias':
-        return 'label';
-      case 'symbol':
-      case 'stock':
-        return suggestion.assetType === 'ETF' ? 'analytics' : 'trending_up';
-      case 'crypto':
-        return 'currency_bitcoin';
-      case 'index':
-        return 'show_chart';
-      case 'forex':
-        return 'currency_exchange';
-      case 'recent':
-        return 'schedule';
-      case 'parameter':
-        return 'settings';
-      case 'example':
-        return 'lightbulb';
-      case 'history':
-        return 'history';
-      case 'history_ai':
-        return 'smart_toy';
-      case 'natural_language':
-        return 'chat';
-      default:
-        return 'chevron_right';
-    }
   }
 
   /**

@@ -63,12 +63,28 @@
       }
     </div>
   </div>
-  <mat-button-toggle-group [value]="currentCommand" (change)="onViewToggleChange($event)" class="view-toggle-group">
+  <button
+    mat-stroked-button
+    type="button"
+    class="view-menu-trigger"
+    [matMenuTriggerFor]="viewMenu"
+    [matTooltip]="(currentAction()?.label || 'Select view') + ' — click to switch view'"
+  >
+    <mat-icon>{{ currentAction()?.icon || 'visibility' }}</mat-icon>
+    <span>{{ currentAction()?.label || 'Select view' }}</span>
+    <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+  </button>
+  <mat-menu #viewMenu="matMenu" class="view-menu">
     @for (action of actions; track action.command) {
-      <mat-button-toggle [value]="action.command" [matTooltip]="action.label">
+      <button
+        mat-menu-item
+        type="button"
+        [class.active]="action.command === currentCommand"
+        (click)="onActionSelect(action.command)"
+      >
         <mat-icon>{{ action.icon }}</mat-icon>
-        {{ action.label }}
-      </mat-button-toggle>
+        <span>{{ action.label }}</span>
+      </button>
     }
-  </mat-button-toggle-group>
+  </mat-menu>
 </div>

@@ -1,0 +1,13 @@
+# Shared Node.js environment setup for all Husky hooks.
+# Source this file at the top of every hook: . "$(dirname "$0")/init-node"
+#
+# Supports: nvm, Volta, fnm, or plain system Node.
+# If none of these managers are found, assumes Node is already in PATH.
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Only call `nvm use` if nvm was actually loaded (it's a shell function, not a binary)
+if type nvm &>/dev/null; then
+  nvm use --silent 2>/dev/null || true
+fi

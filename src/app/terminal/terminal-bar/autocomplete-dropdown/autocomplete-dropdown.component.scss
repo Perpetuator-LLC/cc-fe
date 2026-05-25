@@ -1,12 +1,5 @@
 /* Copyright (c) 2026 Perpetuator LLC */
 
-// Host is transparent to layout so the dropdown positions against
-// the parent terminal-bar's input wrapper exactly as it did before
-// the component was extracted.
-:host {
-  display: contents;
-}
-
 .autocomplete-dropdown {
   position: absolute;
   z-index: 1000;
@@ -22,40 +15,6 @@
 
   background: var(--md-sys-color-surface-container-high);
   box-shadow: 0 4px 16px var(--md-sys-color-shadow);
-}
-
-.autocomplete-hint {
-  display: flex;
-  justify-content: flex-end;
-  padding: 4px 12px;
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
-
-  .hint-keys {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-
-    font-size: 10px;
-    color: var(--md-sys-color-on-surface-variant);
-
-    kbd {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      min-width: 16px;
-      height: 16px;
-      margin-right: 4px;
-      padding: 0 4px;
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: 4px;
-
-      font-family: system-ui, sans-serif;
-      font-size: 10px;
-
-      background: var(--md-sys-color-surface-container-highest);
-    }
-  }
 }
 
 .suggestion-item {
@@ -93,20 +52,20 @@
     font-size: 18px;
     color: inherit;
   }
+}
 
-  &.type-command {
-    color: var(--md-sys-color-primary);
-  }
+.suggestion-icon.type-command {
+  color: var(--md-sys-color-primary);
+}
 
-  &.type-symbol,
-  &.type-stock {
-    color: var(--md-extended-color-success-color);
-  }
+.suggestion-icon.type-symbol,
+.suggestion-icon.type-stock {
+  color: var(--md-extended-color-success-color);
+}
 
-  &.type-history,
-  &.type-recent {
-    color: var(--md-sys-color-secondary);
-  }
+.suggestion-icon.type-history,
+.suggestion-icon.type-recent {
+  color: var(--md-sys-color-secondary);
 }
 
 .suggestion-text {
@@ -181,4 +140,38 @@
   color: var(--md-sys-color-on-tertiary);
 
   background: var(--md-sys-color-tertiary);
+}
+
+.autocomplete-hint {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  .hint-keys {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    font-size: 10px;
+    color: var(--md-sys-color-on-surface-variant);
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 16px;
+      height: 16px;
+      margin-right: 4px;
+      padding: 0 4px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: 4px;
+
+      font-family: system-ui, sans-serif;
+      font-size: 10px;
+
+      background: var(--md-sys-color-surface-container-highest);
+    }
+  }
 }

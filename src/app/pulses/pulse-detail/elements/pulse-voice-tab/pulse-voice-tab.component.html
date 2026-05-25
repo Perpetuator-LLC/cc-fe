@@ -1,0 +1,11 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="tab-content">
+  <mat-card>
+    <mat-card-content>
+      <h3>Voice Selection</h3>
+      <p class="section-description">Choose the voice for your pulse audio. Hover over a voice card to preview.</p>
+
+      <app-voice-selector [selectedVoiceUuid]="selectedVoiceUuid" (voiceSelected)="voiceSelected.emit($event)" />
+    </mat-card-content>
+  </mat-card>
+</div>

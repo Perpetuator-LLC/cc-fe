@@ -363,7 +363,12 @@ if (require.main === module) {
     console.log(formatChecklistForMarkdown(checklist));
   } else if (filesIndex !== -1) {
     // Per-file mode for lint-staged: only scan paths passed after --files
-    const files = args.slice(filesIndex + 1).filter((f) => !f.startsWith('--'));
+    // Exclude theme definition files — they define color tokens using raw values by design
+    const THEME_FILE_PATTERNS = ['m3-theme.scss', '_generated-theme.scss', '_component-overrides.scss'];
+    const files = args
+      .slice(filesIndex + 1)
+      .filter((f) => !f.startsWith('--'))
+      .filter((f) => !THEME_FILE_PATTERNS.some((p) => f.endsWith(p)));
     if (files.length === 0) process.exit(0);
     files.forEach(scanFile);
     if (strictMode && (hasErrors || hasWarnings)) process.exit(1);
