@@ -173,7 +173,7 @@ export class FinancialHierarchyService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data!.financialHierarchy),
+        map((result) => result.data?.financialHierarchy ?? null),
         tap((data) => {
           this.hierarchyData.set(data);
           this.loading.set(false);
@@ -207,7 +207,7 @@ export class FinancialHierarchyService {
         fetchPolicy: 'network-only',
       })
       .pipe(
-        map((result) => result.data!.financialNodeTimeSeries || []),
+        map((result) => result.data?.financialNodeTimeSeries ?? []),
         catchError((err) => {
           console.error('[FinancialHierarchyService] Error loading time series:', err);
           return of([]);

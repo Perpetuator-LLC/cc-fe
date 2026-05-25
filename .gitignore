@@ -106,3 +106,4 @@ aio/content/examples/.DS_Store
 # Claude Code auto-generated context (session-start hook)
 .claude/
 !.claude/settings.json
+config.bat
