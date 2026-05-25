@@ -286,9 +286,20 @@ describe('WatchlistTabComponent', () => {
   });
 
   describe('route changes subscription (browser back/forward)', () => {
-    xit('should reload chart when route params change', fakeAsync(() => {
+    // The component uses `skip(1)` on route.queryParams to ignore the initial
+    // emission (handled by restoreStateFromUrl). Tests must emit once to
+    // consume the skip, then emit again to exercise the subscription.
+
+    it('should reload chart when route params change', fakeAsync(() => {
       // Initial state - no symbol
       expect(component.selectedSymbol()).toBeNull();
+
+      // Consume the skip(1) with an initial empty emission
+      queryParamsSubject.next({});
+      tick();
+
+      mockRoutingService.applyRoute.calls.reset();
+      mockTerminalService.execute.calls.reset();
 
       // Simulate browser navigation (back/forward)
       queryParamsSubject.next({
@@ -315,8 +326,12 @@ describe('WatchlistTabComponent', () => {
       expect(mockTerminalService.execute).toHaveBeenCalled();
     }));
 
-    xit('should update interval when route changes', fakeAsync(() => {
+    it('should update interval when route changes', fakeAsync(() => {
       component.selectedInterval.set('daily');
+
+      // Consume the skip(1)
+      queryParamsSubject.next({});
+      tick();
 
       queryParamsSubject.next({
         symbol: 'NVDA',
@@ -330,6 +345,11 @@ describe('WatchlistTabComponent', () => {
     it('should not reload if symbol and interval unchanged', fakeAsync(() => {
       component.selectedSymbol.set('AMD');
       component.selectedInterval.set('daily');
+      component.currentCommand.set('CHART');
+
+      // Consume the skip(1)
+      queryParamsSubject.next({});
+      tick();
 
       const callsBefore = mockTerminalService.execute.calls.count();
 
