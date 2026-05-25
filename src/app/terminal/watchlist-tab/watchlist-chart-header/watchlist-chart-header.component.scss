@@ -15,9 +15,14 @@
   background: var(--md-sys-color-surface-container-lowest);
 
   .chart-title {
+    overflow: hidden;
     display: flex;
+    flex: 1;
+    flex-wrap: wrap;
     gap: 12px;
     align-items: baseline;
+
+    min-width: 0;
 
     div {
       text-align: center;
@@ -89,8 +94,8 @@
     }
   }
 
-  .view-toggle-group {
-    overflow: auto;
+  .view-menu-trigger {
+    flex-shrink: 0;
   }
 }
 
