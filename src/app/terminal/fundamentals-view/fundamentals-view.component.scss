@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 Perpetuator LLC */
 
 .fundamentals-view {
+  container-type: inline-size;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -31,10 +32,17 @@
 .fundamentals-grid {
   display: grid;
 
-  // Fit as many ~360px tracks as the container width allows; collapse to 1
-  // column on narrow viewports so charts stay readable.
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  // Single column by default; switch to two columns when the container is
+  // wide enough for both charts to remain readable. Capped at 2 even on
+  // very wide screens — a third column would just shrink each chart.
+  // minmax(0, 1fr) overrides the default `auto` min, so the chart canvases
+  // inside can't force the column to grow past the container width.
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
+
+  @container (min-width: 720px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .fundamentals-chart {
