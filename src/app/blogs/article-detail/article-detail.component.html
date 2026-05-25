@@ -21,7 +21,7 @@
         <div class="title">
           <h2>{{ article.title }}</h2>
           <p [hidden]="!article.blog">
-            <a [routerLink]="blogLinkPath">{{ article.blog?.name }}</a>
+            <a [routerLink]="blogLinkPath">{{ article.blog.name }}</a>
           </p>
         </div>
         <div class="buttons">

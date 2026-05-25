@@ -72,10 +72,9 @@
   <button mat-flat-button color="primary" (click)="connectAccount()" [disabled]="connectButtonDisabled">
     @if (connecting) {
       <mat-spinner diameter="18" />
-      <span>Connecting...</span>
     } @else {
       <mat-icon>add_link</mat-icon>
-      <span>Connect Account</span>
     }
+    <span>{{ connecting ? 'Connecting...' : 'Connect Account' }}</span>
   </button>
 </mat-dialog-actions>
