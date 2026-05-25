@@ -6,7 +6,7 @@ import { MessageService } from '../../message.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
@@ -25,29 +25,13 @@ import { ShareService } from '../../share.service';
 import { SchedulingService } from '../../scheduling.service';
 import { of as rxOf } from 'rxjs';
 
-// Create a complete mock class for MatDialog to avoid Angular Material's internal dependencies
-class MockMatDialog {
-  openDialogs: MatDialogRef<unknown>[] = [];
-  private readonly _afterAllClosed = new Subject<void>();
-  private readonly _afterOpened = new Subject<MatDialogRef<unknown>>();
-  private mockDialogRef: MatDialogRef<unknown> | null = null;
-
-  afterAllClosed = this._afterAllClosed.asObservable();
-  get afterOpened() {
-    return this._afterOpened;
-  }
-
-  setMockDialogRef(ref: MatDialogRef<unknown>) {
-    this.mockDialogRef = ref;
-  }
-
-  open = jasmine.createSpy('open').and.callFake(() => {
-    if (this.mockDialogRef) {
-      this.openDialogs.push(this.mockDialogRef);
-      this._afterOpened.next(this.mockDialogRef);
-    }
-    return this.mockDialogRef;
-  });
+// Use SpyObj for MatDialog (matches pattern used in login.component.spec.ts and
+// other passing dialog tests in this repo). The previous custom MockMatDialog
+// class injected fine but its `open` spy was never invoked from the component —
+// most likely because the partial class shape failed Angular's DI typing on
+// some test runs.
+function makeDialogSpy(): jasmine.SpyObj<MatDialog> {
+  return jasmine.createSpyObj<MatDialog>('MatDialog', ['open', 'closeAll']);
 }
 
 describe('PodcastDetailComponentComponent', () => {
@@ -55,7 +39,7 @@ describe('PodcastDetailComponentComponent', () => {
   let fixture: ComponentFixture<PodcastDetailComponent>;
   let mockPodcastsService: jasmine.SpyObj<PodcastsService>;
   let mockMessageService: jasmine.SpyObj<MessageService>;
-  let mockDialog: MockMatDialog;
+  let mockDialog: jasmine.SpyObj<MatDialog>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockTeamsService: jasmine.SpyObj<TeamsService>;
   let mockVoicesService: jasmine.SpyObj<VoicesService>;
@@ -85,7 +69,7 @@ describe('PodcastDetailComponentComponent', () => {
     Object.defineProperty(mockMessageService, 'messages$', {
       get: () => messagesSubject.asObservable(),
     });
-    mockDialog = new MockMatDialog();
+    mockDialog = makeDialogSpy();
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockTeamsService = jasmine.createSpyObj('TeamsService', ['getTeams']);
     mockVoicesService = jasmine.createSpyObj('VoicesService', ['getVoices']);
@@ -230,6 +214,15 @@ describe('PodcastDetailComponentComponent', () => {
       ],
     }).compileComponents();
 
+    // PodcastDetailComponent is standalone and lists @angular/material/dialog's
+    // MatDialog among its transitive providers (via Material modules pulled in
+    // by its template/imports). Standalone components prefer the component-level
+    // injector, which can win over module-level `useValue`, so the component
+    // ended up with a real MatDialog even though TestBed.inject returned the
+    // mock. overrideProvider forces the substitution at the component injector
+    // level too.
+    TestBed.overrideProvider(MatDialog, { useValue: mockDialog });
+
     fixture = TestBed.createComponent(PodcastDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -239,11 +232,7 @@ describe('PodcastDetailComponentComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // SKIPPED: These tests have complex MatDialog mocking requirements that need proper
-  // Angular Material testing infrastructure. The dialog tests require either
-  // NoopAnimationsModule with full MatDialogModule, or a complete mock that satisfies
-  // Angular Material's internal dialog lifecycle. This is a pre-existing test issue.
-  xdescribe('deletePodcastDialog', () => {
+  describe('deletePodcastDialog', () => {
     it('should pass dialog result to deletePodcast service, not component deleteConfirmation property', (done) => {
       const testPodcastName = 'Test Podcast Name';
       const confirmationTextFromDialog = 'Test Podcast Name';
@@ -253,7 +242,7 @@ describe('PodcastDetailComponentComponent', () => {
         afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(confirmationTextFromDialog)),
       } as unknown as MatDialogRef<DeletePodcastDialogComponent>;
 
-      mockDialog.setMockDialogRef(mockDialogRef);
+      mockDialog.open.and.returnValue(mockDialogRef);
 
       component['deleteConfirmation'] = '';
       component.podcastForm.patchValue({ name: testPodcastName });
@@ -288,7 +277,7 @@ describe('PodcastDetailComponentComponent', () => {
         afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(false)),
       } as unknown as MatDialogRef<DeletePodcastDialogComponent>;
 
-      mockDialog.setMockDialogRef(mockDialogRef);
+      mockDialog.open.and.returnValue(mockDialogRef);
 
       component.podcastForm.patchValue({ name: testPodcastName });
 
@@ -311,7 +300,7 @@ describe('PodcastDetailComponentComponent', () => {
         afterClosed: jasmine.createSpy('afterClosed').and.returnValue(of(confirmationTextFromDialog)),
       } as unknown as MatDialogRef<DeletePodcastDialogComponent>;
 
-      mockDialog.setMockDialogRef(mockDialogRef);
+      mockDialog.open.and.returnValue(mockDialogRef);
 
       component.podcastForm.patchValue({ name: testPodcastName });
 
