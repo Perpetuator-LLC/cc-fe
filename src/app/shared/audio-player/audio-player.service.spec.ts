@@ -294,4 +294,84 @@ describe('AudioPlayerService', () => {
       expect(service.remainingTime()).toBe(0);
     });
   });
+
+  describe('audio element event handlers (initAudio listeners)', () => {
+    function dispatch(name: string): void {
+      const audio = (service as unknown as { audio: HTMLAudioElement }).audio;
+      audio.dispatchEvent(new Event(name));
+    }
+
+    it('loadstart sets isLoading=true and clears error', () => {
+      (
+        service as unknown as { _isLoading: { set(v: boolean): void }; _error: { set(v: string | null): void } }
+      )._error.set('previous');
+      dispatch('loadstart');
+      expect(service.isLoading()).toBeTrue();
+      expect(service.error()).toBeNull();
+    });
+
+    it('canplay sets isLoading=false', () => {
+      (service as unknown as { _isLoading: { set(v: boolean): void } })._isLoading.set(true);
+      dispatch('canplay');
+      expect(service.isLoading()).toBeFalse();
+    });
+
+    it('loadedmetadata updates duration from the audio element', () => {
+      const audio = (service as unknown as { audio: HTMLAudioElement }).audio;
+      Object.defineProperty(audio, 'duration', { configurable: true, value: 123 });
+      dispatch('loadedmetadata');
+      expect(service.duration()).toBe(123);
+    });
+
+    it('timeupdate updates currentTime', () => {
+      const audio = (service as unknown as { audio: HTMLAudioElement }).audio;
+      audio.currentTime = 42;
+      dispatch('timeupdate');
+      expect(service.currentTime()).toBe(42);
+    });
+
+    it('play event marks isPlaying=true', () => {
+      dispatch('play');
+      expect(service.isPlaying()).toBeTrue();
+    });
+
+    it('pause event marks isPlaying=false', () => {
+      (service as unknown as { _isPlaying: { set(v: boolean): void } })._isPlaying.set(true);
+      dispatch('pause');
+      expect(service.isPlaying()).toBeFalse();
+    });
+
+    it('ended resets currentTime to 0 and isPlaying to false', () => {
+      (service as unknown as { _isPlaying: { set(v: boolean): void } })._isPlaying.set(true);
+      (service as unknown as { _currentTime: { set(v: number): void } })._currentTime.set(50);
+      dispatch('ended');
+      expect(service.isPlaying()).toBeFalse();
+      expect(service.currentTime()).toBe(0);
+    });
+
+    it('error marks error message and clears playing state', () => {
+      dispatch('error');
+      expect(service.error()).toBe('Failed to load audio');
+      expect(service.isLoading()).toBeFalse();
+      expect(service.isPlaying()).toBeFalse();
+    });
+
+    it('volumechange syncs volume and mute signals', () => {
+      const audio = (service as unknown as { audio: HTMLAudioElement }).audio;
+      Object.defineProperty(audio, 'volume', { configurable: true, value: 0.7 });
+      Object.defineProperty(audio, 'muted', { configurable: true, value: true });
+      dispatch('volumechange');
+      expect(service.volume()).toBeCloseTo(0.7);
+      expect(service.isMuted()).toBeTrue();
+    });
+  });
+
+  describe('setAutoQueue', () => {
+    it('sets the flag explicitly', () => {
+      service.setAutoQueue(true);
+      expect(service.autoQueueEnabled()).toBeTrue();
+      service.setAutoQueue(false);
+      expect(service.autoQueueEnabled()).toBeFalse();
+    });
+  });
 });
