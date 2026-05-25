@@ -299,6 +299,232 @@ describe('ChartConfigService', () => {
       expect((dataZoom as unknown[]).length).toBeGreaterThan(0);
     });
   });
+
+  describe('formatAxisLabel', () => {
+    it('returns original value when input is not a parseable date', () => {
+      expect(service.formatAxisLabel('not-a-date', true)).toBe('not-a-date');
+      expect(service.formatAxisLabel('not-a-date', false)).toBe('not-a-date');
+    });
+
+    it('renders time only for intraday', () => {
+      service.useLocalTime.set(true);
+      const out = service.formatAxisLabel('2026-01-08T14:30:00.000Z', true);
+      // We expect HH:MM AM/PM (locale dependent but always contains a colon and meridian)
+      expect(out).toMatch(/[AP]M/);
+    });
+
+    it('renders Month Day for daily ISO dates', () => {
+      expect(service.formatAxisLabel('2026-01-08T00:00:00.000Z', false)).toMatch(/Jan 8/);
+    });
+
+    it('falls back to ISO date parsing when not a YYYY-MM-DD prefix (daily)', () => {
+      // Not ISO-prefixed → uses new Date() parse path
+      const out = service.formatAxisLabel('Jan 8, 2026', false);
+      expect(out).toMatch(/Jan/);
+    });
+  });
+
+  describe('formatAxisPointerLabel', () => {
+    it('returns input for unparseable strings', () => {
+      expect(service.formatAxisPointerLabel('bogus', true)).toBe('bogus');
+      expect(service.formatAxisPointerLabel('bogus', false)).toBe('bogus');
+    });
+
+    it('appends ET when not using local time on intraday', () => {
+      service.useLocalTime.set(false);
+      expect(service.formatAxisPointerLabel('2026-01-08T14:30:00.000Z', true)).toContain('ET');
+    });
+
+    it('omits ET when local time is enabled on intraday', () => {
+      service.useLocalTime.set(true);
+      expect(service.formatAxisPointerLabel('2026-01-08T14:30:00.000Z', true)).not.toContain('ET');
+    });
+
+    it('renders Month Day, Year for daily ISO inputs', () => {
+      expect(service.formatAxisPointerLabel('2026-01-08T00:00:00.000Z', false)).toMatch(/Jan 8, 2026/);
+    });
+
+    it('falls back to plain Date parsing when input is not ISO', () => {
+      expect(service.formatAxisPointerLabel('Jan 8, 2026', false)).toMatch(/Jan/);
+    });
+  });
+
+  describe('formatAxisLabelDateOnly', () => {
+    it('formats ISO date strings', () => {
+      expect(service.formatAxisLabelDateOnly('2026-01-08T00:00:00.000Z')).toMatch(/Jan 8/);
+    });
+
+    it('falls back to Date parsing for non-ISO inputs', () => {
+      expect(service.formatAxisLabelDateOnly('Jan 8, 2026')).toMatch(/Jan/);
+    });
+
+    it('returns the original value when unparseable', () => {
+      expect(service.formatAxisLabelDateOnly('bogus')).toBe('bogus');
+    });
+  });
+
+  describe('formatDateForChart', () => {
+    it('accepts a Date object', () => {
+      expect(service.formatDateForChart(new Date('2026-01-08T00:00:00Z'))).toMatch(/Jan 8, 2026/);
+    });
+
+    it('accepts a string', () => {
+      expect(service.formatDateForChart('2026-01-08T00:00:00.000Z')).toMatch(/Jan 8, 2026/);
+    });
+
+    it('handles non-ISO strings via Date constructor', () => {
+      expect(service.formatDateForChart('Jan 8, 2026')).toMatch(/Jan/);
+    });
+
+    it('returns String(input) for unparseable strings', () => {
+      expect(service.formatDateForChart('bogus')).toBe('bogus');
+    });
+  });
+
+  describe('formatDateLabel', () => {
+    it('formats ISO strings', () => {
+      expect(service.formatDateLabel('2026-01-08T00:00:00.000Z')).toMatch(/Jan 8/);
+    });
+
+    it('returns input on unparseable strings', () => {
+      expect(service.formatDateLabel('bogus')).toBe('bogus');
+    });
+
+    it('falls back to Date parsing for non-ISO strings', () => {
+      expect(service.formatDateLabel('Jan 8, 2026')).toMatch(/Jan/);
+    });
+  });
+
+  describe('formatCrosshairDateLabel', () => {
+    it('returns String(value) for empty input', () => {
+      expect(service.formatCrosshairDateLabel('')).toBe('');
+    });
+
+    it('returns input when not parseable as a date', () => {
+      expect(service.formatCrosshairDateLabel('bogus')).toBe('bogus');
+    });
+
+    it('renders date + time and adds ET for intraday on ET timezone', () => {
+      service.useLocalTime.set(false);
+      const out = service.formatCrosshairDateLabel('2026-01-08T14:30:00.000Z');
+      expect(out).toContain('Jan');
+      expect(out).toContain('ET');
+    });
+
+    it('omits ET when local time is enabled', () => {
+      service.useLocalTime.set(true);
+      const out = service.formatCrosshairDateLabel('2026-01-08T14:30:00.000Z');
+      expect(out).not.toContain('ET');
+    });
+
+    it('omits time component for date-only inputs (hasTime=false)', () => {
+      service.useLocalTime.set(false);
+      const out = service.formatCrosshairDateLabel('2026-01-08T00:00:00.000Z');
+      // Should NOT contain AM/PM since hasTime is false (the format omits time)
+      expect(out).not.toMatch(/[AP]M/);
+      // Should still contain the year (date-only path renders a full date)
+      expect(out).toContain('2026');
+    });
+  });
+
+  describe('formatPeriod / formatInterval', () => {
+    it('maps known period to label', () => {
+      expect(service.formatPeriod('1Y')).toBeTruthy();
+    });
+
+    it('returns input unchanged for unknown periods', () => {
+      expect(service.formatPeriod('NOT_A_PERIOD')).toBe('NOT_A_PERIOD');
+    });
+
+    it('maps known interval to label', () => {
+      expect(service.formatInterval('DAILY')).toBe('Daily');
+      expect(service.formatInterval('MIN_30')).toBe('30 Min');
+    });
+
+    it('returns input unchanged for unknown intervals', () => {
+      expect(service.formatInterval('NOT_AN_INTERVAL')).toBe('NOT_AN_INTERVAL');
+    });
+  });
+
+  describe('formatCandlestickTooltip', () => {
+    it('returns "" for empty/null params', () => {
+      expect(service.formatCandlestickTooltip([])).toBe('');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(service.formatCandlestickTooltip(null as any)).toBe('');
+    });
+
+    it('returns "" when data has fewer than 4 numbers', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect(service.formatCandlestickTooltip([{ name: 'X', data: [1, 2] } as any])).toBe('');
+    });
+
+    it('renders OHLC with green color when close >= open', () => {
+      const html = service.formatCandlestickTooltip([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { name: '2026-01-08', data: [100, 105, 98, 106] } as any, // [O, C, L, H]
+      ]);
+      expect(html).toContain('2026-01-08');
+      expect(html).toContain('100.00');
+      expect(html).toContain('#26a69a'); // green
+    });
+
+    it('renders OHLC with red color when close < open', () => {
+      const html = service.formatCandlestickTooltip([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { name: '2026-01-08', data: [105, 100, 98, 106] } as any, // [O, C, L, H] - down
+      ]);
+      expect(html).toContain('#ef5350'); // red
+    });
+  });
+
+  describe('parseChartOptions', () => {
+    it('returns null when the input is null', () => {
+      expect(service.parseChartOptions(null)).toBeNull();
+    });
+
+    it('returns null for unsupported primitive types (number)', () => {
+      expect(service.parseChartOptions(42)).toBeNull();
+    });
+
+    it('returns the same object when input is already an object', () => {
+      const opts = { title: { text: 'X' } };
+      expect(service.parseChartOptions(opts)).toEqual(opts as never);
+    });
+
+    it('reconstructs from a spread-string object (numeric keys)', () => {
+      const original = JSON.stringify({ title: { text: 'X' } });
+      const spread = original.split('').reduce<Record<string, string>>((acc, ch, i) => {
+        acc[String(i)] = ch;
+        return acc;
+      }, {});
+      spyOn(console, 'error');
+      const parsed = service.parseChartOptions(spread);
+      expect(parsed).toEqual({ title: { text: 'X' } } as never);
+    });
+
+    it('returns null when spread-string contents are unparseable JSON', () => {
+      const spread: Record<string, string> = {};
+      'not-json'.split('').forEach((c, i) => (spread[String(i)] = c));
+      spyOn(console, 'error');
+      expect(service.parseChartOptions(spread)).toBeNull();
+    });
+
+    it('parses a JSON string', () => {
+      const opts = service.parseChartOptions('{"title":{"text":"X"}}');
+      expect(opts).toEqual({ title: { text: 'X' } } as never);
+    });
+
+    it('handles double-encoded JSON strings', () => {
+      const doubleEncoded = JSON.stringify(JSON.stringify({ foo: 'bar' }));
+      const opts = service.parseChartOptions(doubleEncoded);
+      expect(opts).toEqual({ foo: 'bar' } as never);
+    });
+
+    it('returns null on invalid JSON string', () => {
+      spyOn(console, 'error');
+      expect(service.parseChartOptions('{not json}')).toBeNull();
+    });
+  });
 });
 
 // Helper functions

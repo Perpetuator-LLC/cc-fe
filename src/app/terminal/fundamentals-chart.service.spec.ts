@@ -229,4 +229,65 @@ describe('FundamentalsChartService', () => {
       expect(xAxis.data?.[0]).toMatch(/\w{3} 2024/);
     });
   });
+
+  describe('EPS chart markPoints for significant share count changes', () => {
+    it('annotates Share Issuance when YoY shares jump >20%', () => {
+      const data = [income({ fiscalDateEnding: '2023-12-31' }), income({ fiscalDateEnding: '2024-12-31' })];
+      const bs = [
+        balance({ fiscalDateEnding: '2023-12-31', commonStockSharesOutstanding: 1_000_000_000 }),
+        balance({ fiscalDateEnding: '2024-12-31', commonStockSharesOutstanding: 1_500_000_000 }),
+      ];
+      const opt = service.buildEpsChart(data, bs);
+      const series = opt.series as { name: string; markPoint?: { data: { name: string }[] } }[];
+      const shareSeries = series.find((s) => s.name === 'Shares Outstanding');
+      expect(shareSeries?.markPoint).toBeDefined();
+      expect(shareSeries?.markPoint?.data[0].name).toBe('Share Issuance');
+    });
+
+    it('annotates Buyback when YoY shares drop >20%', () => {
+      const data = [income({ fiscalDateEnding: '2023-12-31' }), income({ fiscalDateEnding: '2024-12-31' })];
+      const bs = [
+        balance({ fiscalDateEnding: '2023-12-31', commonStockSharesOutstanding: 1_000_000_000 }),
+        balance({ fiscalDateEnding: '2024-12-31', commonStockSharesOutstanding: 700_000_000 }),
+      ];
+      const opt = service.buildEpsChart(data, bs);
+      const series = opt.series as { name: string; markPoint?: { data: { name: string }[] } }[];
+      const shareSeries = series.find((s) => s.name === 'Shares Outstanding');
+      expect(shareSeries?.markPoint?.data[0].name).toBe('Buyback');
+    });
+
+    it('does not add markPoints when YoY share change is small (<20%)', () => {
+      const data = [income({ fiscalDateEnding: '2023-12-31' }), income({ fiscalDateEnding: '2024-12-31' })];
+      const bs = [
+        balance({ fiscalDateEnding: '2023-12-31', commonStockSharesOutstanding: 1_000_000_000 }),
+        balance({ fiscalDateEnding: '2024-12-31', commonStockSharesOutstanding: 1_050_000_000 }),
+      ];
+      const opt = service.buildEpsChart(data, bs);
+      const series = opt.series as { name: string; markPoint?: unknown }[];
+      const shareSeries = series.find((s) => s.name === 'Shares Outstanding');
+      expect(shareSeries?.markPoint).toBeUndefined();
+    });
+
+    it('exercises the EPS+Shares tooltip formatter', () => {
+      const data = [income({ fiscalDateEnding: '2024-12-31' })];
+      const bs = [balance({ fiscalDateEnding: '2024-12-31' })];
+      const opt = service.buildEpsChart(data, bs);
+      const fmt = (opt.tooltip as { formatter: (p: unknown) => string }).formatter;
+      const html = fmt([
+        { name: '2024', seriesName: 'EPS', value: 5, color: '#fff' },
+        { name: '2024', seriesName: 'Shares Outstanding', value: 1.5, color: '#fff' },
+      ]);
+      expect(html).toContain('EPS:');
+      expect(html).toContain('Shares:');
+    });
+
+    it('tooltip handles null/empty values gracefully', () => {
+      const data = [income({ fiscalDateEnding: '2024-12-31' })];
+      const opt = service.buildEpsChart(data);
+      const fmt = (opt.tooltip as { formatter: (p: unknown) => string }).formatter;
+      expect(fmt([])).toBe('');
+      const html = fmt([{ name: '2024', seriesName: 'EPS', value: null as unknown as number, color: '#fff' }]);
+      expect(html).toContain('N/A');
+    });
+  });
 });
