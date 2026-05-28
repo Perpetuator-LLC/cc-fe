@@ -68,6 +68,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
   protected pulseConfigUuid: string;
   protected selectedTabIndex = 0;
   protected generatingPulse = false;
+  protected selectedPulseUuid: string | null = null;
 
   // Phone verification status for SMS toggle
   phoneVerified = false;
@@ -455,7 +456,7 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
               this.jobService.addJob({
                 uuid: jobUuid,
                 kind: this.getJobKindForChainIndex(index),
-                status: 'pending',
+                status: index === 0 ? 'pending' : 'pending',
                 createdAt: new Date().toISOString(),
               } as Job);
             });
@@ -594,6 +595,21 @@ export class PulseDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/media/recordings', pulse.uuid], {
       queryParams: { pulse: this.pulseConfigUuid },
     });
+  }
+
+  /**
+   * Copy pulse transcript to clipboard
+   */
+  copyTranscript(pulse: Pulse): void {
+    if (!pulse.transcript) {
+      this.messageService.error('No transcript available');
+      return;
+    }
+
+    navigator.clipboard.writeText(pulse.transcript).then(
+      () => this.messageService.success('Transcript copied to clipboard'),
+      () => this.messageService.error('Failed to copy transcript'),
+    );
   }
 
   /**

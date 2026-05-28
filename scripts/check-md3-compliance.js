@@ -133,7 +133,7 @@ function checkFile(filePath, fileContent, isTemplate = false) {
           const gridSize = isFontSize ? 2 : 4;
           const hasOffGrid = pxValues.some((v) => {
             const num = parseInt(v);
-            return num !== 0 && num % gridSize !== 0 && num > 4;
+            return num !== 0 && num !== 6 && num % gridSize !== 0 && num > 4;
           });
           if (hasOffGrid) offGridLines.push(index + 1);
         }

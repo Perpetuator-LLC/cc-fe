@@ -1,0 +1,208 @@
+/* Copyright (c) 2025-2026 Perpetuator LLC */
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    left: 24px;
+
+    width: 2px;
+    height: calc(100% + 24px);
+    border-left: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  &:last-child {
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.timeline-icon {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  margin-right: 1.2rem;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 50%;
+
+  font-size: 1.5rem;
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container);
+
+  &.job-success {
+    border-color: var(--md-extended-color-success-color);
+    color: var(--md-extended-color-success-color);
+    background: var(--md-extended-color-success-color-container);
+  }
+
+  &.job-failed {
+    border-color: var(--md-sys-color-error);
+    color: var(--md-sys-color-error);
+    background: var(--md-sys-color-error-container);
+  }
+
+  &.job-pending {
+    border-color: var(--md-extended-color-warning-color);
+    color: var(--md-extended-color-warning-color);
+    background: var(--md-extended-color-warning-color-container);
+  }
+
+  &.job-running {
+    border-color: var(--md-extended-color-info-color);
+    color: var(--md-extended-color-info-color);
+    background: var(--md-extended-color-info-color-container);
+  }
+}
+
+.timeline-content {
+  flex: 1;
+
+  width: 300px;
+  max-width: 100%;
+  padding: 16px 20px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 8px;
+
+  @media screen and (width <= 576px) {
+    padding: 16px;
+  }
+}
+
+.timeline-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  margin-bottom: 0.5rem;
+
+  .timeline-left-content {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+
+    min-width: 0;
+
+    @media screen and (width <= 768px) {
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+  }
+}
+
+.timeline-title {
+  flex-shrink: 0;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+}
+
+.timeline-status {
+  flex-shrink: 0;
+
+  padding: 4px 12px;
+  border: 1px solid;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.job-success {
+    border-color: var(--md-extended-color-success-color);
+    color: var(--md-extended-color-success-color);
+    background: var(--md-extended-color-success-color-container);
+  }
+
+  &.job-failed {
+    border-color: var(--md-sys-color-error);
+    color: var(--md-sys-color-error);
+    background: var(--md-sys-color-error-container);
+  }
+
+  &.job-pending {
+    border-color: var(--md-extended-color-warning-color);
+    color: var(--md-extended-color-warning-color);
+    background: var(--md-extended-color-warning-color-container);
+  }
+
+  &.job-running {
+    border-color: var(--md-extended-color-info-color);
+    color: var(--md-extended-color-info-color);
+    background: var(--md-extended-color-info-color-container);
+  }
+}
+
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+
+  > span {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    white-space: nowrap;
+
+    &:not(:last-child)::after {
+      content: '•';
+      margin-left: 8px;
+      font-weight: bold;
+      color: var(--md-sys-color-surface-container);
+    }
+  }
+
+  .timeline-cost {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .timeline-date {
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  @media screen and (width <= 768px) {
+    &.desktop {
+      display: none;
+    }
+  }
+}
+
+.job-section {
+  .message-text {
+    font-size: 10px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .error-message {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--md-sys-color-error);
+  }
+}

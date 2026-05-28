@@ -1,0 +1,20 @@
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
+<div class="infinite-scroll-container">
+  @if (hasNextPage()) {
+    <div #scrollSentinel class="scroll-sentinel"></div>
+  }
+  @if (isLoadingMore()) {
+    <div class="loading-more-indicator">
+      <mat-progress-spinner diameter="32" mode="indeterminate" />
+      <span>Loading more jobs...</span>
+    </div>
+  }
+  @if (hasNextPage() && !isLoadingMore()) {
+    <button mat-stroked-button class="load-more-btn" (click)="loadMore.emit()">Load More Jobs</button>
+  }
+  @if (!hasNextPage() && !isLoadingMore()) {
+    <div class="end-of-list">
+      <span>All jobs loaded</span>
+    </div>
+  }
+</div>

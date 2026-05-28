@@ -126,9 +126,16 @@
 }
 
 .schedule-name {
-  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.schedule-title {
+  overflow: hidden;
 
   font-size: 16px;
   font-weight: 500;
@@ -137,31 +144,64 @@
   white-space: nowrap;
 }
 
-.schedule-description {
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.schedule-resources {
+.schedule-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.schedule-next-run {
-  display: flex;
-  gap: 4px;
+  gap: 12px;
   align-items: center;
 
   font-size: 12px;
   color: var(--md-sys-color-on-surface-variant);
+}
+
+.meta-item {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
 
   mat-icon {
     width: 14px;
     height: 14px;
     font-size: 14px;
+  }
+}
+
+.week-strip {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: center;
+
+  padding: 8px 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+
+  @include mixins.mobile() {
+    display: none;
+  }
+}
+
+.week-strip-day {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.day-label {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.day-dot {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--md-sys-color-outline-variant);
+  border-radius: 50%;
+
+  &.active {
+    border-color: var(--md-sys-color-primary);
+    background: var(--md-sys-color-primary);
   }
 }
 
