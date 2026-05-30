@@ -10,6 +10,7 @@
 // ============================================================================
 // Material Palettes - HCT-generated from base colors
 // ============================================================================
+$material-palettes: generated.$material-palettes;
 $palettes: generated.$theme-palettes;
 
 // ============================================================================
@@ -33,14 +34,14 @@ $info-palette: map.get($palettes, info);
 // ============================================================================
 // Theme Definitions
 // ============================================================================
-$_rest: (
-  secondary: $secondary-palette,
-  neutral: $neutral-palette,
-  neutral-variant: $neutral-variant-palette,
-  error: $error-palette,
+$_material-rest: (
+  secondary: map.get($material-palettes, secondary),
+  neutral: map.get($material-palettes, neutral),
+  neutral-variant: map.get($material-palettes, neutral-variant),
+  error: map.get($material-palettes, error),
 );
-$_primary: map.merge($primary-palette, $_rest);
-$_tertiary: map.merge($tertiary-palette, $_rest);
+$_primary: map.merge(map.get($material-palettes, primary), $_material-rest);
+$_tertiary: map.merge(map.get($material-palettes, tertiary), $_material-rest);
 
 $light-color: mat.define-colors(
   (
