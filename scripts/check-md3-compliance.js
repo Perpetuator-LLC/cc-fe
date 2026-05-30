@@ -364,7 +364,7 @@ if (require.main === module) {
   } else if (filesIndex !== -1) {
     // Per-file mode for lint-staged: only scan paths passed after --files
     // Exclude theme definition files — they define color tokens using raw values by design
-    const THEME_FILE_PATTERNS = ['m3-theme.scss', '_generated-theme.scss', '_component-overrides.scss'];
+    const THEME_FILE_PATTERNS = ['m3-theme.scss', '_theme-palettes.generated.scss', '_component-overrides.scss'];
     const files = args
       .slice(filesIndex + 1)
       .filter((f) => !f.startsWith('--'))

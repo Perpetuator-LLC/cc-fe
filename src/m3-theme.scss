@@ -1,234 +1,30 @@
 /* Copyright (c) 2025-2026 Perpetuator LLC */
 // Pulse Material 3 theme.
-// Source colors live here; update these values, then run `yarn theme:generate`.
+// Generated palettes come from styles/_theme-palettes.generated.scss.
+// Update scripts/generate-palettes.ts, then run `yarn theme:generate`.
 
 @use 'sass:map';
 @use '@angular/material' as mat;
+@use 'styles/theme-palettes.generated' as generated;
 
 // ============================================================================
-// Base Colors - Single source of truth for brand identity
-// ============================================================================
-$base-primary: #3b82f6; // Capital Blue
-$base-secondary: #22d3ee; // Signal Cyan
-$base-tertiary: #a78bfa; // Pulse Violet
-$base-accent: #f97316; // Pulse Orange
-$base-error: #ef4444; // Error Red
-$base-success: #10b981; // Success Emerald
-$base-warning: #fbbf24; // Warning Amber
-$base-info: #38bdf8; // Info Sky
-
-// ============================================================================
-// Core Material Palettes (HCT-generated from base colors)
-// Generated using: ng generate @angular/material:m3-theme
 // Material Palettes - HCT-generated from base colors
 // ============================================================================
-
-$_palettes: (
-  primary: (
-    0: #000000,
-    10: #001a42,
-    20: #002e6a,
-    25: #00397f,
-    30: #004395,
-    35: #004fab,
-    40: #005ac2,
-    50: #2573e6,
-    60: #4d8eff,
-    70: #81aaff,
-    80: #adc6ff,
-    90: #d8e2ff,
-    95: #edf0ff,
-    98: #f9f9ff,
-    99: #fefbff,
-    100: #ffffff,
-  ),
-  secondary: (
-    0: #000000,
-    10: #001f25,
-    20: #00363e,
-    25: #00424c,
-    30: #004e5a,
-    35: #005b68,
-    40: #006877,
-    50: #008395,
-    60: #009fb4,
-    70: #00bcd5,
-    80: #2fd9f4,
-    90: #a2eeff,
-    95: #d4f7ff,
-    98: #effcff,
-    99: #f7fdff,
-    100: #ffffff,
-  ),
-  tertiary: (
-    0: #000000,
-    10: #21005e,
-    20: #381385,
-    25: #432390,
-    30: #4f319c,
-    35: #5b3ea8,
-    40: #674bb5,
-    50: #8065d0,
-    60: #9b7fed,
-    70: #b59cff,
-    80: #cebdff,
-    90: #e8ddff,
-    95: #f5eeff,
-    98: #fdf7ff,
-    99: #fffbff,
-    100: #ffffff,
-  ),
-  accent: (
-    0: #000000,
-    10: #341100,
-    20: #552100,
-    25: #662900,
-    30: #783200,
-    35: #8a3a00,
-    40: #9d4300,
-    50: #c45600,
-    60: #ec6a06,
-    70: #ff8d4b,
-    80: #ffb690,
-    90: #ffdbca,
-    95: #ffede6,
-    98: #fff8f6,
-    99: #fffbff,
-    100: #ffffff,
-  ),
-  error: (
-    0: #000000,
-    10: #410004,
-    20: #68000a,
-    25: #7d000f,
-    30: #930013,
-    35: #a80619,
-    40: #b91a24,
-    50: #dd3739,
-    60: #ff5451,
-    70: #ff8982,
-    80: #ffb3ad,
-    90: #ffdad7,
-    95: #ffedeb,
-    98: #fff8f7,
-    99: #fffbff,
-    100: #ffffff,
-  ),
-  neutral: (
-    0: #000000,
-    4: #060a10,
-    6: #0a1018,
-    10: #0e1620,
-    12: #121a23,
-    17: #182230,
-    20: #1b2534,
-    22: #1f2b3c,
-    24: #253044,
-    25: #283448,
-    30: #343f52,
-    35: #404b5e,
-    40: #4c586b,
-    50: #657185,
-    60: #7f8ba0,
-    70: #98a6bb,
-    80: #b4c1d7,
-    87: #ced8ea,
-    90: #dbe3f2,
-    92: #e2e8f5,
-    94: #e8edf7,
-    95: #eef0f5,
-    96: #f4f5fa,
-    98: #fbf9fd,
-    99: #fefbff,
-    100: #ffffff,
-  ),
-  neutral-variant: (
-    0: #000000,
-    10: #111a26,
-    20: #1d2a3c,
-    25: #25344a,
-    30: #2f4159,
-    35: #3a4d67,
-    40: #465a75,
-    50: #5f738f,
-    60: #798daa,
-    70: #98a6bb,
-    80: #b5c1d3,
-    90: #c1c6d2,
-    95: #ebf1ff,
-    98: #f9f9ff,
-    99: #fefbff,
-    100: #ffffff,
-  ),
-  success: (
-    0: #000000,
-    10: #002113,
-    20: #003824,
-    25: #00452d,
-    30: #005236,
-    35: #005f40,
-    40: #006c49,
-    50: #00885d,
-    60: #00a572,
-    70: #26c289,
-    80: #4edea3,
-    90: #6ffbbe,
-    95: #beffdb,
-    98: #e8ffef,
-    99: #f4fff6,
-    100: #ffffff,
-  ),
-  warning: (
-    0: #000000,
-    10: #261a00,
-    20: #402d00,
-    25: #4d3800,
-    30: #5c4300,
-    35: #6a4e00,
-    40: #795900,
-    50: #987100,
-    60: #b88900,
-    70: #d9a200,
-    80: #f9bd22,
-    90: #ffdf9f,
-    95: #ffefd4,
-    98: #fff8f2,
-    99: #fffbff,
-    100: #ffffff,
-  ),
-  info: (
-    0: #000000,
-    10: #001e2c,
-    20: #00354a,
-    25: #004059,
-    30: #004c69,
-    35: #005979,
-    40: #00668a,
-    50: #0080ad,
-    60: #009bd1,
-    70: #2db7f2,
-    80: #7bd0ff,
-    90: #c4e7ff,
-    95: #e3f3ff,
-    98: #f5faff,
-    99: #fbfcff,
-    100: #ffffff,
-  ),
-);
+$palettes: generated.$theme-palettes;
 
 // ============================================================================
 // Exported Palette Accessors
 // ============================================================================
-$primary-palette: map.get($_palettes, primary);
-$secondary-palette: map.get($_palettes, secondary);
-$tertiary-palette: map.get($_palettes, tertiary);
-$accent-palette: map.get($_palettes, accent);
-$neutral-palette: map.get($_palettes, neutral);
-$neutral-variant-palette: map.get($_palettes, neutral-variant);
-$error-palette: map.get($_palettes, error);
-$success-palette: map.get($_palettes, success);
-$warning-palette: map.get($_palettes, warning);
-$info-palette: map.get($_palettes, info);
+$primary-palette: map.get($palettes, primary);
+$secondary-palette: map.get($palettes, secondary);
+$tertiary-palette: map.get($palettes, tertiary);
+$accent-palette: map.get($palettes, accent);
+$neutral-palette: map.get($palettes, neutral);
+$neutral-variant-palette: map.get($palettes, neutral-variant);
+$error-palette: map.get($palettes, error);
+$success-palette: map.get($palettes, success);
+$warning-palette: map.get($palettes, warning);
+$info-palette: map.get($palettes, info);
 
 @function get-color($palette, $tone) {
   @return map.get($palette, $tone);
