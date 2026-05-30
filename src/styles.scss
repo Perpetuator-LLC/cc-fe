@@ -11,95 +11,7 @@
 
 html {
   @include mat.all-component-themes(customTheme.$dark-theme);
-
-  // ============================================================================
-  // MD3 System Colors - Dark Theme
-  // Using palette tones via customTheme.get-color() function
-  // Main colors: higher tones (60-80) for visibility on dark backgrounds
-  // On-colors: lower tones (10-20) for contrast on colored surfaces
-  // Containers: mid tones (30) for subtle backgrounds
-  // On-containers: high tones (90) for text on containers
-  // ============================================================================
-
-  // Primary - Rich Capital Blue
-  --md-sys-color-primary: #{customTheme.get-color(customTheme.$primary-palette, 70)};
-  --md-sys-color-on-primary: #{customTheme.get-color(customTheme.$primary-palette, 20)};
-  --md-sys-color-primary-container: #{customTheme.get-color(customTheme.$primary-palette, 30)};
-  --md-sys-color-on-primary-container: #{customTheme.get-color(customTheme.$primary-palette, 90)};
-
-  // Secondary - Vibrant Orange (tone 60 for vivid orange)
-  --md-sys-color-secondary: #{customTheme.get-color(customTheme.$secondary-palette, 50)};
-  --md-sys-color-on-secondary: #{customTheme.get-color(customTheme.$secondary-palette, 90)};
-  --md-sys-color-secondary-container: #{customTheme.get-color(customTheme.$secondary-palette, 30)};
-  --md-sys-color-on-secondary-container: #{customTheme.get-color(customTheme.$secondary-palette, 90)};
-
-  // Tertiary - Rich Vibrant Purple
-  --md-sys-color-tertiary: #{customTheme.get-color(customTheme.$tertiary-palette, 40)};
-  --md-sys-color-on-tertiary: #{customTheme.get-color(customTheme.$tertiary-palette, 90)};
-  --md-sys-color-tertiary-container: #{customTheme.get-color(customTheme.$tertiary-palette, 30)};
-  --md-sys-color-on-tertiary-container: #{customTheme.get-color(customTheme.$tertiary-palette, 90)};
-
-  // Error
-  --md-sys-color-error: #{customTheme.get-color(customTheme.$error-palette, 80)};
-  --md-sys-color-on-error: #{customTheme.get-color(customTheme.$error-palette, 20)};
-  --md-sys-color-error-container: #{customTheme.get-color(customTheme.$error-palette, 30)};
-  --md-sys-color-on-error-container: #{customTheme.get-color(customTheme.$error-palette, 90)};
-
-  // Surface colors - Dark theme
-  --md-sys-color-surface: #{customTheme.get-color(customTheme.$neutral-palette, 6)};
-  --md-sys-color-on-surface: #{customTheme.get-color(customTheme.$neutral-palette, 90)};
-  --md-sys-color-surface-variant: #{customTheme.get-color(customTheme.$neutral-variant-palette, 30)};
-  --md-sys-color-on-surface-variant: #{customTheme.get-color(customTheme.$neutral-palette, 80)};
-  --md-sys-color-surface-container-lowest: #{customTheme.get-color(customTheme.$neutral-palette, 4)};
-  --md-sys-color-surface-container-low: #{customTheme.get-color(customTheme.$neutral-palette, 12)};
-  --md-sys-color-surface-container: #{customTheme.get-color(customTheme.$neutral-palette, 17)};
-  --md-sys-color-surface-container-high: #{customTheme.get-color(customTheme.$neutral-palette, 22)};
-  --md-sys-color-surface-container-highest: #{customTheme.get-color(customTheme.$neutral-palette, 24)};
-  --md-sys-color-outline: #{customTheme.get-color(customTheme.$neutral-variant-palette, 60)};
-  --md-sys-color-outline-variant: #{customTheme.get-color(customTheme.$neutral-variant-palette, 30)};
-  --md-sys-color-inverse-surface: #{customTheme.get-color(customTheme.$neutral-palette, 90)};
-  --md-sys-color-inverse-on-surface: #{customTheme.get-color(customTheme.$neutral-palette, 20)};
-  --md-sys-color-inverse-primary: #{customTheme.get-color(customTheme.$primary-palette, 40)};
-
-  // Dark mode: lighter shadow color for visibility on dark backgrounds
-  // stylelint-disable-next-line function-disallowed-list
-  --md-sys-color-shadow: rgb(255 255 255 / 0.25);
-  --md-sys-color-scrim: #{customTheme.get-color(customTheme.$neutral-palette, 0)};
-
-  // MDC elevated button shadow colors
-  --mdc-elevated-button-container-shadow-color: var(--md-sys-color-shadow);
-  --mdc-protected-button-container-shadow-color: var(--md-sys-color-shadow);
-
-  // MD3 Extended Colors - Dark Theme
-  // Using palette tones for semantic UI states (success, warning, info)
-  // Dark theme: higher tones (60-80) for visibility, lower tones (10-30) for containers
-  --md-extended-color-success-color: #{customTheme.get-color(customTheme.$success-palette, 70)};
-  --md-extended-color-success-on-color: #{customTheme.get-color(customTheme.$success-palette, 10)};
-  --md-extended-color-success-color-container: #{customTheme.get-color(customTheme.$success-palette, 30)};
-  --md-extended-color-success-on-color-container: #{customTheme.get-color(customTheme.$success-palette, 90)};
-  --md-extended-color-warning-color: #{customTheme.get-color(customTheme.$warning-palette, 70)};
-  --md-extended-color-warning-on-color: #{customTheme.get-color(customTheme.$warning-palette, 10)};
-  --md-extended-color-warning-color-container: #{customTheme.get-color(customTheme.$warning-palette, 30)};
-  --md-extended-color-warning-on-color-container: #{customTheme.get-color(customTheme.$warning-palette, 90)};
-  --md-extended-color-info-color: #{customTheme.get-color(customTheme.$info-palette, 70)};
-  --md-extended-color-info-on-color: #{customTheme.get-color(customTheme.$info-palette, 10)};
-  --md-extended-color-info-color-container: #{customTheme.get-color(customTheme.$info-palette, 30)};
-  --md-extended-color-info-on-color-container: #{customTheme.get-color(customTheme.$info-palette, 90)};
-
-  // RGB values for glass morphism effects (dark theme)
-  // stylelint-disable function-disallowed-list -- These are CSS custom property definitions, not usage
-  --md-sys-color-surface-container-rgb: 39, 42, 49; // matches #272a31
-  --md-sys-color-surface-container-high-rgb: 49, 53, 60; // matches #31353c
-  // Glass morphism backgrounds with transparency (pre-computed for component use)
-  // "Dirty smoked glass" - dark charcoal with transparency to show blurred orbs through
-  --md-sys-color-glass-surface: rgb(20 23 28 / 0.75);
-  --md-sys-color-glass-surface-high: rgb(25 28 35 / 0.8);
-  // stylelint-enable function-disallowed-list
-
-  --mat-slider-value-indicator-width: 32px;
-  --mat-slider-value-indicator-height: 32px;
-  --mat-slider-value-indicator-transform-origin: 0 32px;
-  --mat-slider-label-label-text-line-height: 1;
+  @include customTheme.dark-theme-vars();
 }
 
 body {
@@ -195,91 +107,7 @@ body {
 
 body.light {
   @include mat.all-component-colors(customTheme.$light-color);
-
-  // ============================================================================
-  // MD3 System Colors - Light Theme
-  // Using palette tones via customTheme.get-color() function
-  // Main colors: lower tones (30-40) for rich colors on light backgrounds
-  // On-colors: high tones (90-100) for light text on colored surfaces
-  // Containers: high tones (90) for subtle light backgrounds
-  // On-containers: low tones (10-20) for dark text on light containers
-  // ============================================================================
-
-  // Primary - Rich Capital Blue
-  --md-sys-color-primary: #{customTheme.get-color(customTheme.$primary-palette, 40)};
-  --md-sys-color-on-primary: #{customTheme.get-color(customTheme.$primary-palette, 100)};
-  --md-sys-color-primary-container: #{customTheme.get-color(customTheme.$primary-palette, 90)};
-  --md-sys-color-on-primary-container: #{customTheme.get-color(customTheme.$primary-palette, 10)};
-
-  // Secondary - Rich Orange
-  --md-sys-color-secondary: #{customTheme.get-color(customTheme.$secondary-palette, 40)};
-  --md-sys-color-on-secondary: #{customTheme.get-color(customTheme.$secondary-palette, 100)};
-  --md-sys-color-secondary-container: #{customTheme.get-color(customTheme.$secondary-palette, 90)};
-  --md-sys-color-on-secondary-container: #{customTheme.get-color(customTheme.$secondary-palette, 10)};
-
-  // Tertiary - Rich Purple
-  --md-sys-color-tertiary: #{customTheme.get-color(customTheme.$tertiary-palette, 40)};
-  --md-sys-color-on-tertiary: #{customTheme.get-color(customTheme.$tertiary-palette, 100)};
-  --md-sys-color-tertiary-container: #{customTheme.get-color(customTheme.$tertiary-palette, 90)};
-  --md-sys-color-on-tertiary-container: #{customTheme.get-color(customTheme.$tertiary-palette, 10)};
-
-  // Error
-  --md-sys-color-error: #{customTheme.get-color(customTheme.$error-palette, 40)};
-  --md-sys-color-on-error: #{customTheme.get-color(customTheme.$error-palette, 100)};
-  --md-sys-color-error-container: #{customTheme.get-color(customTheme.$error-palette, 90)};
-  --md-sys-color-on-error-container: #{customTheme.get-color(customTheme.$error-palette, 10)};
-
-  // Surface colors - Light theme
-  --md-sys-color-surface: #{customTheme.get-color(customTheme.$neutral-palette, 98)};
-  --md-sys-color-on-surface: #{customTheme.get-color(customTheme.$neutral-palette, 10)};
-  --md-sys-color-surface-variant: #{customTheme.get-color(customTheme.$neutral-palette, 90)};
-  --md-sys-color-on-surface-variant: #{customTheme.get-color(customTheme.$neutral-palette, 30)};
-  --md-sys-color-surface-container-lowest: #{customTheme.get-color(customTheme.$neutral-palette, 100)};
-  --md-sys-color-surface-container-low: #{customTheme.get-color(customTheme.$neutral-palette, 96)};
-  --md-sys-color-surface-container: #{customTheme.get-color(customTheme.$neutral-palette, 94)};
-  --md-sys-color-surface-container-high: #{customTheme.get-color(customTheme.$neutral-palette, 92)};
-  --md-sys-color-surface-container-highest: #{customTheme.get-color(customTheme.$neutral-palette, 90)};
-  --md-sys-color-outline: #{customTheme.get-color(customTheme.$neutral-palette, 50)};
-  --md-sys-color-outline-variant: #{customTheme.get-color(customTheme.$neutral-palette, 80)};
-  --md-sys-color-inverse-surface: #{customTheme.get-color(customTheme.$neutral-palette, 20)};
-  --md-sys-color-inverse-on-surface: #{customTheme.get-color(customTheme.$neutral-palette, 95)};
-  --md-sys-color-inverse-primary: #{customTheme.get-color(customTheme.$primary-palette, 80)};
-
-  // Light mode: standard dark shadow for elevation visibility
-  // stylelint-disable-next-line function-disallowed-list
-  --md-sys-color-shadow: rgb(0 0 0 / 0.2);
-  --md-sys-color-scrim: #{customTheme.get-color(customTheme.$neutral-palette, 0)};
-
-  // MDC elevated button shadow colors
-  --mdc-elevated-button-container-shadow-color: var(--md-sys-color-shadow);
-  --mdc-protected-button-container-shadow-color: var(--md-sys-color-shadow);
-
-  // MD3 Extended Colors - Light Theme
-  // Using palette tones for semantic UI states (success, warning, info)
-  // Light theme: lower tones (30-40) for rich colors, higher tones (90) for containers
-  --md-extended-color-success-color: #{customTheme.get-color(customTheme.$success-palette, 40)};
-  --md-extended-color-success-on-color: #{customTheme.get-color(customTheme.$success-palette, 100)};
-  --md-extended-color-success-color-container: #{customTheme.get-color(customTheme.$success-palette, 90)};
-  --md-extended-color-success-on-color-container: #{customTheme.get-color(customTheme.$success-palette, 10)};
-  --md-extended-color-warning-color: #{customTheme.get-color(customTheme.$warning-palette, 40)};
-  --md-extended-color-warning-on-color: #{customTheme.get-color(customTheme.$warning-palette, 100)};
-  --md-extended-color-warning-color-container: #{customTheme.get-color(customTheme.$warning-palette, 90)};
-  --md-extended-color-warning-on-color-container: #{customTheme.get-color(customTheme.$warning-palette, 10)};
-  --md-extended-color-info-color: #{customTheme.get-color(customTheme.$info-palette, 40)};
-  --md-extended-color-info-on-color: #{customTheme.get-color(customTheme.$info-palette, 100)};
-  --md-extended-color-info-color-container: #{customTheme.get-color(customTheme.$info-palette, 90)};
-  --md-extended-color-info-on-color-container: #{customTheme.get-color(customTheme.$info-palette, 10)};
-
-  // RGB values for glass morphism effects (light theme)
-  --md-sys-color-surface-container-rgb: 235, 237, 242;
-  --md-sys-color-surface-container-high-rgb: 224, 226, 231;
-
-  // Glass morphism backgrounds with transparency (pre-computed for component use)
-  // "Dirty smoked glass" - darker with 0.85 opacity
-  // stylelint-disable function-disallowed-list -- These are CSS custom property definitions, not usage
-  --md-sys-color-glass-surface: rgb(235 237 242 / 0.85);
-  --md-sys-color-glass-surface-high: rgb(224 226 231 / 0.85);
-  // stylelint-enable function-disallowed-list
+  @include customTheme.light-theme-vars();
 }
 
 // Job card border colors for status bar
@@ -1863,7 +1691,7 @@ html body {
   }
 
   .mat-mdc-form-field:has(mat-hint) {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 
   .mat-mdc-notch-piece {
@@ -1962,7 +1790,7 @@ html body {
     }
 
     .mat-mdc-select-value {
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .mat-mdc-form-field-infix {

@@ -1,159 +1,216 @@
 /* Copyright (c) 2025-2026 Perpetuator LLC */
-// Angular Material 20 Theme
-// Base colors defined at top - pre-generated HCT palettes still required for Material compatibility
+// Pulse Material 3 theme.
+// Source colors live here; update these values, then run `yarn theme:generate`.
 
 @use 'sass:map';
-@use 'sass:color';
 @use '@angular/material' as mat;
 
 // ============================================================================
 // Base Colors - Single source of truth for brand identity
-// To change theme colors, update these values then regenerate palettes with:
-//   ng generate @angular/material:m3-theme --primary=#NEW_HEX --secondary=#NEW_HEX
 // ============================================================================
-$base-primary: #3f97ff; // Capital Blue
-$base-secondary: #f14a00; // Vibrant Orange
-$base-tertiary: #8b3aa4; // Rich Purple
-$base-error: #ba1a1a; // Standard Error Red
-$base-success: #2e7d32; // Success Green
-$base-warning: #ed6c02; // Warning Amber/Orange
-$base-info: #0288d1; // Info Blue
+$base-primary: #3b82f6; // Capital Blue
+$base-secondary: #22d3ee; // Signal Cyan
+$base-tertiary: #a78bfa; // Pulse Violet
+$base-accent: #f97316; // Pulse Orange
+$base-error: #ef4444; // Error Red
+$base-success: #10b981; // Success Emerald
+$base-warning: #fbbf24; // Warning Amber
+$base-info: #38bdf8; // Info Sky
 
 // ============================================================================
-// Palette Generation Function
-// For extended semantic colors (success, warning, info) not part of core theme
-// ============================================================================
-@function generate-palette($base-color) {
-  @return (
-    0: #000000,
-    10: color.change($base-color, $lightness: 10%),
-    20: color.change($base-color, $lightness: 20%),
-    25: color.change($base-color, $lightness: 25%),
-    30: color.change($base-color, $lightness: 30%),
-    35: color.change($base-color, $lightness: 35%),
-    40: color.change($base-color, $lightness: 40%),
-    50: color.change($base-color, $lightness: 50%),
-    60: color.change($base-color, $lightness: 60%),
-    70: color.change($base-color, $lightness: 70%),
-    80: color.change($base-color, $lightness: 80%),
-    90: color.change($base-color, $lightness: 90%),
-    95: color.change($base-color, $lightness: 95%),
-    98: color.change($base-color, $lightness: 98%),
-    99: color.change($base-color, $lightness: 99%),
-    100: #ffffff
-  );
-}
-
-// ============================================================================
-// Core Material Palettes (HCT-generated from base colors)
-// Generated using: ng generate @angular/material:m3-theme
+// Material Palettes - HCT-generated from base colors
 // ============================================================================
 $_palettes: (
   primary: (
     0: #000000,
-    10: #001c3b,
-    20: #00315f,
-    25: #003c73,
-    30: #004787,
-    35: #00539b,
-    40: #005fb0,
-    50: #0077dc,
-    60: #3792f9,
-    70: #73adff,
-    80: #a6c8ff,
-    90: #d5e3ff,
-    95: #ebf1ff,
+    10: #001a42,
+    20: #002e6a,
+    25: #00397f,
+    30: #004395,
+    35: #004fab,
+    40: #005ac2,
+    50: #2573e6,
+    60: #4d8eff,
+    70: #81aaff,
+    80: #adc6ff,
+    90: #d8e2ff,
+    95: #edf0ff,
     98: #f9f9ff,
-    99: #fdfbff,
+    99: #fefbff,
     100: #ffffff,
   ),
   secondary: (
     0: #000000,
-    10: #3a0b00,
-    20: #5e1700,
-    25: #711e00,
-    30: #842500,
-    35: #982c00,
-    40: #ad3300,
-    50: #d84100,
-    60: #ff5717,
-    70: #ff8b66,
-    80: #ffb59e,
-    90: #ffdbd0,
-    95: #ffede8,
-    98: #fff8f6,
-    99: #fffbff,
+    10: #001f25,
+    20: #00363e,
+    25: #00424c,
+    30: #004e5a,
+    35: #005b68,
+    40: #006877,
+    50: #008395,
+    60: #009fb4,
+    70: #00bcd5,
+    80: #2fd9f4,
+    90: #a2eeff,
+    95: #d4f7ff,
+    98: #effcff,
+    99: #f7fdff,
     100: #ffffff,
   ),
   tertiary: (
     0: #000000,
-    10: #330044,
-    20: #54006d,
-    25: #630c7d,
-    30: #701e8a,
-    35: #7e2d97,
-    40: #8b3aa4,
-    50: #a755bf,
-    60: #c36fdb,
-    70: #e189f8,
-    80: #f1afff,
-    90: #fbd7ff,
-    95: #ffebfe,
-    98: #fff7fb,
+    10: #21005e,
+    20: #381385,
+    25: #432390,
+    30: #4f319c,
+    35: #5b3ea8,
+    40: #674bb5,
+    50: #8065d0,
+    60: #9b7fed,
+    70: #b59cff,
+    80: #cebdff,
+    90: #e8ddff,
+    95: #f5eeff,
+    98: #fdf7ff,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  accent: (
+    0: #000000,
+    10: #341100,
+    20: #552100,
+    25: #662900,
+    30: #783200,
+    35: #8a3a00,
+    40: #9d4300,
+    50: #c45600,
+    60: #ec6a06,
+    70: #ff8d4b,
+    80: #ffb690,
+    90: #ffdbca,
+    95: #ffede6,
+    98: #fff8f6,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  error: (
+    0: #000000,
+    10: #410004,
+    20: #68000a,
+    25: #7d000f,
+    30: #930013,
+    35: #a80619,
+    40: #b91a24,
+    50: #dd3739,
+    60: #ff5451,
+    70: #ff8982,
+    80: #ffb3ad,
+    90: #ffdad7,
+    95: #ffedeb,
+    98: #fff8f7,
     99: #fffbff,
     100: #ffffff,
   ),
   neutral: (
     0: #000000,
-    4: #0b0e14,
-    6: #10131a,
-    10: #181c22,
-    12: #1c2026,
-    17: #272a31,
-    20: #2d3037,
-    22: #31353c,
-    24: #363940,
-    25: #383b42,
-    30: #43474e,
-    35: #4f525a,
-    40: #5b5e66,
-    50: #74777f,
-    60: #8e9199,
-    70: #a8abb3,
-    80: #c4c6cf,
-    87: #d7dae3,
-    90: #e0e2eb,
-    92: #e6e8f1,
-    94: #ebedf7,
-    95: #eef0f9,
-    96: #f1f3fc,
-    98: #f9f9ff,
-    99: #fdfbff,
+    4: #060a10,
+    6: #0a1018,
+    10: #0e1620,
+    12: #121a23,
+    17: #182230,
+    20: #1b2534,
+    22: #1f2b3c,
+    24: #253044,
+    25: #283448,
+    30: #343f52,
+    35: #404b5e,
+    40: #4c586b,
+    50: #657185,
+    60: #7f8ba0,
+    70: #98a6bb,
+    80: #b4c1d7,
+    87: #ced8ea,
+    90: #dbe3f2,
+    92: #e2e8f5,
+    94: #e8edf7,
+    95: #eef0f5,
+    96: #f4f5fa,
+    98: #fbf9fd,
+    99: #fefbff,
     100: #ffffff,
   ),
   neutral-variant: (
     0: #000000,
-    10: #151c26,
-    20: #2a313c,
-    25: #353c47,
-    30: #414753,
-    35: #4c535f,
-    40: #585f6b,
-    50: #717784,
-    60: #8b919e,
-    70: #a5abb9,
-    80: #c0c6d5,
-    90: #dde2f1,
+    10: #111a26,
+    20: #1d2a3c,
+    25: #25344a,
+    30: #2f4159,
+    35: #3a4d67,
+    40: #465a75,
+    50: #5f738f,
+    60: #798daa,
+    70: #98a6bb,
+    80: #b5c1d3,
+    90: #c1c6d2,
     95: #ebf1ff,
     98: #f9f9ff,
-    99: #fdfbff,
+    99: #fefbff,
     100: #ffffff,
   ),
-  // Extended palettes - generated from base colors
-  error: generate-palette($base-error),
-  success: generate-palette($base-success),
-  warning: generate-palette($base-warning),
-  info: generate-palette($base-info),
+  success: (
+    0: #000000,
+    10: #002113,
+    20: #003824,
+    25: #00452d,
+    30: #005236,
+    35: #005f40,
+    40: #006c49,
+    50: #00885d,
+    60: #00a572,
+    70: #26c289,
+    80: #4edea3,
+    90: #6ffbbe,
+    95: #beffdb,
+    98: #e8ffef,
+    99: #f4fff6,
+    100: #ffffff,
+  ),
+  warning: (
+    0: #000000,
+    10: #261a00,
+    20: #402d00,
+    25: #4d3800,
+    30: #5c4300,
+    35: #6a4e00,
+    40: #795900,
+    50: #987100,
+    60: #b88900,
+    70: #d9a200,
+    80: #f9bd22,
+    90: #ffdf9f,
+    95: #ffefd4,
+    98: #fff8f2,
+    99: #fffbff,
+    100: #ffffff,
+  ),
+  info: (
+    0: #000000,
+    10: #001e2c,
+    20: #00354a,
+    25: #004059,
+    30: #004c69,
+    35: #005979,
+    40: #00668a,
+    50: #0080ad,
+    60: #009bd1,
+    70: #2db7f2,
+    80: #7bd0ff,
+    90: #c4e7ff,
+    95: #e3f3ff,
+    98: #f5faff,
+    99: #fbfcff,
+    100: #ffffff,
+  ),
 );
 
 // ============================================================================
@@ -162,6 +219,7 @@ $_palettes: (
 $primary-palette: map.get($_palettes, primary);
 $secondary-palette: map.get($_palettes, secondary);
 $tertiary-palette: map.get($_palettes, tertiary);
+$accent-palette: map.get($_palettes, accent);
 $neutral-palette: map.get($_palettes, neutral);
 $neutral-variant-palette: map.get($_palettes, neutral-variant);
 $error-palette: map.get($_palettes, error);
@@ -169,7 +227,6 @@ $success-palette: map.get($_palettes, success);
 $warning-palette: map.get($_palettes, warning);
 $info-palette: map.get($_palettes, info);
 
-// Helper function to get color from palette by tone
 @function get-color($palette, $tone) {
   @return map.get($palette, $tone);
 }
@@ -227,3 +284,201 @@ $dark-theme: mat.define-theme(
     ),
   )
 );
+
+@mixin semantic-aliases {
+  --md-sys-color-success: var(--md-extended-color-success-color);
+  --md-sys-color-on-success: var(--md-extended-color-success-on-color);
+  --md-sys-color-success-container: var(--md-extended-color-success-color-container);
+  --md-sys-color-on-success-container: var(--md-extended-color-success-on-color-container);
+  --md-sys-color-warning: var(--md-extended-color-warning-color);
+  --md-sys-color-on-warning: var(--md-extended-color-warning-on-color);
+  --md-sys-color-warning-container: var(--md-extended-color-warning-color-container);
+  --md-sys-color-on-warning-container: var(--md-extended-color-warning-on-color-container);
+  --md-sys-color-info: var(--md-extended-color-info-color);
+  --md-sys-color-on-info: var(--md-extended-color-info-on-color);
+  --md-sys-color-info-container: var(--md-extended-color-info-color-container);
+  --md-sys-color-on-info-container: var(--md-extended-color-info-on-color-container);
+
+  --mdc-elevated-button-container-shadow-color: var(--md-sys-color-shadow);
+  --mdc-protected-button-container-shadow-color: var(--md-sys-color-shadow);
+
+  --theme-yellow: var(--md-sys-color-warning);
+  --theme-white: var(--md-sys-color-on-surface);
+  --theme-color: var(--md-sys-color-on-surface);
+  --secondary-light: var(--md-sys-color-surface-container-high);
+
+  --mat-slider-value-indicator-width: 32px;
+  --mat-slider-value-indicator-height: 32px;
+  --mat-slider-value-indicator-transform-origin: 0 32px;
+  --mat-slider-label-label-text-line-height: 1;
+}
+
+@mixin dark-theme-vars {
+  --p-primary: #3b82f6;
+  --p-primary-bright: #60a5fa;
+  --p-on-primary: #ffffff;
+  --p-secondary: #22d3ee;
+  --p-on-secondary: #001f25;
+  --p-tertiary: #a78bfa;
+  --p-tertiary-bright: #c4b5fd;
+  --p-on-tertiary: #25005a;
+  --p-accent: #f97316;
+  --p-accent-bright: #fb923c;
+  --p-on-accent: #2a1200;
+  --p-accent-container: #ffe0c7;
+  --p-accent-soft-edge: rgb(249 115 22 / 0.35);
+  --p-success: #10b981;
+  --p-error: #ef4444;
+  --p-warning: #fbbf24;
+  --p-info: #38bdf8;
+  --p-surface: #0a1018;
+  --p-surface-container-low: #0e1620;
+  --p-surface-container: #121a23;
+  --p-surface-container-high: #182230;
+  --p-on-surface: #e6edf6;
+  --p-on-surface-variant: #98a6bb;
+  --p-on-surface-muted: #6b7a91;
+  --p-outline: #2f4159;
+  --p-outline-variant: #25344a;
+
+  --md-sys-color-primary: var(--p-primary-bright);
+  --md-sys-color-on-primary: #{get-color($primary-palette, 20)};
+  --md-sys-color-primary-container: #{get-color($primary-palette, 30)};
+  --md-sys-color-on-primary-container: #{get-color($primary-palette, 90)};
+  --md-sys-color-secondary: var(--p-secondary);
+  --md-sys-color-on-secondary: var(--p-on-secondary);
+  --md-sys-color-secondary-container: #{get-color($secondary-palette, 30)};
+  --md-sys-color-on-secondary-container: #{get-color($secondary-palette, 90)};
+  --md-sys-color-tertiary: var(--p-tertiary);
+  --md-sys-color-on-tertiary: var(--p-on-tertiary);
+  --md-sys-color-tertiary-container: #{get-color($tertiary-palette, 30)};
+  --md-sys-color-on-tertiary-container: #{get-color($tertiary-palette, 90)};
+  --md-sys-color-error: var(--p-error);
+  --md-sys-color-on-error: #{get-color($error-palette, 20)};
+  --md-sys-color-error-container: #{get-color($error-palette, 30)};
+  --md-sys-color-on-error-container: #{get-color($error-palette, 90)};
+  --md-sys-color-surface: var(--p-surface);
+  --md-sys-color-on-surface: var(--p-on-surface);
+  --md-sys-color-surface-variant: var(--p-outline);
+  --md-sys-color-on-surface-variant: var(--p-on-surface-variant);
+  --md-sys-color-surface-container-lowest: #{get-color($neutral-palette, 4)};
+  --md-sys-color-surface-container-low: var(--p-surface-container-low);
+  --md-sys-color-surface-container: var(--p-surface-container);
+  --md-sys-color-surface-container-high: var(--p-surface-container-high);
+  --md-sys-color-surface-container-highest: #{get-color($neutral-palette, 22)};
+  --md-sys-color-outline: var(--p-outline);
+  --md-sys-color-outline-variant: var(--p-outline-variant);
+  --md-sys-color-inverse-surface: #{get-color($neutral-palette, 90)};
+  --md-sys-color-inverse-on-surface: #{get-color($neutral-palette, 20)};
+  --md-sys-color-inverse-primary: #{get-color($primary-palette, 40)};
+  --md-sys-color-shadow: rgb(0 0 0 / 0.45);
+  --md-sys-color-scrim: #{get-color($neutral-palette, 0)};
+  --md-sys-color-surface-container-rgb: 18, 26, 35;
+  --md-sys-color-surface-container-high-rgb: 24, 34, 48;
+  --md-sys-color-glass-surface: rgb(18 26 35 / 0.78);
+  --md-sys-color-glass-surface-high: rgb(24 34 48 / 0.82);
+
+  --md-extended-color-accent-color: var(--p-accent);
+  --md-extended-color-accent-on-color: var(--p-on-accent);
+  --md-extended-color-accent-color-container: var(--p-accent-container);
+  --md-extended-color-accent-on-color-container: var(--p-on-accent);
+  --md-extended-color-success-color: var(--p-success);
+  --md-extended-color-success-on-color: #{get-color($success-palette, 10)};
+  --md-extended-color-success-color-container: #{get-color($success-palette, 30)};
+  --md-extended-color-success-on-color-container: #{get-color($success-palette, 90)};
+  --md-extended-color-warning-color: var(--p-warning);
+  --md-extended-color-warning-on-color: #{get-color($warning-palette, 10)};
+  --md-extended-color-warning-color-container: #{get-color($warning-palette, 30)};
+  --md-extended-color-warning-on-color-container: #{get-color($warning-palette, 90)};
+  --md-extended-color-info-color: var(--p-info);
+  --md-extended-color-info-on-color: #{get-color($info-palette, 10)};
+  --md-extended-color-info-color-container: #{get-color($info-palette, 30)};
+  --md-extended-color-info-on-color-container: #{get-color($info-palette, 90)};
+
+  @include semantic-aliases;
+}
+
+@mixin light-theme-vars {
+  --p-primary: #2563eb;
+  --p-primary-bright: #2563eb;
+  --p-on-primary: #ffffff;
+  --p-secondary: #0d9488;
+  --p-on-secondary: #ffffff;
+  --p-tertiary: #7c3aed;
+  --p-tertiary-bright: #7c3aed;
+  --p-on-tertiary: #ffffff;
+  --p-accent: #ea580c;
+  --p-accent-bright: #c2410c;
+  --p-on-accent: #ffffff;
+  --p-accent-container: #ffe0c7;
+  --p-accent-soft-edge: rgb(234 88 12 / 0.4);
+  --p-success: #10b981;
+  --p-error: #ef4444;
+  --p-warning: #fbbf24;
+  --p-info: #38bdf8;
+  --p-surface: #fbf9fd;
+  --p-surface-container-low: #f4f5fa;
+  --p-surface-container: #eef0f5;
+  --p-surface-container-high: #e8eaef;
+  --p-on-surface: #131520;
+  --p-on-surface-variant: #414753;
+  --p-on-surface-muted: #6e7280;
+  --p-outline: #6e7280;
+  --p-outline-variant: #c1c6d2;
+
+  --md-sys-color-primary: var(--p-primary);
+  --md-sys-color-on-primary: var(--p-on-primary);
+  --md-sys-color-primary-container: #{get-color($primary-palette, 90)};
+  --md-sys-color-on-primary-container: #{get-color($primary-palette, 10)};
+  --md-sys-color-secondary: var(--p-secondary);
+  --md-sys-color-on-secondary: var(--p-on-secondary);
+  --md-sys-color-secondary-container: #{get-color($secondary-palette, 90)};
+  --md-sys-color-on-secondary-container: #{get-color($secondary-palette, 10)};
+  --md-sys-color-tertiary: var(--p-tertiary);
+  --md-sys-color-on-tertiary: var(--p-on-tertiary);
+  --md-sys-color-tertiary-container: #{get-color($tertiary-palette, 90)};
+  --md-sys-color-on-tertiary-container: #{get-color($tertiary-palette, 10)};
+  --md-sys-color-error: var(--p-error);
+  --md-sys-color-on-error: #{get-color($error-palette, 100)};
+  --md-sys-color-error-container: #{get-color($error-palette, 90)};
+  --md-sys-color-on-error-container: #{get-color($error-palette, 10)};
+  --md-sys-color-surface: var(--p-surface);
+  --md-sys-color-on-surface: var(--p-on-surface);
+  --md-sys-color-surface-variant: #{get-color($neutral-palette, 95)};
+  --md-sys-color-on-surface-variant: var(--p-on-surface-variant);
+  --md-sys-color-surface-container-lowest: #{get-color($neutral-palette, 100)};
+  --md-sys-color-surface-container-low: var(--p-surface-container-low);
+  --md-sys-color-surface-container: var(--p-surface-container);
+  --md-sys-color-surface-container-high: var(--p-surface-container-high);
+  --md-sys-color-surface-container-highest: #{get-color($neutral-palette, 90)};
+  --md-sys-color-outline: var(--p-outline);
+  --md-sys-color-outline-variant: var(--p-outline-variant);
+  --md-sys-color-inverse-surface: #{get-color($neutral-palette, 20)};
+  --md-sys-color-inverse-on-surface: #{get-color($neutral-palette, 95)};
+  --md-sys-color-inverse-primary: #{get-color($primary-palette, 80)};
+  --md-sys-color-shadow: rgb(15 23 42 / 0.16);
+  --md-sys-color-scrim: #{get-color($neutral-palette, 0)};
+  --md-sys-color-surface-container-rgb: 238, 240, 245;
+  --md-sys-color-surface-container-high-rgb: 232, 234, 239;
+  --md-sys-color-glass-surface: rgb(238 240 245 / 0.86);
+  --md-sys-color-glass-surface-high: rgb(232 234 239 / 0.88);
+
+  --md-extended-color-accent-color: var(--p-accent);
+  --md-extended-color-accent-on-color: var(--p-on-accent);
+  --md-extended-color-accent-color-container: var(--p-accent-container);
+  --md-extended-color-accent-on-color-container: #{get-color($accent-palette, 10)};
+  --md-extended-color-success-color: var(--p-success);
+  --md-extended-color-success-on-color: #{get-color($success-palette, 100)};
+  --md-extended-color-success-color-container: #{get-color($success-palette, 90)};
+  --md-extended-color-success-on-color-container: #{get-color($success-palette, 10)};
+  --md-extended-color-warning-color: var(--p-warning);
+  --md-extended-color-warning-on-color: #{get-color($warning-palette, 10)};
+  --md-extended-color-warning-color-container: #{get-color($warning-palette, 90)};
+  --md-extended-color-warning-on-color-container: #{get-color($warning-palette, 10)};
+  --md-extended-color-info-color: var(--p-info);
+  --md-extended-color-info-on-color: #{get-color($info-palette, 10)};
+  --md-extended-color-info-color-container: #{get-color($info-palette, 90)};
+  --md-extended-color-info-on-color-container: #{get-color($info-palette, 10)};
+
+  @include semantic-aliases;
+}
