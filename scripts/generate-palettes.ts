@@ -14,6 +14,12 @@ import fs from 'fs';
 import path from 'path';
 import { argbFromHex, hexFromArgb, TonalPalette, Hct } from '@material/material-color-utilities';
 
+// Edit brand/source colors here, then run `yarn theme:generate`.
+//
+// Material colors (primary, secondary, tertiary, error) are used to build
+// Angular Material-valid palettes. App colors (accent, success, warning, info)
+// are generated for our own CSS tokens and must not be passed directly to
+// `mat.define-theme()`.
 const BASE_COLORS: Record<string, string> = {
   primary: '#3b82f6',
   secondary: '#22d3ee',
