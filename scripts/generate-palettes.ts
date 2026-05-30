@@ -1,234 +1,125 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 /**
- * M3 Theme Generator
+ * M3 Theme Palette Generator
  *
- * This script generates Material Design 3 (MD3) tonal palettes from base hex colors
- * using Google's official HCT (Hue, Chroma, Tone) algorithm.
- *
- * It outputs a complete SCSS theme file that is imported by styles.scss.
+ * Generates Material Design 3 tonal palettes from base hex colors using
+ * Google's HCT algorithm. The output is a generated Sass partial consumed by
+ * src/m3-theme.scss, which remains the app's single public theme entrypoint.
  *
  * Usage:
  *   yarn theme:generate
- *
- * The generated file (src/styles/_generated-theme.scss) contains:
- * - All color palettes (primary, secondary, tertiary, neutral, etc.)
- * - Extended semantic palettes (success, warning, info, error)
- * - Theme definitions ($light-theme, $dark-theme)
- * - Helper function (get-color)
  */
 
 import fs from 'fs';
 import path from 'path';
 import { argbFromHex, hexFromArgb, TonalPalette, Hct } from '@material/material-color-utilities';
 
-// ============================================================================
-// Base Colors - Single source of truth for brand identity
-// Change these values and run `yarn theme:generate` to regenerate palettes
-// ============================================================================
 const BASE_COLORS: Record<string, string> = {
-  primary: '#3f97ff', // Capital Blue
-  secondary: '#f14a00', // Vibrant Orange
-  tertiary: '#8b3aa4', // Rich Purple
-  error: '#ba1a1a', // Standard Error Red
-  success: '#2e7d32', // Success Green
-  warning: '#ed6c02', // Warning Amber/Orange
-  info: '#0288d1', // Info Blue
+  primary: '#3b82f6',
+  secondary: '#22d3ee',
+  tertiary: '#a78bfa',
+  accent: '#f97316',
+  error: '#ef4444',
+  success: '#10b981',
+  warning: '#fbbf24',
+  info: '#38bdf8',
 };
 
-// Standard MD3 tones
 const STANDARD_TONES = [0, 10, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100];
-
-// Extended tones required for neutral palettes
 const NEUTRAL_TONES = [
   0, 4, 6, 10, 12, 17, 20, 22, 24, 25, 30, 35, 40, 50, 60, 70, 80, 87, 90, 92, 94, 95, 96, 98, 99, 100,
 ];
 
-// ============================================================================
-// Palette Generation
-// ============================================================================
-
 function generatePalette(hexColor: string, tones: number[]): Record<number, string> {
-  const argb = argbFromHex(hexColor);
-  const palette = TonalPalette.fromInt(argb);
-
+  const palette = TonalPalette.fromInt(argbFromHex(hexColor));
   const result: Record<number, string> = {};
+
   tones.forEach((tone) => {
-    const color = palette.tone(tone);
-    result[tone] = hexFromArgb(color);
+    result[tone] = hexFromArgb(palette.tone(tone));
   });
 
   return result;
 }
 
 function generateNeutralPalette(baseHexColor: string, chroma: number, tones: number[]): Record<number, string> {
-  const hct = Hct.fromInt(argbFromHex(baseHexColor));
-  const hue = hct.hue;
-
+  const hue = Hct.fromInt(argbFromHex(baseHexColor)).hue;
   const result: Record<number, string> = {};
+
   tones.forEach((tone) => {
-    const neutralHct = Hct.from(hue, chroma, tone);
-    result[tone] = hexFromArgb(neutralHct.toInt());
+    result[tone] = hexFromArgb(Hct.from(hue, chroma, tone).toInt());
   });
 
   return result;
 }
 
-function formatPaletteCompact(palette: Record<number, string>): string {
+function formatPalette(palette: Record<number, string>): string {
   const entries = Object.entries(palette);
   const lines: string[] = [];
 
-  // Group into lines of ~4 values for readability
   for (let i = 0; i < entries.length; i += 4) {
     const chunk = entries.slice(i, i + 4);
-    const line = chunk.map(([tone, hex]) => `${tone}: ${hex}`).join(', ');
-    lines.push('    ' + line + ',');
+    lines.push(`    ${chunk.map(([tone, hex]) => `${tone}: ${hex}`).join(', ')},`);
   }
 
   return lines.join('\n');
 }
 
+function formatThemePalettes(): string {
+  const palettes: Record<string, Record<number, string>> = {
+    primary: generatePalette(BASE_COLORS['primary'], STANDARD_TONES),
+    secondary: generatePalette(BASE_COLORS['secondary'], STANDARD_TONES),
+    tertiary: generatePalette(BASE_COLORS['tertiary'], STANDARD_TONES),
+    accent: generatePalette(BASE_COLORS['accent'], STANDARD_TONES),
+    error: generatePalette(BASE_COLORS['error'], STANDARD_TONES),
+    neutral: generateNeutralPalette(BASE_COLORS['primary'], 4, NEUTRAL_TONES),
+    'neutral-variant': generateNeutralPalette(BASE_COLORS['primary'], 8, NEUTRAL_TONES),
+    success: generatePalette(BASE_COLORS['success'], STANDARD_TONES),
+    warning: generatePalette(BASE_COLORS['warning'], STANDARD_TONES),
+    info: generatePalette(BASE_COLORS['info'], STANDARD_TONES),
+  };
+
+  return Object.entries(palettes)
+    .map(
+      ([name, palette]) => `  ${name}: (
+${formatPalette(palette)}
+  ),`,
+    )
+    .join('\n');
+}
+
 function generateOutput(): string {
   const timestamp = new Date().toISOString();
+  const baseColorLines = Object.entries(BASE_COLORS)
+    .map(([name, hex]) => `//   ${name}: ${hex}`)
+    .join('\n');
 
-  const primaryPalette = generatePalette(BASE_COLORS['primary'], STANDARD_TONES);
-  const secondaryPalette = generatePalette(BASE_COLORS['secondary'], STANDARD_TONES);
-  const tertiaryPalette = generatePalette(BASE_COLORS['tertiary'], STANDARD_TONES);
-  const errorPalette = generatePalette(BASE_COLORS['error'], STANDARD_TONES);
-  const successPalette = generatePalette(BASE_COLORS['success'], STANDARD_TONES);
-  const warningPalette = generatePalette(BASE_COLORS['warning'], STANDARD_TONES);
-  const infoPalette = generatePalette(BASE_COLORS['info'], STANDARD_TONES);
-  const neutralPalette = generateNeutralPalette(BASE_COLORS['primary'], 4, NEUTRAL_TONES);
-  const neutralVariantPalette = generateNeutralPalette(BASE_COLORS['primary'], 8, NEUTRAL_TONES);
-
-  return `/* Copyright (c) 2025 Perpetuator LLC */
+  return `/* Copyright (c) 2025-2026 Perpetuator LLC */
 // ============================================================================
 // Generated M3 Theme Palettes
 // DO NOT EDIT - Generated by: yarn theme:generate
 // Generated at: ${timestamp}
 //
 // Base colors:
-//   primary: ${BASE_COLORS['primary']}
-//   secondary: ${BASE_COLORS['secondary']}
-//   tertiary: ${BASE_COLORS['tertiary']}
-//   error: ${BASE_COLORS['error']}
-//   success: ${BASE_COLORS['success']}
-//   warning: ${BASE_COLORS['warning']}
-//   info: ${BASE_COLORS['info']}
+${baseColorLines}
 // ============================================================================
 
-@use 'sass:map';
-@use '@angular/material' as mat;
-
-// ============================================================================
-// Core Material Palettes (HCT-generated)
-// ============================================================================
-$primary-palette: (
-${formatPaletteCompact(primaryPalette)}
+$theme-palettes: (
+${formatThemePalettes()}
 );
-
-$secondary-palette: (
-${formatPaletteCompact(secondaryPalette)}
-);
-
-$tertiary-palette: (
-${formatPaletteCompact(tertiaryPalette)}
-);
-
-$error-palette: (
-${formatPaletteCompact(errorPalette)}
-);
-
-$neutral-palette: (
-${formatPaletteCompact(neutralPalette)}
-);
-
-$neutral-variant-palette: (
-${formatPaletteCompact(neutralVariantPalette)}
-);
-
-// ============================================================================
-// Extended Semantic Palettes (HCT-generated)
-// ============================================================================
-$success-palette: (
-${formatPaletteCompact(successPalette)}
-);
-
-$warning-palette: (
-${formatPaletteCompact(warningPalette)}
-);
-
-$info-palette: (
-${formatPaletteCompact(infoPalette)}
-);
-
-// ============================================================================
-// Helper function to get color from palette by tone
-// ============================================================================
-@function get-color($palette, $tone) {
-  @return map.get($palette, $tone);
-}
-
-// ============================================================================
-// Theme Definitions (Material-validated structure)
-// ============================================================================
-$_rest: (
-  secondary: $secondary-palette,
-  neutral: $neutral-palette,
-  neutral-variant: $neutral-variant-palette,
-  error: $error-palette,
-);
-
-$_primary: map.merge($primary-palette, $_rest);
-$_tertiary: map.merge($tertiary-palette, $_rest);
-
-$light-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: $_primary,
-    tertiary: $_tertiary,
-  ),
-  typography: (
-    brand-family: 'Lexend, sans-serif',
-    plain-family: 'Roboto, sans-serif',
-  ),
-  density: (
-    scale: 0,
-  ),
-));
-
-$dark-theme: mat.define-theme((
-  color: (
-    theme-type: dark,
-    primary: $_primary,
-    tertiary: $_tertiary,
-  ),
-  typography: (
-    brand-family: 'Lexend, sans-serif',
-    plain-family: 'Roboto, sans-serif',
-  ),
-  density: (
-    scale: 0,
-  ),
-));
 `;
 }
 
-// ============================================================================
-// Main
-// ============================================================================
-
 const output = generateOutput();
-const outputPath = path.join(process.cwd(), 'src/styles/_generated-theme.scss');
+const outputPath = path.join(process.cwd(), 'src/styles/_theme-palettes.generated.scss');
 
 fs.writeFileSync(outputPath, output);
 
-console.log('✅ Generated M3 theme!');
-console.log(`   Output file: ${outputPath}`);
+console.log('Generated M3 theme palettes.');
+console.log(`Output file: ${outputPath}`);
 console.log('');
 console.log('Base colors used:');
 Object.entries(BASE_COLORS).forEach(([name, hex]) => {
-  console.log(`   ${name}: ${hex}`);
+  console.log(`  ${name}: ${hex}`);
 });
 console.log('');
-console.log('The generated theme is automatically used by styles.scss');
-console.log('Run `yarn build` or `yarn start` to see the changes.');
+console.log('src/m3-theme.scss consumes this generated palette partial.');
