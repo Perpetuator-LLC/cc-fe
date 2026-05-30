@@ -42,6 +42,11 @@ interface ScheduleDisplay {
   episodeInfo: { uuid: string; name: string } | null;
   podcastInfo: { uuid: string; name: string } | null;
   pulseInfo: { uuid: string; name: string } | null;
+  isCrontab: boolean;
+  scheduleTime: string;
+  dayPatternLabel: string;
+  activeDays: Record<number, boolean>;
+  weekDots: { value: number; letter: string; active: boolean }[];
 }
 type ScheduleWithDisplay = Schedule & ScheduleDisplay;
 
@@ -171,6 +176,16 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
   }
 
   private enrichSchedule(s: Schedule): ScheduleWithDisplay {
+    const isCrontab = this.isCrontabSchedule(s);
+    const activeDays: Record<number, boolean> = {};
+    for (const d of this.getScheduleDays(s)) {
+      activeDays[d] = true;
+    }
+    const weekDots = this.daysOfWeek.map((day) => ({
+      value: day.value,
+      letter: day.short.charAt(0),
+      active: !!activeDays[day.value],
+    }));
     return {
       ...s,
       icon: this.getJobIcon(s),
@@ -180,6 +195,11 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
       episodeInfo: this.getEpisodeInfo(s),
       podcastInfo: this.getPodcastInfo(s),
       pulseInfo: this.getPulseInfo(s),
+      isCrontab,
+      scheduleTime: isCrontab ? this.getScheduleTime(s) : '',
+      dayPatternLabel: isCrontab ? this.getDayPatternLabel(s) : '',
+      activeDays,
+      weekDots,
     };
   }
 
