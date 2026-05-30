@@ -1,7 +1,13 @@
 /* Copyright (c) 2025-2026 Perpetuator LLC */
 // Pulse Material 3 theme.
-// Generated palettes come from styles/_theme-palettes.generated.scss.
-// Update scripts/generate-palettes.ts, then run `yarn theme:generate`.
+//
+// To change source colors, edit scripts/generate-palettes.ts, then run:
+//   yarn theme:generate
+//
+// This file is the app's public theme entrypoint. The generated palette partial
+// intentionally contains two maps:
+// - $material-palettes: strict Angular Material palette shape for mat.define-theme()
+// - $theme-palettes: extended app palettes for custom CSS tokens
 
 @use 'sass:map';
 @use '@angular/material' as mat;
