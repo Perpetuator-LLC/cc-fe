@@ -12,16 +12,9 @@
         </div>
       </div>
       <div class="header-actions">
-        <button mat-flat-button color="primary" (click)="generatePulse.emit()" [disabled]="generatingPulse">
-          <span class="button-content">
-            @if (generatingPulse) {
-              <mat-spinner diameter="18" />
-            } @else {
-              <mat-icon>play_arrow</mat-icon>
-            }
-            Generate Now
-          </span>
-        </button>
+        <app-action-button icon="play_arrow" [loading]="generatingPulse" (actionClick)="generatePulse.emit()">
+          Generate Now
+        </app-action-button>
         <button mat-icon-button [matMenuTriggerFor]="headerMenu" matTooltip="More actions">
           <mat-icon>more_vert</mat-icon>
         </button>

@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
 import { PulseConfig } from '../../../pulses.types';
 
 @Component({
@@ -20,6 +21,7 @@ import { PulseConfig } from '../../../pulses.types';
     MatMenuModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    ActionButtonComponent,
   ],
   templateUrl: './pulse-detail-header.component.html',
   styleUrl: './pulse-detail-header.component.scss',

@@ -1,0 +1,53 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+:host {
+  display: inline-flex;
+}
+
+.action-button {
+  --mdc-filled-button-container-color: var(--md-sys-color-surface-container);
+  --mdc-filled-button-label-text-color: var(--p-primary-bright);
+  --mat-filled-button-state-layer-color: var(--p-primary-bright);
+  --mat-filled-button-ripple-color: color-mix(in srgb, var(--p-primary) 16%, transparent);
+
+  border: 1px solid color-mix(in srgb, var(--p-primary) 35%, transparent);
+  border-radius: 12px;
+
+  color: var(--p-primary-bright);
+
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--p-primary) 14%, transparent),
+      color-mix(in srgb, var(--p-primary) 4%, transparent)
+    ),
+    var(--md-sys-color-surface-container);
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+
+  mat-icon,
+  mat-spinner {
+    color: currentcolor;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--p-primary);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--p-primary) 20%, transparent),
+        color-mix(in srgb, var(--p-primary) 8%, transparent)
+      ),
+      var(--md-sys-color-surface-container);
+  }
+}
+
+.button-content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
