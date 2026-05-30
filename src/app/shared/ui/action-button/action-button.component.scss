@@ -10,6 +10,8 @@
   --mat-filled-button-state-layer-color: var(--p-primary-bright);
   --mat-filled-button-ripple-color: color-mix(in srgb, var(--p-primary) 16%, transparent);
 
+  padding-right: 12px;
+  padding-left: 6px;
   border: 1px solid color-mix(in srgb, var(--p-primary) 35%, transparent);
   border-radius: 12px;
 
