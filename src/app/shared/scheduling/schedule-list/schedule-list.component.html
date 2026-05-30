@@ -7,10 +7,7 @@
   <div class="schedule-list-header">
     <h3>Schedules</h3>
     @if (canAddSchedule) {
-      <button mat-flat-button color="primary" (click)="createSchedule()">
-        <mat-icon>add</mat-icon>
-        <span>Add Schedule</span>
-      </button>
+      <app-action-button icon="add" (actionClick)="createSchedule()">Add Schedule</app-action-button>
     }
   </div>
 
@@ -19,10 +16,7 @@
       <mat-icon>schedule</mat-icon>
       <p>{{ emptyStateMessage }}</p>
       @if (canAddSchedule) {
-        <button mat-flat-button color="primary" (click)="createSchedule()">
-          <mat-icon>add</mat-icon>
-          <span>Add Schedule</span>
-        </button>
+        <app-action-button icon="add" (actionClick)="createSchedule()">Add Schedule</app-action-button>
       }
     </div>
   } @else {
