@@ -109,3 +109,5 @@ aio/content/examples/.DS_Store
 
 # custom
 re-theme
+.codex
+AGENTS.md
