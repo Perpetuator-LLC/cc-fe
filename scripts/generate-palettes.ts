@@ -25,7 +25,7 @@ const BASE_COLORS: Record<string, string> = {
   info: '#38bdf8',
 };
 
-const STANDARD_TONES = [0, 10, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100];
+const MATERIAL_TONES = [0, 10, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 95, 98, 99, 100];
 const NEUTRAL_TONES = [
   0, 4, 6, 10, 12, 17, 20, 22, 24, 25, 30, 35, 40, 50, 60, 70, 80, 87, 90, 92, 94, 95, 96, 98, 99, 100,
 ];
@@ -66,16 +66,35 @@ function formatPalette(palette: Record<number, string>): string {
 
 function formatThemePalettes(): string {
   const palettes: Record<string, Record<number, string>> = {
-    primary: generatePalette(BASE_COLORS['primary'], STANDARD_TONES),
-    secondary: generatePalette(BASE_COLORS['secondary'], STANDARD_TONES),
-    tertiary: generatePalette(BASE_COLORS['tertiary'], STANDARD_TONES),
-    accent: generatePalette(BASE_COLORS['accent'], STANDARD_TONES),
-    error: generatePalette(BASE_COLORS['error'], STANDARD_TONES),
+    primary: generatePalette(BASE_COLORS['primary'], MATERIAL_TONES),
+    secondary: generatePalette(BASE_COLORS['secondary'], MATERIAL_TONES),
+    tertiary: generatePalette(BASE_COLORS['tertiary'], MATERIAL_TONES),
+    accent: generatePalette(BASE_COLORS['accent'], MATERIAL_TONES),
+    error: generatePalette(BASE_COLORS['error'], MATERIAL_TONES),
     neutral: generateNeutralPalette(BASE_COLORS['primary'], 4, NEUTRAL_TONES),
     'neutral-variant': generateNeutralPalette(BASE_COLORS['primary'], 8, NEUTRAL_TONES),
-    success: generatePalette(BASE_COLORS['success'], STANDARD_TONES),
-    warning: generatePalette(BASE_COLORS['warning'], STANDARD_TONES),
-    info: generatePalette(BASE_COLORS['info'], STANDARD_TONES),
+    success: generatePalette(BASE_COLORS['success'], MATERIAL_TONES),
+    warning: generatePalette(BASE_COLORS['warning'], MATERIAL_TONES),
+    info: generatePalette(BASE_COLORS['info'], MATERIAL_TONES),
+  };
+
+  return Object.entries(palettes)
+    .map(
+      ([name, palette]) => `  ${name}: (
+${formatPalette(palette)}
+  ),`,
+    )
+    .join('\n');
+}
+
+function formatMaterialThemePalettes(): string {
+  const palettes: Record<string, Record<number, string>> = {
+    primary: generatePalette(BASE_COLORS['primary'], MATERIAL_TONES),
+    secondary: generatePalette(BASE_COLORS['secondary'], MATERIAL_TONES),
+    tertiary: generatePalette(BASE_COLORS['tertiary'], MATERIAL_TONES),
+    error: generatePalette(BASE_COLORS['error'], MATERIAL_TONES),
+    neutral: generateNeutralPalette(BASE_COLORS['primary'], 4, MATERIAL_TONES),
+    'neutral-variant': generateNeutralPalette(BASE_COLORS['primary'], 8, MATERIAL_TONES),
   };
 
   return Object.entries(palettes)
@@ -102,6 +121,10 @@ function generateOutput(): string {
 // Base colors:
 ${baseColorLines}
 // ============================================================================
+
+$material-palettes: (
+${formatMaterialThemePalettes()}
+);
 
 $theme-palettes: (
 ${formatThemePalettes()}
