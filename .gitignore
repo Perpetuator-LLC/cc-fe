@@ -35,11 +35,7 @@ yarn-error.log
 package-lock.json
 
 # IDEs and editors
-# Ignore personal/volatile IntelliJ state, but TRACK the shared run
-# configurations (Docker Compose "Dev Stack" etc.) so the dev-container
-# integration works for the whole team, not just whoever created it.
-.idea/*
-!.idea/runConfigurations/
+.idea/
 .project
 .classpath
 .c9/
@@ -110,7 +106,6 @@ aio/content/examples/.DS_Store
 # Claude Code auto-generated context (session-start hook)
 .claude/
 !.claude/settings.json
-config.bat
 branch_structure.json
 temp_auto_push.bat
 temp_interactive_push.bat
@@ -119,3 +114,4 @@ temp_interactive_push.bat
 re-theme
 .codex
 AGENTS.md
+config.bat
