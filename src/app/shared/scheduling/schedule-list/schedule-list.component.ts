@@ -32,6 +32,7 @@ import { DAYS_OF_WEEK, DayOfWeek } from '../schedule.types';
 import { ScheduleType } from '../../../scheduling.service';
 import { parseScheduleArgs } from '../../../utils/schedule';
 import { ActionButtonComponent } from '../../ui/action-button/action-button.component';
+import { IconTileComponent } from '../../ui/icon-tile/icon-tile.component';
 import { PillComponent } from '../../ui/pill/pill.component';
 import { WeekStripComponent } from '../week-strip/week-strip.component';
 
@@ -66,6 +67,7 @@ type ScheduleWithDisplay = Schedule & ScheduleDisplay;
     MatProgressBarModule,
     MatDialogModule,
     ActionButtonComponent,
+    IconTileComponent,
     PillComponent,
     WeekStripComponent,
   ],

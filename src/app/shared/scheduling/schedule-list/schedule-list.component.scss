@@ -78,10 +78,6 @@
 
   &.disabled {
     opacity: 0.6;
-
-    .schedule-icon mat-icon {
-      color: var(--md-sys-color-on-surface-variant);
-    }
   }
 }
 
@@ -93,33 +89,6 @@
 
   @include mixins.mobile() {
     flex-wrap: wrap;
-  }
-}
-
-.schedule-icon {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-
-  width: 48px;
-  height: 48px;
-  border: 1px solid color-mix(in srgb, var(--p-primary) 35%, transparent);
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--p-primary) 18%, transparent),
-      color-mix(in srgb, var(--p-primary) 6%, transparent)
-    ),
-    var(--md-sys-color-surface-container-high);
-
-  mat-icon {
-    width: 24px;
-    height: 24px;
-    font-size: 24px;
-    color: var(--p-primary-bright);
   }
 }
 

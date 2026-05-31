@@ -1,0 +1,111 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+:host {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.icon-tile {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+
+  box-sizing: border-box;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+
+  color: var(--md-sys-color-on-surface-variant);
+
+  background: var(--md-sys-color-surface-container-high);
+
+  &.large {
+    width: 56px;
+    height: 56px;
+  }
+
+  &.primary {
+    border-color: color-mix(in srgb, var(--p-primary) 35%, transparent);
+    color: var(--p-primary-bright);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--p-primary) 18%, transparent),
+        color-mix(in srgb, var(--p-primary) 6%, transparent)
+      ),
+      var(--md-sys-color-surface-container-high);
+  }
+
+  &.tertiary {
+    border-color: color-mix(in srgb, var(--p-tertiary) 35%, transparent);
+    color: var(--p-tertiary);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--p-tertiary) 18%, transparent),
+        color-mix(in srgb, var(--p-tertiary) 6%, transparent)
+      ),
+      var(--md-sys-color-surface-container-high);
+  }
+
+  &.success {
+    border-color: color-mix(in srgb, var(--md-extended-color-success-color) 35%, transparent);
+    color: var(--md-extended-color-success-color);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--md-extended-color-success-color) 16%, transparent),
+        color-mix(in srgb, var(--md-extended-color-success-color) 6%, transparent)
+      ),
+      var(--md-sys-color-surface-container-high);
+  }
+
+  &.warning {
+    border-color: color-mix(in srgb, var(--md-extended-color-warning-color) 35%, transparent);
+    color: var(--md-extended-color-warning-color);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--md-extended-color-warning-color) 16%, transparent),
+        color-mix(in srgb, var(--md-extended-color-warning-color) 6%, transparent)
+      ),
+      var(--md-sys-color-surface-container-high);
+  }
+
+  &.error {
+    border-color: color-mix(in srgb, var(--md-sys-color-error) 35%, transparent);
+    color: var(--md-sys-color-error);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--md-sys-color-error) 16%, transparent),
+        color-mix(in srgb, var(--md-sys-color-error) 6%, transparent)
+      ),
+      var(--md-sys-color-surface-container-high);
+  }
+
+  &.info {
+    border-color: color-mix(in srgb, var(--md-extended-color-info-color) 35%, transparent);
+    color: var(--md-extended-color-info-color);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--md-extended-color-info-color) 16%, transparent),
+        color-mix(in srgb, var(--md-extended-color-info-color) 6%, transparent)
+      ),
+      var(--md-sys-color-surface-container-high);
+  }
+
+  mat-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+  }
+
+  &.large mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+  }
+}

@@ -28,25 +28,6 @@
   align-items: center;
 }
 
-.pulse-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-
-  background: var(--md-sys-color-primary-container);
-
-  mat-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 32px;
-    color: var(--md-sys-color-on-primary-container);
-  }
-}
-
 .header-text {
   h1 {
     margin: 0;

@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActionButtonComponent } from '../../../../shared/ui/action-button/action-button.component';
+import { IconTileComponent } from '../../../../shared/ui/icon-tile/icon-tile.component';
 import { PulseConfig } from '../../../pulses.types';
 
 @Component({
@@ -22,6 +23,7 @@ import { PulseConfig } from '../../../pulses.types';
     MatProgressSpinnerModule,
     MatTooltipModule,
     ActionButtonComponent,
+    IconTileComponent,
   ],
   templateUrl: './pulse-detail-header.component.html',
   styleUrl: './pulse-detail-header.component.scss',

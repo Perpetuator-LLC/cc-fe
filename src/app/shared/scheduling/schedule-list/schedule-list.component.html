@@ -24,9 +24,7 @@
       @for (schedule of filteredSchedules; track schedule.uuid) {
         <div class="schedule-card" [class.disabled]="!schedule.enabled">
           <div class="schedule-card-content">
-            <div class="schedule-icon">
-              <mat-icon>{{ schedule.icon }}</mat-icon>
-            </div>
+            <app-icon-tile [icon]="schedule.icon" />
             <div class="schedule-info">
               <div class="schedule-name">
                 <span class="schedule-title">{{ schedule.name }}</span>
