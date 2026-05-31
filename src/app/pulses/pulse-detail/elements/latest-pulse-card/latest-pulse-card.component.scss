@@ -157,6 +157,8 @@
 }
 
 .hero-progress-bar {
+  cursor: pointer;
+
   overflow: hidden;
   flex: 1;
 
@@ -164,6 +166,11 @@
   border-radius: 999px;
 
   background: var(--md-sys-color-outline-variant);
+
+  &:focus-visible {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: 4px;
+  }
 }
 
 .hero-progress-fill {

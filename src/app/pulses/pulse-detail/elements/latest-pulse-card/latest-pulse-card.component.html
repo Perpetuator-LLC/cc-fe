@@ -85,10 +85,23 @@
 
     <!-- Progress / duration bar -->
     <div class="hero-progress">
-      <span class="hero-progress-time">0:00</span>
-      <div class="hero-progress-bar"><div class="hero-progress-fill"></div></div>
+      <span class="hero-progress-time">{{ currentTimeText }}</span>
+      <div
+        class="hero-progress-bar"
+        (click)="onProgressClick($event)"
+        (keydown.arrowRight)="seekByStep(5)"
+        (keydown.arrowLeft)="seekByStep(-5)"
+        role="slider"
+        tabindex="0"
+        [attr.aria-valuenow]="progressPercent"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-label="Latest recording progress"
+      >
+        <div class="hero-progress-fill" [appDynamicStyle]="progressFillStyle"></div>
+      </div>
       <span class="hero-progress-time hero-progress-time-end">
-        {{ pulse.audioDurationSeconds | pulseFormatSeconds }}
+        {{ durationText }}
       </span>
     </div>
 
