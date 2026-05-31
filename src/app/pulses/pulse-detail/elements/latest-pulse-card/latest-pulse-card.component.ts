@@ -10,6 +10,7 @@ import { Pulse } from '../../../pulses.types';
 import { PulseCanPlayPipe } from '../../pipes/pulse-can-play.pipe';
 import { PulseFormatSecondsPipe } from '../../pipes/pulse-format-seconds.pipe';
 import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
+import { PillComponent } from '../../../../shared/ui/pill/pill.component';
 
 @Component({
   selector: 'app-latest-pulse-card',
@@ -24,6 +25,7 @@ import { PulseTimeAgoPipe } from '../../pipes/pulse-time-ago.pipe';
     PulseCanPlayPipe,
     PulseFormatSecondsPipe,
     PulseTimeAgoPipe,
+    PillComponent,
   ],
   templateUrl: './latest-pulse-card.component.html',
   styleUrl: './latest-pulse-card.component.scss',

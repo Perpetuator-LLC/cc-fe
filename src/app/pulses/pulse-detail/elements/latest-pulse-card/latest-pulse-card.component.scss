@@ -17,7 +17,7 @@
     border: 1px solid var(--md-sys-color-outline-variant);
     border-radius: 16px;
 
-    background: var(--md-sys-color-surface-container-low);
+    background: var(--md-sys-color-surface-container);
   }
 }
 
@@ -26,19 +26,6 @@
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-}
-
-.hero-eyebrow-pill {
-  padding: 4px 12px;
-  border-radius: 999px;
-
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--md-sys-color-on-primary-container);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-
-  background: var(--md-sys-color-primary-container);
 }
 
 .hero-eyebrow-meta {
@@ -79,8 +66,14 @@
 
 .hero-play-fab {
   flex: 0 0 auto;
+
   width: 64px;
   height: 64px;
+
+  color: var(--p-on-primary);
+
+  background: var(--p-primary);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--p-primary) 30%, transparent);
 
   mat-icon {
     width: 32px;
@@ -136,6 +129,12 @@
   flex-shrink: 0;
   gap: 4px;
   align-items: center;
+
+  button[mat-icon-button] {
+    border: 1px solid var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container);
+  }
 }
 
 .hero-progress {
@@ -164,13 +163,13 @@
   height: 4px;
   border-radius: 999px;
 
-  background: var(--md-sys-color-surface-container-highest);
+  background: var(--md-sys-color-outline-variant);
 }
 
 .hero-progress-fill {
   width: 0;
   height: 100%;
-  background: var(--md-sys-color-primary);
+  background: var(--p-primary);
 }
 
 .hero-validation {
@@ -193,7 +192,7 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
-  background: var(--md-sys-color-surface-container);
+  background: var(--md-sys-color-surface-container-low);
 
   mat-icon {
     width: 16px;
@@ -205,7 +204,7 @@
   .hero-validation-label {
     flex: 1;
     font-size: 12px;
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--md-sys-color-on-surface);
   }
 
   .hero-validation-value {
@@ -226,28 +225,6 @@
     .hero-validation-value {
       color: var(--md-sys-color-on-surface-variant);
     }
-  }
-}
-
-/* Validated pill (shared with history rows when this is reused) */
-.validated-pill {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-
-  padding: 4px 12px 4px 8px;
-  border-radius: 999px;
-
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--md-extended-color-success-color);
-
-  background: var(--md-extended-color-success-color-container);
-
-  mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
   }
 }
 

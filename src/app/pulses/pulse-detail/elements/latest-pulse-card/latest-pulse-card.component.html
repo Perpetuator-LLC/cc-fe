@@ -3,7 +3,7 @@
   <mat-card-content>
     <!-- Eyebrow row -->
     <div class="hero-eyebrow">
-      <span class="hero-eyebrow-pill">Latest Recording</span>
+      <app-pill label="Latest Recording" variant="primary" />
       <span class="hero-eyebrow-meta">{{ pulse.createdAt | pulseTimeAgo }}</span>
       @if (pulse.status === 'FAILED') {
         <span class="hero-error-badge" [matTooltip]="pulse.errorMessage || 'Unknown error'">
@@ -46,10 +46,12 @@
             </span>
           }
           @if (pulse.isValidated) {
-            <span class="validated-pill" matTooltip="Compliance, facts and length all passed">
-              <mat-icon>verified</mat-icon>
-              Validated
-            </span>
+            <app-pill
+              icon="verified"
+              label="Validated"
+              variant="success"
+              matTooltip="Compliance, facts and length all passed"
+            />
           }
         </div>
       </div>
