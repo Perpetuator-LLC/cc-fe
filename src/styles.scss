@@ -766,6 +766,26 @@ body .toolbar-container {
     )
   );
 
+  @include mat.slide-toggle-overrides(
+    (
+      track-width: 56px,
+      track-height: 32px,
+      selected-handle-size: 24px,
+      selected-with-icon-handle-horizontal-margin: 0 28px,
+      selected-handle-horizontal-margin: 0 28px,
+      selected-pressed-handle-horizontal-margin: 0 26px,
+      selected-track-color: var(--p-primary),
+      selected-hover-track-color: var(--p-primary),
+      selected-focus-track-color: var(--p-primary),
+      selected-pressed-track-color: var(--p-primary),
+      selected-handle-color: var(--p-on-primary),
+      selected-hover-handle-color: var(--p-on-primary),
+      selected-focus-handle-color: var(--p-on-primary),
+      selected-pressed-handle-color: var(--p-on-primary),
+      selected-icon-color: var(--p-primary),
+    )
+  );
+
   // MDC button shape tokens
   --mdc-filled-button-container-shape: 8px;
   --mdc-outlined-button-container-shape: 8px;
