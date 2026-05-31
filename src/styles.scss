@@ -754,6 +754,17 @@ body .toolbar-container {
     )
   );
 
+  @include mat.tabs-overrides(
+    (
+      active-indicator-color: var(--md-sys-color-primary),
+      active-hover-indicator-color: var(--md-sys-color-primary),
+      active-focus-indicator-color: var(--md-sys-color-primary),
+      active-label-text-color: var(--md-sys-color-primary),
+      active-hover-label-text-color: var(--md-sys-color-primary),
+      active-focus-label-text-color: var(--md-sys-color-primary),
+    )
+  );
+
   // MDC button shape tokens
   --mdc-filled-button-container-shape: 8px;
   --mdc-outlined-button-container-shape: 8px;
