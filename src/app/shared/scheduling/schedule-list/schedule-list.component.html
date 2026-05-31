@@ -42,15 +42,7 @@
                   </button>
                 }
                 @if (schedule.pulseInfo; as pulseInfo) {
-                  <button
-                    mat-button
-                    type="button"
-                    class="resource-link-pulse"
-                    (click)="navigateToPulse($event, pulseInfo.uuid)"
-                  >
-                    <mat-icon>graphic_eq</mat-icon>
-                    {{ pulseInfo.name }}
-                  </button>
+                  <app-pill label="Pulse" variant="tertiary" [dot]="true" />
                 }
                 @if (schedule.episodeInfo; as episodeInfo) {
                   <button

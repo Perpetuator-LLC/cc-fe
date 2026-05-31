@@ -32,6 +32,7 @@ import { DAYS_OF_WEEK, DayOfWeek } from '../schedule.types';
 import { ScheduleType } from '../../../scheduling.service';
 import { parseScheduleArgs } from '../../../utils/schedule';
 import { ActionButtonComponent } from '../../ui/action-button/action-button.component';
+import { PillComponent } from '../../ui/pill/pill.component';
 
 /** Pre-computed display fields attached to each schedule row. */
 interface ScheduleDisplay {
@@ -64,6 +65,7 @@ type ScheduleWithDisplay = Schedule & ScheduleDisplay;
     MatProgressBarModule,
     MatDialogModule,
     ActionButtonComponent,
+    PillComponent,
   ],
   templateUrl: './schedule-list.component.html',
   styleUrls: ['./schedule-list.component.scss'],
