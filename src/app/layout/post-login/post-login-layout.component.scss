@@ -532,7 +532,7 @@ mat-nav-list {
   min-width: 84px;
   border-right: 1px solid var(--md-sys-color-outline-variant);
 
-  background: var(--md-sys-color-surface-container);
+  background: var(--md-sys-color-surface-container-low);
 
   transition: min-width 0.3s ease;
 }
@@ -563,7 +563,7 @@ mat-nav-list {
 .content-wrapper {
   width: 100%;
   min-height: 100%;
-  background-color: var(--md-sys-color-surface-container);
+  background-color: var(--md-sys-color-surface);
 
   // When used with footer, content fills remaining space
   .content {
@@ -736,7 +736,7 @@ mat-nav-list {
       padding: 16px;
       border-right: 1px solid var(--md-sys-color-outline-variant);
 
-      background: var(--md-sys-color-surface-container);
+      background: var(--md-sys-color-surface-container-low);
 
       transition: all 0.3s ease;
 
@@ -866,7 +866,7 @@ mat-nav-list {
     .toolbar-container-section {
       padding-inline: 32px; // MD3 4px grid: 30px → 32px
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
-      background-color: var(--md-sys-color-surface-container-low);
+      background-color: var(--md-sys-color-surface);
 
       @media screen and (width <= 576px) {
         padding-inline: 16px;
