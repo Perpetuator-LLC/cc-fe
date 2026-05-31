@@ -407,6 +407,8 @@ export class ScheduleListComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(FriendlyScheduleDialogComponent, {
       width: '560px',
       maxWidth: '95vw',
+      panelClass: 'schedule-dialog-panel',
+      backdropClass: 'schedule-dialog-backdrop',
       disableClose: true,
       data,
     });

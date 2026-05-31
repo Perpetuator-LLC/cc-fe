@@ -103,6 +103,73 @@ body {
     background: var(--md-sys-color-scrim);
     backdrop-filter: blur(4px);
   }
+
+  .schedule-dialog-panel.mat-mdc-dialog-panel {
+    @include customTheme.dark-theme-vars();
+
+    .mdc-dialog__surface {
+      border: 1px solid var(--md-sys-color-outline-variant);
+      color: var(--md-sys-color-on-surface);
+      background: var(--md-sys-color-surface-container-low);
+    }
+
+    .mat-mdc-dialog-title,
+    .mat-mdc-dialog-content {
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .mat-mdc-form-field {
+      --mdc-filled-text-field-container-color: var(--md-sys-color-surface-container-high);
+      --mdc-filled-text-field-label-text-color: var(--p-primary);
+      --mdc-filled-text-field-focus-label-text-color: var(--p-primary);
+      --mdc-filled-text-field-input-text-color: var(--md-sys-color-on-surface);
+      --mdc-filled-text-field-input-text-placeholder-color: var(--p-on-surface-muted);
+      --mdc-filled-text-field-active-indicator-color: transparent;
+      --mdc-filled-text-field-hover-active-indicator-color: transparent;
+      --mdc-filled-text-field-focus-active-indicator-color: transparent;
+      --mat-form-field-filled-label-text-color: var(--p-primary);
+      --mat-form-field-filled-focus-label-text-color: var(--p-primary);
+      --mat-form-field-filled-hover-label-text-color: var(--p-primary);
+      --mat-select-enabled-trigger-text-color: var(--md-sys-color-on-surface);
+      --mat-select-enabled-arrow-color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .mat-button-toggle-group {
+      --schedule-dialog-toggle-selected-container: var(--md-sys-color-on-primary-container);
+      --schedule-dialog-toggle-selected-content: var(--md-sys-color-on-primary);
+      --mat-button-toggle-background-color: transparent;
+      --mat-button-toggle-text-color: var(--md-sys-color-on-surface);
+      --mat-button-toggle-divider-color: var(--md-sys-color-outline-variant);
+      --mat-button-toggle-selected-state-background-color: var(--schedule-dialog-toggle-selected-container);
+      --mat-button-toggle-selected-state-text-color: var(--schedule-dialog-toggle-selected-content);
+      --mat-button-toggle-legacy-selected-state-background-color: var(--schedule-dialog-toggle-selected-container);
+      --mat-button-toggle-legacy-selected-state-text-color: var(--schedule-dialog-toggle-selected-content);
+      --mat-pseudo-checkbox-minimal-selected-checkmark-color: var(--schedule-dialog-toggle-selected-content);
+    }
+
+    :where(.mat-button-toggle.mat-button-toggle-checked) {
+      color: var(--schedule-dialog-toggle-selected-content);
+      background-color: var(--schedule-dialog-toggle-selected-container);
+    }
+
+    .mat-mdc-text-field-wrapper.mdc-text-field {
+      border-color: var(--md-sys-color-outline-variant);
+      background: var(--md-sys-color-surface-container-high);
+    }
+
+    .mat-mdc-form-field-focus-overlay {
+      background: var(--md-sys-color-surface-container-highest);
+    }
+
+    :where(.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper.mdc-text-field) {
+      border-color: var(--p-primary);
+    }
+  }
+
+  .schedule-dialog-backdrop.cdk-overlay-backdrop {
+    background: color-mix(in srgb, var(--md-sys-color-scrim) 66%, transparent);
+    backdrop-filter: blur(3px);
+  }
 }
 
 body.light {

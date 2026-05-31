@@ -3,7 +3,12 @@
   <!-- Day Pattern Quick Select -->
   <div class="day-pattern-section">
     <label class="section-label" for="day-pattern">Days</label>
-    <mat-button-toggle-group id="day-pattern" formControlName="dayPattern" class="day-pattern-toggle">
+    <mat-button-toggle-group
+      id="day-pattern"
+      formControlName="dayPattern"
+      class="day-pattern-toggle"
+      hideSingleSelectionIndicator
+    >
       <mat-button-toggle value="daily">Every Day</mat-button-toggle>
       <mat-button-toggle value="weekdays">Weekdays</mat-button-toggle>
       <mat-button-toggle value="weekends">Weekends</mat-button-toggle>

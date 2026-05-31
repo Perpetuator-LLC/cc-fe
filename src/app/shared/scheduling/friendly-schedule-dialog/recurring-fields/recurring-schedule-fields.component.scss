@@ -8,7 +8,7 @@
 .recurring-options {
   padding: 16px;
   border-radius: 8px;
-  background: var(--md-sys-color-surface-container-lowest);
+  background: var(--md-sys-color-surface-container-low);
 }
 
 .section-label {
@@ -30,6 +30,8 @@
 .day-pattern-toggle {
   flex-wrap: wrap;
   width: 100%;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
 
   mat-button-toggle {
     flex: 1;
@@ -52,25 +54,25 @@
 
   min-width: 44px;
   height: 36px;
-  border: 1px solid var(--md-sys-color-outline);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
   font-size: 14px;
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
 
-  background: var(--md-sys-color-surface);
+  background: var(--md-sys-color-surface-container);
 
   transition: all 0.2s ease;
 
   &:hover {
-    background: var(--md-sys-color-surface-container);
+    background: var(--md-sys-color-surface-container-high);
   }
 
   &.selected {
-    border-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    background: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    background: var(--md-sys-color-primary-container);
   }
 }
 
@@ -95,16 +97,16 @@
   min-width: 120px;
   height: 56px;
   padding: 0 16px;
-  border: 1px solid var(--md-sys-color-outline);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 4px;
 
   font-size: 16px;
   color: var(--md-sys-color-on-surface);
 
-  background: var(--md-sys-color-surface);
+  background: var(--md-sys-color-surface-container-high);
 
   &:focus {
-    border-color: var(--md-sys-color-primary);
+    border-color: var(--p-primary);
     outline: none;
   }
 }

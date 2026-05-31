@@ -31,7 +31,7 @@
 
   mat-icon {
     margin-top: 4px;
-    color: var(--md-sys-color-primary);
+    color: var(--p-tertiary);
   }
 
   .job-option-text {
@@ -58,7 +58,7 @@
   align-items: center;
 
   mat-icon {
-    color: var(--md-sys-color-primary);
+    color: var(--p-tertiary);
   }
 }
 
@@ -77,7 +77,7 @@
   background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    color: var(--md-sys-color-primary);
+    color: var(--p-primary-bright);
   }
 }
 
@@ -101,6 +101,8 @@
 
 .schedule-type-toggle {
   width: 100%;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
 
   mat-button-toggle {
     flex: 1;
@@ -142,25 +144,25 @@
 
   min-width: 44px;
   height: 36px;
-  border: 1px solid var(--md-sys-color-outline);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
   font-size: 14px;
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
 
-  background: var(--md-sys-color-surface);
+  background: var(--md-sys-color-surface-container);
 
   transition: all 0.2s ease;
 
   &:hover {
-    background: var(--md-sys-color-surface-container);
+    background: var(--md-sys-color-surface-container-high);
   }
 
   &.selected {
-    border-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    background: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    background: var(--md-sys-color-primary-container);
   }
 }
 
@@ -199,16 +201,16 @@
   min-width: 120px;
   height: 56px;
   padding: 0 16px;
-  border: 1px solid var(--md-sys-color-outline);
+  border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 4px;
 
   font-size: 16px;
   color: var(--md-sys-color-on-surface);
 
-  background: var(--md-sys-color-surface);
+  background: var(--md-sys-color-surface-container-high);
 
   &:focus {
-    border-color: var(--md-sys-color-primary);
+    border-color: var(--p-primary);
     outline: none;
   }
 }
@@ -235,12 +237,44 @@
   }
 }
 
+.schedule-cancel-button {
+  color: var(--p-primary-bright);
+}
+
+.schedule-submit-button {
+  --mdc-filled-button-container-color: var(--md-sys-color-surface-container);
+  --mdc-filled-button-label-text-color: var(--p-accent-bright);
+  --mat-filled-button-state-layer-color: var(--p-accent-bright);
+  --mat-filled-button-ripple-color: color-mix(in srgb, var(--p-accent) 16%, transparent);
+
+  border: 1px solid color-mix(in srgb, var(--p-accent) 35%, transparent);
+  color: var(--p-accent-bright);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--p-accent) 16%, transparent),
+      color-mix(in srgb, var(--p-accent) 5%, transparent)
+    ),
+    var(--md-sys-color-surface-container);
+
+  &:hover:not(:disabled) {
+    border-color: var(--p-accent);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--p-accent) 24%, transparent),
+        color-mix(in srgb, var(--p-accent) 9%, transparent)
+      ),
+      var(--md-sys-color-surface-container);
+  }
+}
+
 // Recurring and one-time option containers
 .recurring-options,
 .one-time-options {
   padding: 16px;
   border-radius: 8px;
-  background: var(--md-sys-color-surface-container-lowest);
+  background: var(--md-sys-color-surface-container-low);
 }
 
 // Podcast display for pre-selected podcast
@@ -254,10 +288,10 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
-  background: var(--md-sys-color-surface-container-low);
+  background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    color: var(--md-sys-color-primary);
+    color: var(--p-tertiary-bright);
   }
 
   .podcast-info {
@@ -289,10 +323,10 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
-  background: var(--md-sys-color-surface-container-low);
+  background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    color: var(--md-sys-color-primary);
+    color: var(--p-tertiary-bright);
   }
 
   .pulse-info {
@@ -324,10 +358,10 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 
-  background: var(--md-sys-color-surface-container-low);
+  background: var(--md-sys-color-surface-container);
 
   mat-icon {
-    color: var(--md-sys-color-primary);
+    color: var(--p-tertiary-bright);
   }
 
   .episode-info {
