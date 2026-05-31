@@ -74,14 +74,7 @@
               </div>
             </div>
             @if (schedule.isCrontab) {
-              <div class="week-strip">
-                @for (dot of schedule.weekDots; track dot.value) {
-                  <div class="week-strip-day">
-                    <span class="day-label">{{ dot.letter }}</span>
-                    <span class="day-dot" [class.active]="dot.active"></span>
-                  </div>
-                }
-              </div>
+              <app-week-strip [dots]="schedule.weekDots" />
             }
             <div class="schedule-actions">
               <mat-slide-toggle

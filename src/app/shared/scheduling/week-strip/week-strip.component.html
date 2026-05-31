@@ -1,0 +1,9 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<div class="week-strip">
+  @for (dot of dots; track dot.value) {
+    <div class="week-strip-day">
+      <span class="day-label">{{ dot.letter }}</span>
+      <span class="day-dot" [class.active]="dot.active"></span>
+    </div>
+  }
+</div>

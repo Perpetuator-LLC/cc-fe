@@ -33,6 +33,7 @@ import { ScheduleType } from '../../../scheduling.service';
 import { parseScheduleArgs } from '../../../utils/schedule';
 import { ActionButtonComponent } from '../../ui/action-button/action-button.component';
 import { PillComponent } from '../../ui/pill/pill.component';
+import { WeekStripComponent } from '../week-strip/week-strip.component';
 
 /** Pre-computed display fields attached to each schedule row. */
 interface ScheduleDisplay {
@@ -66,6 +67,7 @@ type ScheduleWithDisplay = Schedule & ScheduleDisplay;
     MatDialogModule,
     ActionButtonComponent,
     PillComponent,
+    WeekStripComponent,
   ],
   templateUrl: './schedule-list.component.html',
   styleUrls: ['./schedule-list.component.scss'],
