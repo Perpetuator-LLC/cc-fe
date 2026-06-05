@@ -30,14 +30,14 @@
         <input matInput [(ngModel)]="searchString" (input)="onSearchChange($event)" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Status</mat-label>
-        <mat-select [(value)]="selectedActiveStatus" (selectionChange)="onActiveStatusFilterChange()">
-          <mat-option [value]="null">All Status</mat-option>
-          <mat-option value="active">Active</mat-option>
-          <mat-option value="inactive">Inactive</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <app-labeled-select
+        class="status-field"
+        label="Status"
+        [options]="statusOptions"
+        [value]="selectedActiveStatus"
+        [placeholderOption]="allStatusOption"
+        (valueChange)="onStatusSelectChange($event)"
+      />
     </div>
 
     <div class="view-toggles">

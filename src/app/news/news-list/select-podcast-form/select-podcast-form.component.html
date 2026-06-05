@@ -8,35 +8,22 @@
     </p>
     <div class="before-select-right-podcasts">
       <div class="fields">
-        <div class="podcast-field-wrapper">
-          <mat-form-field class="podcast-select-field">
-            <mat-label>Select Podcast</mat-label>
-            <mat-select
-              [value]="selectedPodcastUuid"
-              (selectionChange)="onPodcastValueChange($event.value)"
-              [disabled]="loadingPodcasts"
-            >
-              @if (loadingPodcasts) {
-                <mat-option disabled> Loading podcasts... </mat-option>
-              }
-              @for (podcast of podcasts; track podcast.uuid) {
-                <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          @if (loadingPodcasts) {
-            <mat-spinner diameter="20" class="podcast-loading-spinner" />
-          }
-        </div>
-        <mat-form-field class="time-select-field">
-          <mat-label>Time</mat-label>
-          <mat-select [value]="selectedHours" (selectionChange)="onHoursValueChange($event.value)">
-            <mat-option [value]="12">12 Hours</mat-option>
-            <mat-option [value]="24">24 Hours</mat-option>
-            <mat-option [value]="7 * 24">1 Week</mat-option>
-            <mat-option [value]="14 * 24">2 Weeks</mat-option>
-          </mat-select>
-        </mat-form-field>
+        <app-labeled-select
+          class="podcast-select-field"
+          label="Select Podcast"
+          [options]="podcastOptions"
+          [value]="selectedPodcastUuid"
+          [loading]="loadingPodcasts"
+          loadingText="Loading podcasts..."
+          (valueChange)="onPodcastValueChange($event)"
+        />
+        <app-labeled-select
+          class="time-select-field"
+          label="Time"
+          [options]="timeOptions"
+          [value]="selectedHours"
+          (valueChange)="onHoursValueChange($event)"
+        />
       </div>
       <button mat-flat-button color="primary" type="button" (click)="onFetchClick()" [disabled]="fetchDisabled">
         Fetch News

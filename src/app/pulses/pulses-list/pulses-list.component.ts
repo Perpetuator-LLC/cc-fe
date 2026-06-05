@@ -35,8 +35,8 @@ import { FormsModule } from '@angular/forms';
 import { Job, JobService } from '../../jobs/job.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { LoadingService } from '../../layout/loading.service';
-import { MatSelectModule } from '@angular/material/select';
 import { RelayPaginatorBase } from '../../utils/relay-paginator';
+import { LabeledSelectComponent, LabeledSelectOption } from '../../shared/labeled-select/labeled-select.component';
 
 export interface ColumnOption {
   id: string;
@@ -81,7 +81,7 @@ type PulseConfigWithDisplay = PulseConfig & PulseDisplay;
     MatCheckboxModule,
     FormsModule,
     MatMenuItem,
-    MatSelectModule,
+    LabeledSelectComponent,
   ],
   templateUrl: './pulses-list.component.html',
   styleUrls: ['./pulses-list.component.scss'],
@@ -121,6 +121,12 @@ export class PulsesListComponent extends RelayPaginatorBase<PulseConfigWithDispl
   jobs: Job[] = [];
   selectedActiveStatus: string | null = null;
   orderBy = '-updated_at';
+
+  readonly allStatusOption: LabeledSelectOption = { value: null, label: 'All Status' };
+  readonly statusOptions: LabeledSelectOption[] = [
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+  ];
 
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -282,6 +288,11 @@ export class PulsesListComponent extends RelayPaginatorBase<PulseConfigWithDispl
         this.loadPage(this.pageSize, null, 0);
       }
     });
+  }
+
+  onStatusSelectChange(value: unknown): void {
+    this.selectedActiveStatus = (value as string | null) ?? null;
+    this.onActiveStatusFilterChange();
   }
 
   onActiveStatusFilterChange(): void {

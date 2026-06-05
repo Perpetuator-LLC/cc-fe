@@ -2,13 +2,10 @@
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NgClass } from '@angular/common';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatOption, MatSelect } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,6 +25,15 @@ import { NewsConnection, NewsResult, NewsService } from '../news.service';
 import { NewsDetailPanelComponent } from './news-detail-panel/news-detail-panel.component';
 import { SelectPodcastFormComponent } from './select-podcast-form/select-podcast-form.component';
 import { NewsResultsComponent } from './news-results/news-results.component';
+import { LabeledSelectComponent, LabeledSelectOption } from '../../shared/labeled-select/labeled-select.component';
+
+/** Static time-window options for the news toolbar. */
+const TIME_OPTIONS: LabeledSelectOption[] = [
+  { value: 12, label: '12 Hours' },
+  { value: 24, label: '24 Hours' },
+  { value: 7 * 24, label: '1 Week' },
+  { value: 14 * 24, label: '2 Weeks' },
+];
 
 // export interface News {
 //   results: NewsResult[];
@@ -43,22 +49,18 @@ export interface SidePanelAccordianData {
   standalone: true,
   imports: [
     NgClass,
-    MatFormField,
-    MatLabel,
     MatIconModule,
     MatCard,
     MatCardContent,
     MatInput,
     MatButton,
-    MatProgressSpinner,
     MatTooltip,
-    MatSelect,
-    MatOption,
     MatProgressBarModule,
     MatCheckboxModule,
     NewsDetailPanelComponent,
     SelectPodcastFormComponent,
     NewsResultsComponent,
+    LabeledSelectComponent,
   ],
   templateUrl: './news-list.component.html',
   styleUrl: './news-list.component.scss',
@@ -293,6 +295,34 @@ export class NewsListComponent implements OnInit, OnDestroy {
         },
       }),
     );
+  }
+
+  readonly timeOptions = TIME_OPTIONS;
+  readonly rssAllFeedsOption: LabeledSelectOption = { value: null, label: 'All Feeds' };
+
+  /** Podcasts mapped to the labeled-select option shape. */
+  get podcastOptions(): LabeledSelectOption[] {
+    return this.podcasts.map((podcast) => ({ value: podcast.uuid, label: podcast.name ?? '' }));
+  }
+
+  /** RSS feeds mapped to the labeled-select option shape (URL shown as tooltip). */
+  get rssFeedOptions(): LabeledSelectOption[] {
+    return this.rssFeeds.map((feed) => ({ value: feed.uuid, label: feed.name, tooltip: feed.url }));
+  }
+
+  onPodcastSelectChange(value: unknown): void {
+    this.selectedPodcastUuid = (value as string | null) ?? null;
+    this.onPodcastChange();
+  }
+
+  onRssFeedSelectChange(value: unknown): void {
+    this.selectedRssFeedUuid = (value as string | null) ?? null;
+    this.onRssFeedChange();
+  }
+
+  onHoursSelectChange(value: unknown): void {
+    this.selectedHours = value as number;
+    this.onPodcastChange();
   }
 
   onPodcastChange() {

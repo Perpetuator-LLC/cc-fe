@@ -12,6 +12,10 @@
 html {
   @include mat.all-component-themes(customTheme.$dark-theme);
   @include customTheme.dark-theme-vars();
+
+  // App-wide themed filled form fields (blue label, soft border, no underline,
+  // surface-container background). Outline-appearance fields are unaffected.
+  @include mixins.themed-form-fields();
 }
 
 body {
@@ -118,21 +122,8 @@ body {
       color: var(--md-sys-color-on-surface);
     }
 
-    .mat-mdc-form-field {
-      --mdc-filled-text-field-container-color: var(--md-sys-color-surface-container-high);
-      --mdc-filled-text-field-label-text-color: var(--p-primary);
-      --mdc-filled-text-field-focus-label-text-color: var(--p-primary);
-      --mdc-filled-text-field-input-text-color: var(--md-sys-color-on-surface);
-      --mdc-filled-text-field-input-text-placeholder-color: var(--p-on-surface-muted);
-      --mdc-filled-text-field-active-indicator-color: transparent;
-      --mdc-filled-text-field-hover-active-indicator-color: transparent;
-      --mdc-filled-text-field-focus-active-indicator-color: transparent;
-      --mat-form-field-filled-label-text-color: var(--p-primary);
-      --mat-form-field-filled-focus-label-text-color: var(--p-primary);
-      --mat-form-field-filled-hover-label-text-color: var(--p-primary);
-      --mat-select-enabled-trigger-text-color: var(--md-sys-color-on-surface);
-      --mat-select-enabled-arrow-color: var(--md-sys-color-on-surface-variant);
-    }
+    // Filled form-field theming now comes from the global `themed-form-fields`
+    // mixin in styles.scss (applied on `html`).
 
     .mat-button-toggle-group {
       --schedule-dialog-toggle-selected-container: var(--md-sys-color-on-primary-container);
@@ -150,19 +141,6 @@ body {
     :where(.mat-button-toggle.mat-button-toggle-checked) {
       color: var(--schedule-dialog-toggle-selected-content);
       background-color: var(--schedule-dialog-toggle-selected-container);
-    }
-
-    .mat-mdc-text-field-wrapper.mdc-text-field {
-      border-color: var(--md-sys-color-outline-variant);
-      background: var(--md-sys-color-surface-container-high);
-    }
-
-    .mat-mdc-form-field-focus-overlay {
-      background: var(--md-sys-color-surface-container-highest);
-    }
-
-    :where(.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper.mdc-text-field) {
-      border-color: var(--p-primary);
     }
   }
 

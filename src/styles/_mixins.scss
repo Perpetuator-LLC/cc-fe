@@ -295,23 +295,23 @@
 // Glass Morphism / Backdrop Blur Effects
 // ============================================================================
 @mixin glass-card {
-  background: rgba(var(--md-sys-color-surface-container-rgb), 0.99);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container) 99%, transparent);
   backdrop-filter: blur(12px);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
 }
 
 @mixin glass-card-elevated {
-  background: rgba(var(--md-sys-color-surface-container-high-rgb), 0.8);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 80%, transparent);
   backdrop-filter: blur(16px);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--md-sys-color-shadow) 10%, transparent);
 }
 
 // Frosted glass for hero sections - more blur, less opacity
 @mixin glass-hero($opacity: 0.75, $blur: 24px) {
-  background: rgba(30, 32, 34, $opacity);
+  background: color-mix(in srgb, var(--md-sys-color-inverse-surface) calc($opacity * 100%), transparent);
   backdrop-filter: blur($blur);
   -webkit-backdrop-filter: blur($blur);
   border-radius: 16px;
@@ -704,7 +704,7 @@
   gap: 12px;
   align-items: center;
 
-  font-size: 13px;
+  font-size: 14px;
   color: var(--md-sys-color-on-surface-variant);
 
   > span {
@@ -886,9 +886,6 @@
 //   <button mat-flat-button class="btn-tertiary">AI Feature</button>
 // ============================================================================
 
-// Base button radius - smaller rounded corners for all buttons
-$button-border-radius: 8px;
-
 // ----------------------------------------------------------------------------
 // PRIMARY (Blue) - Common actions, default brand color
 // ----------------------------------------------------------------------------
@@ -902,7 +899,7 @@ $button-border-radius: 8px;
   --mdc-protected-button-label-text-color: var(--md-sys-color-on-primary);
 
   // Fallback for non-MDC contexts
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-primary);
   background-color: var(--md-sys-color-primary);
 
@@ -922,7 +919,7 @@ $button-border-radius: 8px;
   --mdc-outlined-button-label-text-color: var(--md-sys-color-primary);
 
   border: 1px solid var(--md-sys-color-primary);
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-primary);
   background-color: transparent;
 
@@ -939,7 +936,7 @@ $button-border-radius: 8px;
 @mixin btn-primary-text {
   --mdc-text-button-label-text-color: var(--md-sys-color-primary);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-primary);
   background-color: transparent;
 
@@ -959,7 +956,7 @@ $button-border-radius: 8px;
   --mdc-protected-button-container-color: var(--md-sys-color-primary-container);
   --mdc-protected-button-label-text-color: var(--md-sys-color-on-primary-container);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-primary-container);
   background-color: var(--md-sys-color-primary-container);
 
@@ -992,7 +989,7 @@ $button-border-radius: 8px;
   --mdc-protected-button-container-color: var(--md-sys-color-secondary);
   --mdc-protected-button-label-text-color: var(--md-sys-color-on-secondary);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-secondary);
   background-color: var(--md-sys-color-secondary);
 
@@ -1012,7 +1009,7 @@ $button-border-radius: 8px;
   --mdc-outlined-button-label-text-color: var(--md-sys-color-secondary);
 
   border: 1px solid var(--md-sys-color-secondary);
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-secondary);
   background-color: color-mix(in srgb, var(--md-sys-color-secondary) 8%, transparent);
 
@@ -1030,7 +1027,7 @@ $button-border-radius: 8px;
 @mixin btn-secondary-text {
   --mdc-text-button-label-text-color: var(--md-sys-color-secondary);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-secondary);
   background-color: transparent;
 
@@ -1050,7 +1047,7 @@ $button-border-radius: 8px;
   --mdc-protected-button-container-color: var(--md-sys-color-secondary-container);
   --mdc-protected-button-label-text-color: var(--md-sys-color-on-secondary-container);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-secondary-container);
   background-color: var(--md-sys-color-secondary-container);
 
@@ -1083,7 +1080,7 @@ $button-border-radius: 8px;
   --mdc-protected-button-container-color: var(--md-sys-color-tertiary);
   --mdc-protected-button-label-text-color: var(--md-sys-color-on-tertiary);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-tertiary);
   background-color: var(--md-sys-color-tertiary);
 
@@ -1103,7 +1100,7 @@ $button-border-radius: 8px;
   --mdc-outlined-button-label-text-color: var(--md-sys-color-tertiary);
 
   border: 1px solid var(--md-sys-color-tertiary);
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-tertiary);
   background-color: color-mix(in srgb, var(--md-sys-color-tertiary) 8%, transparent);
 
@@ -1121,7 +1118,7 @@ $button-border-radius: 8px;
 @mixin btn-tertiary-text {
   --mdc-text-button-label-text-color: var(--md-sys-color-tertiary);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-tertiary);
   background-color: transparent;
 
@@ -1141,7 +1138,7 @@ $button-border-radius: 8px;
   --mdc-protected-button-container-color: var(--md-sys-color-tertiary-container);
   --mdc-protected-button-label-text-color: var(--md-sys-color-on-tertiary-container);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-tertiary-container);
   background-color: var(--md-sys-color-tertiary-container);
 
@@ -1174,7 +1171,7 @@ $button-border-radius: 8px;
   --mdc-protected-button-container-color: var(--md-sys-color-surface-container-high);
   --mdc-protected-button-label-text-color: var(--md-sys-color-on-surface);
 
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-surface);
   background-color: var(--md-sys-color-surface-container-high);
 
@@ -1194,7 +1191,7 @@ $button-border-radius: 8px;
   --mdc-outlined-button-label-text-color: var(--md-sys-color-on-surface);
 
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: $button-border-radius;
+  border-radius: 8px;
   color: var(--md-sys-color-on-surface);
   background-color: transparent;
 
@@ -1309,4 +1306,43 @@ $button-border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
+}
+
+// ============================================================================
+// Form Fields
+// ============================================================================
+
+/// Themed filled form-field appearance (blue label, soft border, no active
+/// indicator, surface-container background). Targets only filled text-field
+/// tokens, so `appearance="outline"` fields are unaffected. Include at a scope
+/// that wraps the form fields you want themed.
+@mixin themed-form-fields {
+  .mat-mdc-form-field {
+    --mdc-filled-text-field-container-color: var(--md-sys-color-surface-container-high);
+    --mdc-filled-text-field-label-text-color: var(--p-primary);
+    --mdc-filled-text-field-focus-label-text-color: var(--p-primary);
+    --mdc-filled-text-field-input-text-color: var(--md-sys-color-on-surface);
+    --mdc-filled-text-field-input-text-placeholder-color: var(--p-on-surface-muted);
+    --mdc-filled-text-field-active-indicator-color: transparent;
+    --mdc-filled-text-field-hover-active-indicator-color: transparent;
+    --mdc-filled-text-field-focus-active-indicator-color: transparent;
+    --mat-form-field-filled-label-text-color: var(--p-primary);
+    --mat-form-field-filled-focus-label-text-color: var(--p-primary);
+    --mat-form-field-filled-hover-label-text-color: var(--p-primary);
+    --mat-select-enabled-trigger-text-color: var(--md-sys-color-on-surface);
+    --mat-select-enabled-arrow-color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .mat-mdc-text-field-wrapper.mdc-text-field {
+    border-color: var(--md-sys-color-outline-variant);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  .mat-mdc-form-field-focus-overlay {
+    background: var(--md-sys-color-surface-container-highest);
+  }
+
+  :where(.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper.mdc-text-field) {
+    border-color: var(--p-primary);
+  }
 }

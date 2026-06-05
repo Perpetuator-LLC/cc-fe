@@ -69,7 +69,7 @@
       row-gap: 8px;
       align-items: center;
 
-      mat-form-field {
+      app-labeled-select {
         &.podcast-select-field {
           width: 300px;
           max-width: 100%;
@@ -121,7 +121,7 @@
         }
       }
 
-      .time-field {
+      app-labeled-select.time-field {
         width: 134px;
         max-width: 100%;
       }
@@ -735,21 +735,6 @@
         @media screen and (width <= 576px) {
           flex-direction: column;
           align-items: center;
-        }
-      }
-
-      .podcast-field-wrapper {
-        position: relative;
-        display: inline-block;
-
-        .podcast-loading-spinner {
-          pointer-events: none;
-
-          position: absolute;
-          z-index: 10;
-          top: 50%;
-          right: 8px;
-          transform: translateY(-50%);
         }
       }
 

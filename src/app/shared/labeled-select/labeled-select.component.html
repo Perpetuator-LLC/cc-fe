@@ -1,0 +1,24 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+<mat-form-field>
+  <mat-label>{{ label }}</mat-label>
+  <mat-select [value]="value" [disabled]="disabled" (selectionChange)="onSelectionChange($event.value)">
+    @if (loading) {
+      <mat-option disabled>{{ loadingText }}</mat-option>
+    }
+    @if (placeholderOption) {
+      <mat-option [value]="placeholderOption.value">{{ placeholderOption.label }}</mat-option>
+    }
+    @for (option of options; track option.value) {
+      <mat-option
+        [value]="option.value"
+        [disabled]="option.disabled ?? false"
+        [matTooltip]="option.tooltip ?? ''"
+        matTooltipPosition="after"
+        >{{ option.label }}</mat-option
+      >
+    }
+  </mat-select>
+  @if (loading) {
+    <mat-spinner matSuffix diameter="20" />
+  }
+</mat-form-field>

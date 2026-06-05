@@ -1,0 +1,18 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+@use 'styles/mixins' as mixins;
+
+// The host is the styleable box (callers set width on the host); the inner
+// form field fills it. Kept off `display: contents` so width/flex rules from
+// consumers reach the control across the component boundary.
+:host {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+// Themed appearance is inherited from the global mixin, but include it here too
+// so the component stays consistent if ever rendered outside the global scope.
+@include mixins.themed-form-fields();
