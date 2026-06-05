@@ -447,10 +447,14 @@ export class ChartConfigService {
     const dataZoomConfig: any = {
       type: 'inside',
       xAxisIndex: showVolume ? [0, 1] : [0], // Apply zoom to both x-axes when showing volume
-      // Smoother zooming configuration
-      zoomOnMouseWheel: true,
+      // When locked-to-right, DISABLE the built-in wheel zoom/move. The
+      // component (WatchlistTabComponent.onChartInit) then drives a custom
+      // pegged-right zoom that keeps the latest candle fixed on the right edge
+      // and only moves the left edge — so the pinned side never rubber-bands.
+      // When unlocked, ECharts' native zoom-at-cursor is used.
+      zoomOnMouseWheel: !lockToRight,
       moveOnMouseMove: !lockToRight, // Disable panning when locked
-      moveOnMouseWheel: true, // Enable move on mouse wheel
+      moveOnMouseWheel: !lockToRight,
       preventDefaultMouseMove: false,
       zoomLock: false, // Prevent zoom lock for better feel
       throttle: 50, // Reduced throttle for more responsive zoom events during continuous scroll

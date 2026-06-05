@@ -2685,8 +2685,6 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
    * Handle chart initialization - set up zoom behavior and OHLC crosshair.
    * Allows free zooming without boundaries - data loads progressively.
    */
-  private zoomCorrectionTimer: ReturnType<typeof setTimeout> | null = null;
-
   onChartInit(chart: echarts.ECharts): void {
     this.chartInstance = chart;
 
@@ -2714,37 +2712,10 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
         locked: this.lockToRight(),
       });
 
-      // If locked to right and user scrolled away from 100%, snap back
-      // Use a slightly larger threshold (99.5) to catch more edge cases
-      if (this.lockToRight() && endPercent < 99.9) {
-        // Calculate the zoom range (how zoomed in/out)
-        const MIN_RANGE = 3;
-        const range = Math.max(endPercent - startPercent, MIN_RANGE);
-        // Adjust to keep end at 100%
-        const newStart = Math.max(0, 100 - range);
-
-        if (this.zoomCorrectionTimer) {
-          clearTimeout(this.zoomCorrectionTimer);
-        }
-
-        // Use a very short timeout to batch corrections but keep them frame-instant
-        this.zoomCorrectionTimer = setTimeout(() => {
-          this.isCorrectingZoom = true;
-
-          chart.dispatchAction({
-            type: 'dataZoom',
-            start: newStart,
-            end: 100,
-          });
-
-          // Allow the next zoom event after 100ms
-          setTimeout(() => {
-            this.isCorrectingZoom = false;
-          }, 100);
-        }, 16); // 16ms = ~1 frame delay for instant feel
-
-        return; // Don't process further - the new dispatch will trigger another event
-      }
+      // Right edge is pinned by the custom mousewheel hook below (when locked
+      // it keeps end=100 and only moves start), so the old "snap back to 100%"
+      // correction is gone — that delayed re-dispatch was exactly the
+      // rubber-band/jump the pinned side used to show.
 
       // Track if user is at the left edge (for "no more data" hint)
       // Consider "at edge" when start is at or near 0%
@@ -2790,6 +2761,49 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
           }
         }
       }
+    });
+
+    // ── Custom pegged-right zoom ──────────────────────────────────────────
+    // When locked-to-right we OWN the mouse wheel (the built-in inside-zoom is
+    // disabled in ChartConfigService when locked). We keep the right edge
+    // pinned at end=100 (the latest candle) and only move the left edge, so the
+    // pinned side never rubber-bands or animates. Unlocked → ECharts' native
+    // zoom-at-cursor runs instead.
+    chart.getZr().on('mousewheel', (e: { wheelDelta?: number; event?: WheelEvent }) => {
+      if (!this.lockToRight()) return; // unlocked → let ECharts' built-in zoom handle it
+
+      // We drive the zoom ourselves; stop the page from scrolling.
+      e.event?.preventDefault?.();
+
+      const option = chart.getOption();
+      const dzList = option['dataZoom'] as { type?: string; start?: number }[] | undefined;
+      const dz = dzList?.find((d) => d.type === 'inside') ?? dzList?.[0];
+      if (!dz) return;
+
+      const curStart = dz.start ?? 0;
+      const span = Math.max(100 - curStart, 0.5);
+
+      // Floor the visible span at ~5 candles so zoom-in can't collapse the window.
+      const total = this.rawCandleData().length;
+      const minSpan = total > 0 ? Math.max((5 / total) * 100, 0.5) : 1;
+
+      // wheelDelta > 0 = scroll up = zoom IN (smaller span).
+      const zoomIn = (e.wheelDelta ?? 0) > 0;
+      const factor = zoomIn ? 1 / 1.15 : 1.15;
+      const newSpan = Math.min(Math.max(span * factor, minSpan), 100);
+      const newStart = Math.max(0, 100 - newSpan);
+
+      // Apply with the right edge pinned at 100. Guard the datazoom handler so
+      // it doesn't re-process our own update.
+      this.isCorrectingZoom = true;
+      chart.setOption({ dataZoom: [{ start: newStart, end: 100 }] }, { lazyUpdate: false });
+      setTimeout(() => {
+        this.isCorrectingZoom = false;
+      }, 0);
+
+      // Track left edge + lazily load more history when we approach the start.
+      this.atLeftEdge.set(newStart <= 1);
+      this.checkProgressiveDataLoad(newStart);
     });
 
     // Listen for mousemove to update OHLC display based on crosshair position
