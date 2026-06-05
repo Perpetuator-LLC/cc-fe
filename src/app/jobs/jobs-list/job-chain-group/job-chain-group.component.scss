@@ -2,8 +2,11 @@
 
 .timeline-item {
   position: relative;
+
   display: flex;
   align-items: flex-start;
+
+  width: 100%;
   margin-bottom: 0;
 
   &::before {
@@ -57,7 +60,9 @@
 .timeline-content {
   flex: 1;
 
+  box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   max-width: 100%;
   padding: 16px 20px;
   border: 1px solid var(--p-outline-variant, var(--md-sys-color-outline-variant));
@@ -94,6 +99,10 @@
 
   margin-bottom: 0.5rem;
 
+  app-pill {
+    flex: 0 0 auto;
+  }
+
   .timeline-left-content {
     display: flex;
     flex: 1;
@@ -112,11 +121,13 @@
 }
 
 .timeline-title {
-  flex-shrink: 0;
+  overflow: hidden;
+  flex-shrink: 1;
 
   font-size: 14px;
   font-weight: 600;
   color: var(--p-on-surface, var(--md-sys-color-on-surface));
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -130,6 +141,7 @@
     display: flex;
     align-items: flex-start;
 
+    box-sizing: border-box;
     width: 100%;
     padding: 16px 20px;
     border: 1px solid var(--p-outline-variant, var(--md-sys-color-outline-variant));
@@ -151,6 +163,12 @@
     align-items: flex-start;
     justify-content: space-between;
 
+    min-width: 0;
+
+    > app-pill {
+      flex: 0 0 auto;
+    }
+
     &.job-failed {
       .chain-title {
         color: var(--md-sys-color-error);
@@ -169,12 +187,15 @@
     flex: 1;
     flex-direction: column;
     gap: 8px;
+
+    min-width: 0;
   }
 
   .chain-title-row {
     display: flex;
     gap: 8px;
     align-items: center;
+    min-width: 0;
 
     .expand-icon {
       width: 20px;
@@ -184,9 +205,13 @@
     }
 
     .chain-title {
+      overflow: hidden;
+
       font-size: 14px;
       font-weight: 600;
       color: var(--p-on-surface, var(--md-sys-color-on-surface));
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .chain-progress-badge {
@@ -248,7 +273,8 @@
   }
 
   .chain-jobs {
-    width: 100%;
+    box-sizing: border-box;
+    width: calc(100% - 32px);
     margin-top: 12px;
     margin-left: 32px;
     padding-left: 24px;
