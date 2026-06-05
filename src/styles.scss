@@ -1760,6 +1760,17 @@ mat-nav-list {
 // ============================================================================
 
 // High specificity to override Material's disabled styles on mat-menu-item
+.profile-menu.mat-mdc-menu-panel {
+  --mat-menu-divider-color: var(--md-sys-color-outline-variant);
+
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.profile-menu .mat-mdc-menu-content {
+  background: var(--md-sys-color-surface-container-low);
+}
+
 .mat-mdc-menu-panel .profile-header.mat-mdc-menu-item-disabled,
 .mat-mdc-menu-panel .profile-header[disabled] {
   opacity: 1;
