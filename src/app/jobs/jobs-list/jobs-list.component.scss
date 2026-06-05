@@ -3,13 +3,63 @@
 
 .middle-card {
   position: relative;
-  padding-top: 1.5em;
-  padding-inline: 30px;
-  background-color: var(--md-sys-color-surface-container);
+  min-height: 100%;
+  padding: 32px;
+  background: var(--p-surface, var(--md-sys-color-surface));
 
   @media screen and (width <= 576px) {
-    padding-inline: 24px;
+    padding: 16px;
   }
+}
+
+.jobs-container {
+  overflow: hidden;
+
+  max-width: 1140px;
+  margin: 0 auto;
+  border: 1px solid var(--p-outline-variant, var(--md-sys-color-outline-variant));
+  border-radius: 12px;
+
+  background: var(--p-surface-container-low, var(--md-sys-color-surface-container-low));
+}
+
+.jobs-toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--p-outline-variant, var(--md-sys-color-outline-variant));
+
+  background: var(--p-surface-container, var(--md-sys-color-surface-container));
+
+  @media screen and (width <= 576px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+}
+
+.jobs-toolbar-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.jobs-kicker {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--p-on-surface, var(--md-sys-color-on-surface));
+}
+
+.jobs-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--p-on-surface-muted, var(--md-sys-color-on-surface-variant));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 // Top-level loading spinner (matching podcasts component)
@@ -26,98 +76,53 @@
   }
 }
 
-// Compact filter in upper right corner
-.filter-container-top-right {
-  text-align: right;
+.status-filter-compact {
+  width: 160px;
+  font-size: 12px;
 
-  .status-filter-compact {
-    width: 140px;
+  .mat-mdc-text-field-wrapper,
+  .mdc-notched-outline {
+    border-radius: 8px;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 16px;
+    padding: 8px 0;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--p-outline-variant, var(--md-sys-color-outline-variant));
+    border-width: 1px;
+  }
+
+  .mdc-notched-outline--focused .mdc-notched-outline__leading,
+  .mdc-notched-outline--focused .mdc-notched-outline__notch,
+  .mdc-notched-outline--focused .mdc-notched-outline__trailing {
+    border-color: var(--p-secondary, var(--md-sys-color-secondary));
+  }
+
+  .mat-mdc-select-value {
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-
-    // Material form field wrapper sizing and rounded corners
-    .mat-mdc-form-field-wrapper {
-      height: 36px;
-      border-radius: 8px;
-    }
-
-    // Material form field
-    .mat-mdc-text-field-wrapper {
-      border-radius: 8px;
-    }
-
-    // Material form field infix
-    .mat-mdc-form-field-infix {
-      min-height: 16px;
-      padding: 8px 0;
-    }
-
-    // Border styling for outlined appearance with rounded corners
-    .mdc-notched-outline {
-      border-radius: 8px;
-    }
-
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: var(--md-sys-color-outline-variant);
-      border-width: 1px;
-    }
-
-    // Rounded corners for leading edge
-    .mdc-notched-outline__leading {
-      border-radius: 8px 0 0 8px;
-    }
-
-    // Notch should not have border radius
-    .mdc-notched-outline__notch {
-      border-radius: 0;
-    }
-
-    // Rounded corners for trailing edge
-    .mdc-notched-outline__trailing {
-      border-radius: 0 8px 8px 0;
-    }
-
-    // Focused border styling
-    .mdc-notched-outline--focused .mdc-notched-outline__leading,
-    .mdc-notched-outline--focused .mdc-notched-outline__notch,
-    .mdc-notched-outline--focused .mdc-notched-outline__trailing {
-      border-color: var(--md-sys-color-secondary);
-      border-width: 1px;
-    }
-
-    // Hide subscript (hint/error area)
-    .mat-mdc-form-field-subscript-wrapper {
-      display: none;
-    }
-
-    // Select value text styling
-    .mat-mdc-select-value {
-      font-size: 12px;
-      color: var(--md-sys-color-on-surface-variant);
-    }
-
-    @media screen and (width <= 576px) {
-      width: 120px;
-      font-size: 12px;
-
-      .mat-mdc-select-value {
-        font-size: 12px;
-      }
-    }
+    color: var(--p-on-surface-variant, var(--md-sys-color-on-surface-variant));
   }
 
   @media screen and (width <= 576px) {
-    top: 16px;
-    right: 24px;
+    width: 100%;
   }
 }
 
 .timeline-date-title {
-  margin-bottom: 24px;
-  font-size: 16px;
+  margin: 0 0 16px -8px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--md-sys-color-on-surface);
+  color: var(--p-on-surface, var(--md-sys-color-on-surface));
 }
 
 // Empty state styling
@@ -132,6 +137,11 @@
 
   .empty-state-content {
     max-width: 400px;
+    padding: 32px;
+    border: 1px solid var(--p-outline-variant, var(--md-sys-color-outline-variant));
+    border-radius: 12px;
+
+    background: var(--p-surface-container, var(--md-sys-color-surface-container));
   }
 
   .empty-state-icon {
@@ -140,14 +150,14 @@
     margin-bottom: 16px;
 
     font-size: 64px;
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--p-on-surface-variant, var(--md-sys-color-on-surface-variant));
   }
 
   .empty-state-title {
     margin: 0 0 16px;
     font-size: 24px;
     font-weight: 600;
-    color: var(--md-sys-color-on-surface);
+    color: var(--p-on-surface, var(--md-sys-color-on-surface));
   }
 
   .empty-state-message {
@@ -155,7 +165,7 @@
     font-size: 16px;
     /* stylelint-disable-next-line declaration-property-value-disallowed-list */
     line-height: 1.5;
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--p-on-surface-variant, var(--md-sys-color-on-surface-variant));
   }
 }
 
@@ -222,16 +232,39 @@
 
 .timeline {
   position: relative;
-  max-width: 1140px;
-  margin: 0 auto;
+  padding: 32px 32px 40px 64px;
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    top: 36px;
+    bottom: 40px;
+    left: 40px;
+
+    width: 2px;
+    border-radius: 999px;
+
+    background: var(--p-outline-variant, var(--md-sys-color-outline-variant));
+
+    @media screen and (width <= 576px) {
+      left: 20px;
+    }
+  }
 
   @media screen and (width <= 576px) {
-    margin: 1rem auto;
+    padding: 24px 16px 32px 44px;
   }
 }
 
-.timeline-spacing {
-  margin-bottom: 40px;
+.timeline-day {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  & + & {
+    margin-top: 28px;
+  }
 }
 
 .timeline-item {

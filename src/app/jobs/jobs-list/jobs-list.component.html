@@ -6,22 +6,24 @@
 @if (groupedJobs.length === 0 && !loading) {
   <div class="middle-card">
     <div class="jobs-container">
-      <div class="timeline">
-        <!-- Status Filter in upper right corner -->
-        <div class="filter-container-top-right">
-          <mat-form-field appearance="outline" class="status-filter-compact">
-            <mat-select
-              [value]="statusFilter"
-              (selectionChange)="onStatusFilterChange($event.value)"
-              placeholder="All Statuses"
-            >
-              @for (option of statusOptions; track option.value) {
-                <mat-option [value]="option.value">{{ option.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+      <div class="jobs-toolbar">
+        <div class="jobs-toolbar-title">
+          <span class="jobs-kicker">Jobs</span>
+          <span class="jobs-count">{{ groupedJobs.length }} active groups</span>
         </div>
-
+        <mat-form-field appearance="outline" class="status-filter-compact">
+          <mat-select
+            [value]="statusFilter"
+            (selectionChange)="onStatusFilterChange($event.value)"
+            placeholder="All Statuses"
+          >
+            @for (option of statusOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="timeline">
         <div class="empty-state">
           <div class="empty-state-content">
             <mat-icon class="empty-state-icon">work_off</mat-icon>
@@ -42,25 +44,27 @@
 } @else {
   <div class="middle-card">
     <div class="jobs-container">
-      <div class="timeline">
-        <!-- Status Filter in upper right corner -->
-        <div class="filter-container-top-right">
-          <mat-form-field appearance="outline" class="status-filter-compact">
-            <mat-select
-              [value]="statusFilter"
-              (selectionChange)="onStatusFilterChange($event.value)"
-              placeholder="All Statuses"
-            >
-              @for (option of statusOptions; track option.value) {
-                <mat-option [value]="option.value">{{ option.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+      <div class="jobs-toolbar">
+        <div class="jobs-toolbar-title">
+          <span class="jobs-kicker">Jobs</span>
+          <span class="jobs-count">{{ groupedJobs.length }} active groups</span>
         </div>
-
+        <mat-form-field appearance="outline" class="status-filter-compact">
+          <mat-select
+            [value]="statusFilter"
+            (selectionChange)="onStatusFilterChange($event.value)"
+            placeholder="All Statuses"
+          >
+            @for (option of statusOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="timeline">
         @for (group of groupedJobs; track group.label) {
-          <div class="timeline-date-title">{{ group.label }}</div>
-          <div class="timeline-spacing">
+          <section class="timeline-day">
+            <div class="timeline-date-title">{{ group.label }}</div>
             @for (item of group.items; track isChainGroup(item) ? item.chainId : item.uuid) {
               @if (isChainGroup(item) && item.totalJobs > 1) {
                 <app-job-chain-group
@@ -74,7 +78,7 @@
                 <app-job-standalone-item [item]="item" (retry)="retryJob($event)" (delete)="deleteJob($event)" />
               }
             }
-          </div>
+          </section>
         }
 
         <!-- Empty state when no jobs match the filter (only show when not loading) -->

@@ -9,11 +9,12 @@ import { EnrichedJob, JobChainGroup } from '../jobs-list.types';
 import { JobStatus, iconForJob, kindToString, stringToJobStatus } from '../../job.service';
 import { JobDisplayService } from '../../../job-display.service';
 import { Router } from '@angular/router';
+import { PillComponent, PillVariant } from '../../../shared/ui/pill/pill.component';
 
 @Component({
   selector: 'app-job-chain-group',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, NgClass, RouterLink, MatIcon, MatButton, MatTooltipModule],
+  imports: [DatePipe, DecimalPipe, NgClass, RouterLink, MatIcon, MatButton, MatTooltipModule, PillComponent],
   templateUrl: './job-chain-group.component.html',
   styleUrl: './job-chain-group.component.scss',
 })
@@ -35,6 +36,21 @@ export class JobChainGroupComponent {
         return 'job-failed';
       default:
         return 'job-pending';
+    }
+  }
+
+  statusVariant(status: string): PillVariant {
+    switch (status) {
+      case 'completed':
+        return 'success';
+      case 'running':
+        return 'info';
+      case 'failed':
+        return 'error';
+      case 'pending':
+        return 'warning';
+      default:
+        return 'surface';
     }
   }
 

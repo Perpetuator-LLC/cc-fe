@@ -3,7 +3,7 @@
   <div class="timeline-icon" [ngClass]="statusClass(job().status)">
     <mat-icon>{{ iconForJob(job().kind) }}</mat-icon>
   </div>
-  <div class="timeline-content">
+  <div class="timeline-content" [ngClass]="statusClass(job().status)">
     <div class="timeline-header">
       <div class="timeline-left-content">
         <span class="timeline-title">{{ kindToString(job().kind) }}</span>
@@ -15,9 +15,7 @@
           <span class="timeline-date"> Updated {{ job().updatedAt | date: 'EEE dd MMM, yyyy h:mm a' : 'local' }} </span>
         </div>
       </div>
-      <span class="timeline-status" [ngClass]="statusClass(job().status)">
-        {{ job().status.toUpperCase() }}
-      </span>
+      <app-pill [label]="job().status.toUpperCase()" [variant]="statusVariant(job().status)" />
     </div>
     @if (job().error) {
       <div class="job-section">

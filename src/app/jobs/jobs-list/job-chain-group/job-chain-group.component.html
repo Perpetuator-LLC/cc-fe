@@ -11,7 +11,7 @@
     <div class="timeline-icon" [ngClass]="chainStatusClass(chain().status)">
       <mat-icon>{{ getChainIcon(chain()) }}</mat-icon>
     </div>
-    <div class="chain-content">
+    <div class="chain-content" [ngClass]="chainStatusClass(chain().status)">
       <div class="chain-summary">
         <div class="chain-title-row">
           <mat-icon class="expand-icon">{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
@@ -42,66 +42,63 @@
           >
             @for (podcast of chain().resources.podcasts; track podcast.uuid) {
               <button
-                mat-flat-button
-                class="resource-tag podcast-tag"
+                mat-button
+                type="button"
+                class="resource-pill-button"
                 [routerLink]="['/media/podcasts', podcast.uuid]"
                 matTooltip="Podcast"
               >
-                <mat-icon>mic</mat-icon>
-                {{ podcast.name }}
+                <app-pill [label]="podcast.name" variant="info" icon="mic" />
               </button>
             }
             @for (episode of chain().resources.episodes; track episode.uuid) {
               <button
-                mat-flat-button
-                class="resource-tag episode-tag"
+                mat-button
+                type="button"
+                class="resource-pill-button"
                 [routerLink]="['/media/episodes', episode.uuid]"
                 matTooltip="Episode"
               >
-                <mat-icon>podcasts</mat-icon>
-                {{ episode.name }}
+                <app-pill [label]="episode.name" variant="primary" icon="podcasts" />
               </button>
             }
             @for (topic of chain().resources.topics; track topic.uuid) {
               <button
-                mat-flat-button
-                class="resource-tag topic-tag"
+                mat-button
+                type="button"
+                class="resource-pill-button"
                 [routerLink]="['/media/topics', topic.uuid]"
                 matTooltip="Topic"
               >
-                <mat-icon>topic</mat-icon>
-                {{ topic.name }}
+                <app-pill [label]="topic.name" variant="tertiary" icon="topic" />
               </button>
             }
             @for (pulse of chain().resources.pulseConfigs; track pulse.uuid) {
               <button
                 mat-button
                 type="button"
-                class="resource-link-pulse"
+                class="resource-pill-button"
                 [routerLink]="['/media/pulses', pulse.uuid]"
                 matTooltip="Pulse"
               >
-                <mat-icon>vital_signs</mat-icon>
-                {{ pulse.name }}
+                <app-pill [label]="pulse.name" variant="tertiary" icon="vital_signs" />
               </button>
             }
             @for (symbolInfo of chain().resources.symbols; track symbolInfo.symbol) {
               <button
-                mat-flat-button
-                class="resource-tag symbol-tag"
+                mat-button
+                type="button"
+                class="resource-pill-button"
                 (click)="navigateToSymbol(symbolInfo.job)"
                 [matTooltip]="getSymbolTooltip(symbolInfo.job)"
               >
-                <mat-icon>show_chart</mat-icon>
-                {{ symbolInfo.symbol }}
+                <app-pill [label]="symbolInfo.symbol" variant="primary" icon="show_chart" />
               </button>
             }
           </div>
         }
       </div>
-      <span class="timeline-status" [ngClass]="chainStatusClass(chain().status)">
-        {{ chain().status.toUpperCase() }}
-      </span>
+      <app-pill [label]="chain().status.toUpperCase()" [variant]="statusVariant(chain().status)" />
     </div>
   </div>
   <!-- Expanded Chain Jobs -->
@@ -112,7 +109,7 @@
           <div class="timeline-icon" [ngClass]="statusClass(chainJob.status)">
             <mat-icon>{{ iconForJob(chainJob.kind) }}</mat-icon>
           </div>
-          <div class="timeline-content">
+          <div class="timeline-content" [ngClass]="statusClass(chainJob.status)">
             <div class="timeline-header">
               <div class="timeline-left-content">
                 <span class="timeline-title">{{ kindToString(chainJob.kind) }}</span>
@@ -124,9 +121,7 @@
                   {{ chainJob.cost | number: '1.0-0' }}
                 </span>
               </div>
-              <span class="timeline-status" [ngClass]="statusClass(chainJob.status)">
-                {{ chainJob.status.toUpperCase() }}
-              </span>
+              <app-pill [label]="chainJob.status.toUpperCase()" [variant]="statusVariant(chainJob.status)" />
             </div>
             @if (chainJob.error) {
               <div class="error-message">{{ getCleanErrorMessage(chainJob.error) }}</div>

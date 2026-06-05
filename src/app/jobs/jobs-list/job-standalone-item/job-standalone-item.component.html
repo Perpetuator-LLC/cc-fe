@@ -3,7 +3,7 @@
   <div class="timeline-icon" [ngClass]="statusClass(item().status)">
     <mat-icon>{{ iconForJob(item().kind) }}</mat-icon>
   </div>
-  <div class="timeline-content">
+  <div class="timeline-content" [ngClass]="statusClass(item().status)">
     <div class="timeline-header">
       <div class="timeline-left-content">
         <span class="timeline-title">{{ kindToString(item().kind) }}</span>
@@ -17,9 +17,7 @@
           </span>
         </div>
       </div>
-      <span class="timeline-status" [ngClass]="statusClass(item().status)">
-        {{ item().status.toUpperCase() }}
-      </span>
+      <app-pill [label]="item().status.toUpperCase()" [variant]="statusVariant(item().status)" />
     </div>
     @if (item().error) {
       <div class="job-section">
@@ -44,80 +42,79 @@
         <div class="job-links">
           @if (hasPodcastUuid(item())) {
             <button
-              mat-flat-button
-              class="resource-tag podcast-tag"
+              mat-button
+              type="button"
+              class="resource-pill-button"
               [routerLink]="['/media/podcasts', getPodcastUuid(item())]"
               matTooltip="Podcast"
             >
-              <mat-icon>mic</mat-icon>
-              {{ getPodcastName(item()) }}
+              <app-pill [label]="getPodcastName(item())" variant="info" icon="mic" />
             </button>
           }
           @if (hasEpisodeUuid(item())) {
             <button
-              mat-flat-button
-              class="resource-tag episode-tag"
+              mat-button
+              type="button"
+              class="resource-pill-button"
               [routerLink]="['/media/episodes', getEpisodeUuid(item())]"
               matTooltip="Episode"
             >
-              <mat-icon>podcasts</mat-icon>
-              {{ getEpisodeName(item()) }}
+              <app-pill [label]="getEpisodeName(item())" variant="primary" icon="podcasts" />
             </button>
           }
           @if (hasTopicUuid(item())) {
             <button
-              mat-flat-button
-              class="resource-tag topic-tag"
+              mat-button
+              type="button"
+              class="resource-pill-button"
               [routerLink]="['/media/topics', getTopicUuid(item())]"
               matTooltip="Topic"
             >
-              <mat-icon>topic</mat-icon>
-              {{ getTopicName(item()) }}
+              <app-pill [label]="getTopicName(item())" variant="tertiary" icon="topic" />
             </button>
           }
           @if (hasPulseConfigUuid(item())) {
             <button
               mat-button
               type="button"
-              class="resource-link-pulse"
+              class="resource-pill-button"
               [routerLink]="['/media/pulses', getPulseConfigUuid(item())]"
               matTooltip="Pulse"
             >
-              <mat-icon>vital_signs</mat-icon>
-              {{ getPulseConfigName(item()) }}
+              <app-pill [label]="getPulseConfigName(item())" variant="tertiary" icon="vital_signs" />
             </button>
           }
           @if (hasBlogUuid(item())) {
             <button
-              mat-flat-button
-              class="resource-tag blog-tag"
+              mat-button
+              type="button"
+              class="resource-pill-button"
               [routerLink]="['/media/blogs', getBlogUuid(item())]"
               matTooltip="Blog"
             >
-              <mat-icon>menu_book</mat-icon>
-              {{ getBlogName(item()) }}
+              <app-pill [label]="getBlogName(item())" variant="surface" icon="menu_book" />
             </button>
           }
           @if (hasArticleUuid(item())) {
             <button
-              mat-flat-button
-              class="resource-tag article-tag"
+              mat-button
+              type="button"
+              class="resource-pill-button"
               [routerLink]="['/media/articles', getArticleUuid(item())]"
               matTooltip="Article"
             >
-              <mat-icon>article</mat-icon>
-              {{ getArticleTitle(item()) }}
+              <app-pill [label]="getArticleTitle(item())" variant="surface" icon="article" />
             </button>
           }
           @if (hasSymbol(item())) {
             <button
-              mat-flat-button
-              class="resource-tag symbol-tag"
+              mat-button
+              type="button"
+              class="resource-pill-button"
               (click)="navigateToSymbol(item())"
               [matTooltip]="getSymbolTooltip(item())"
             >
-              <mat-icon>show_chart</mat-icon>
-              {{ getSymbol(item()) }}
+              <app-pill [label]="getSymbol(item()) ?? 'Symbol'" variant="primary" icon="show_chart" />
             </button>
           }
         </div>

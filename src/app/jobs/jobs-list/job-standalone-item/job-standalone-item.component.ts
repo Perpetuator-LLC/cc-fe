@@ -9,11 +9,22 @@ import { EnrichedJob } from '../jobs-list.types';
 import { JobStatus, iconForJob, kindToString, stringToJobStatus } from '../../job.service';
 import { JobDisplayService } from '../../../job-display.service';
 import { Router } from '@angular/router';
+import { PillComponent, PillVariant } from '../../../shared/ui/pill/pill.component';
 
 @Component({
   selector: 'app-job-standalone-item',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, NgClass, RouterLink, MatIcon, MatButton, MatIconButton, MatTooltipModule],
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    NgClass,
+    RouterLink,
+    MatIcon,
+    MatButton,
+    MatIconButton,
+    MatTooltipModule,
+    PillComponent,
+  ],
   templateUrl: './job-standalone-item.component.html',
   styleUrl: './job-standalone-item.component.scss',
 })
@@ -52,6 +63,21 @@ export class JobStandaloneItemComponent {
 
   stringToJobStatus(status: string): JobStatus {
     return stringToJobStatus(status);
+  }
+
+  statusVariant(status: string): PillVariant {
+    switch (stringToJobStatus(status)) {
+      case JobStatus.PENDING:
+        return 'warning';
+      case JobStatus.RUNNING:
+        return 'info';
+      case JobStatus.COMPLETED:
+        return 'success';
+      case JobStatus.FAILED:
+        return 'error';
+      default:
+        return 'surface';
+    }
   }
 
   getCleanErrorMessage(errorMessage: string): string {

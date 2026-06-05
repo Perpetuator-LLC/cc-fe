@@ -6,11 +6,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { EnrichedJob } from '../jobs-list.types';
 import { JobStatus, iconForJob, kindToString, stringToJobStatus } from '../../job.service';
 import { JobDisplayService } from '../../../job-display.service';
+import { PillComponent, PillVariant } from '../../../shared/ui/pill/pill.component';
 
 @Component({
   selector: 'app-job-single-chain-item',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, NgClass, MatIcon, MatTooltipModule],
+  imports: [DatePipe, DecimalPipe, NgClass, MatIcon, MatTooltipModule, PillComponent],
   templateUrl: './job-single-chain-item.component.html',
   styleUrl: './job-single-chain-item.component.scss',
 })
@@ -40,6 +41,21 @@ export class JobSingleChainItemComponent {
 
   kindToString(kind: string): string {
     return kindToString(kind);
+  }
+
+  statusVariant(status: string): PillVariant {
+    switch (stringToJobStatus(status)) {
+      case JobStatus.PENDING:
+        return 'warning';
+      case JobStatus.RUNNING:
+        return 'info';
+      case JobStatus.COMPLETED:
+        return 'success';
+      case JobStatus.FAILED:
+        return 'error';
+      default:
+        return 'surface';
+    }
   }
 
   getCleanErrorMessage(errorMessage: string): string {
