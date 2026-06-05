@@ -4,18 +4,14 @@
 .middle-card {
   position: relative;
   min-height: 100%;
-  padding: 32px;
+  padding: 16px;
   background: var(--p-surface, var(--md-sys-color-surface));
-
-  @media screen and (width <= 576px) {
-    padding: 16px;
-  }
 }
 
 .jobs-container {
   overflow: hidden;
 
-  max-width: 1140px;
+  width: 100%;
   margin: 0 auto;
   border: 1px solid var(--p-outline-variant, var(--md-sys-color-outline-variant));
   border-radius: 12px;
