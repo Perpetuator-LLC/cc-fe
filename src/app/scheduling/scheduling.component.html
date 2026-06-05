@@ -47,7 +47,7 @@
         <ng-container matColumnDef="scheduleType">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
           <td mat-cell *matCellDef="let schedule">
-            <span class="schedule-type-chip">{{ schedule.scheduleType || 'INTERVAL' }}</span>
+            <app-pill [label]="schedule.scheduleType || 'INTERVAL'" variant="info" />
           </td>
         </ng-container>
 

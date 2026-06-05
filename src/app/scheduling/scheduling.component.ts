@@ -30,6 +30,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { parseScheduleArgs } from '../utils/schedule';
 import { CommonModule } from '@angular/common';
 import { formatScheduleDescription, getJobKindLabel } from '../shared/scheduling/schedule.utils';
+import { PillComponent } from '../shared/ui/pill/pill.component';
 
 @Component({
   selector: 'app-scheduling',
@@ -50,6 +51,7 @@ import { formatScheduleDescription, getJobKindLabel } from '../shared/scheduling
     MatMenuItem,
     MatMenuTrigger,
     MatDialogModule,
+    PillComponent,
   ],
   templateUrl: './scheduling.component.html',
   styleUrl: './scheduling.component.scss',
