@@ -14,6 +14,13 @@ html {
   @include customTheme.dark-theme-vars();
 }
 
+// mat-select renders its panel in a CDK overlay, so the Material-generated
+// `surface-container` (baked in by define-theme) is used instead of our
+// hand-authored token. Repoint it to the app palette for a consistent surface.
+.mat-mdc-select-panel {
+  --mat-select-panel-background-color: var(--md-sys-color-surface-container);
+}
+
 body {
   margin: 0;
   padding: 0;
