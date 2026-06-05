@@ -36,6 +36,29 @@ const NEUTRAL_TONES = [
   0, 4, 6, 10, 12, 17, 20, 22, 24, 25, 30, 35, 40, 50, 60, 70, 80, 87, 90, 92, 94, 95, 96, 98, 99, 100,
 ];
 
+// Hand-tuned surface colors pinned onto the neutral ramp so that BOTH systems
+// agree on the same hex:
+//   - mat.define-theme() bakes these into the Material component tokens
+//     (--mat-menu-container-color, --mat-select-panel-background-color, etc.)
+//   - our own CSS reads them via get-color($neutral-palette, <tone>) in m3-theme.scss
+//
+// Angular's M3 sys-color maps these neutral tones to surface roles
+// (see @angular/material core/tokens/m3/_md-sys-color.scss):
+//   dark:  surface/surface-dim 6, container-low 10, container 12, container-high 17
+//   light: surface/surface-bright 98, container-low 96, container 94, container-high 92
+const NEUTRAL_OVERRIDES: Record<number, string> = {
+  // dark scheme surfaces
+  6: '#0a1018',
+  10: '#0e1620',
+  12: '#121a23',
+  17: '#182230',
+  // light scheme surfaces
+  92: '#e8eaef',
+  94: '#eef0f5',
+  96: '#f4f5fa',
+  98: '#fbf9fd',
+};
+
 function generatePalette(hexColor: string, tones: number[]): Record<number, string> {
   const palette = TonalPalette.fromInt(argbFromHex(hexColor));
   const result: Record<number, string> = {};
@@ -47,12 +70,18 @@ function generatePalette(hexColor: string, tones: number[]): Record<number, stri
   return result;
 }
 
-function generateNeutralPalette(baseHexColor: string, chroma: number, tones: number[]): Record<number, string> {
+function generateNeutralPalette(
+  baseHexColor: string,
+  chroma: number,
+  tones: number[],
+  applyOverrides = false,
+): Record<number, string> {
   const hue = Hct.fromInt(argbFromHex(baseHexColor)).hue;
   const result: Record<number, string> = {};
 
   tones.forEach((tone) => {
-    result[tone] = hexFromArgb(Hct.from(hue, chroma, tone).toInt());
+    const override = applyOverrides ? NEUTRAL_OVERRIDES[tone] : undefined;
+    result[tone] = override ?? hexFromArgb(Hct.from(hue, chroma, tone).toInt());
   });
 
   return result;
@@ -77,7 +106,7 @@ function formatThemePalettes(): string {
     tertiary: generatePalette(BASE_COLORS['tertiary'], MATERIAL_TONES),
     accent: generatePalette(BASE_COLORS['accent'], MATERIAL_TONES),
     error: generatePalette(BASE_COLORS['error'], MATERIAL_TONES),
-    neutral: generateNeutralPalette(BASE_COLORS['primary'], 4, NEUTRAL_TONES),
+    neutral: generateNeutralPalette(BASE_COLORS['primary'], 4, NEUTRAL_TONES, true),
     'neutral-variant': generateNeutralPalette(BASE_COLORS['primary'], 8, NEUTRAL_TONES),
     success: generatePalette(BASE_COLORS['success'], MATERIAL_TONES),
     warning: generatePalette(BASE_COLORS['warning'], MATERIAL_TONES),
@@ -99,7 +128,7 @@ function formatMaterialThemePalettes(): string {
     secondary: generatePalette(BASE_COLORS['secondary'], MATERIAL_TONES),
     tertiary: generatePalette(BASE_COLORS['tertiary'], MATERIAL_TONES),
     error: generatePalette(BASE_COLORS['error'], MATERIAL_TONES),
-    neutral: generateNeutralPalette(BASE_COLORS['primary'], 4, MATERIAL_TONES),
+    neutral: generateNeutralPalette(BASE_COLORS['primary'], 4, NEUTRAL_TONES, true),
     'neutral-variant': generateNeutralPalette(BASE_COLORS['primary'], 8, MATERIAL_TONES),
   };
 
