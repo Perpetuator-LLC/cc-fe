@@ -35,7 +35,11 @@ yarn-error.log
 package-lock.json
 
 # IDEs and editors
-.idea/
+# Ignore personal/volatile IntelliJ state, but TRACK the shared run
+# configurations (Docker Compose "Dev Stack" etc.) so the dev-container
+# integration works for the whole team, not just whoever created it.
+.idea/*
+!.idea/runConfigurations/
 .project
 .classpath
 .c9/

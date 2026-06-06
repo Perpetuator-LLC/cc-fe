@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Web (dev server)" type="docker-deploy" factoryName="docker-compose" server-name="Docker">
+    <deployment type="docker-compose">
+      <settings>
+        <option name="envFilePath" value="" />
+        <option name="sourceFilePaths">
+          <list>
+            <option value="$PROJECT_DIR$/docker-compose.yml" />
+          </list>
+        </option>
+        <option name="services">
+          <list>
+            <option value="web" />
+          </list>
+        </option>
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>

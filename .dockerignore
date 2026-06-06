@@ -33,7 +33,10 @@ yarn-error.log*
 # Testing
 coverage/
 .nyc_output/
-*.spec.ts
+# NOTE: *.spec.ts is intentionally NOT excluded. The Dockerfile's `build` stage
+# (source + devDependencies) is what CI targets to run the unit suite inside the
+# image, so it needs the specs in the build context. They never reach the
+# runtime image — the `production` stage copies only dist/, never source.
 
 # Documentation and notes
 docs/

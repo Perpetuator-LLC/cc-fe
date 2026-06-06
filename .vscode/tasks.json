@@ -49,6 +49,33 @@
         "panel": "dedicated"
       },
       "detail": "Launches Chrome with remote debugging and logs console output to logs/ai_link/browser/chrome_debug.log"
+    },
+    {
+      "label": "dev: up (container HMR)",
+      "type": "shell",
+      "command": "scripts/dev_up.sh",
+      "isBackground": false,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "detail": "Start the cc-fe dev server in a container (ng serve + HMR) — same docker-compose.yml the JetBrains 'Dev Stack' uses."
+    },
+    {
+      "label": "dev: logs",
+      "type": "shell",
+      "command": "docker compose logs -f web",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "detail": "Follow the containerized dev server logs."
+    },
+    {
+      "label": "dev: down",
+      "type": "shell",
+      "command": "scripts/dev_down.sh",
+      "isBackground": false,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "detail": "Stop the containerized dev server (volumes preserved)."
     }
   ]
 }
