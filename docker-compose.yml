@@ -1,0 +1,109 @@
+# Copyright (c) 2026 Perpetuator LLC
+#
+# Local development stack for cc-fe — the single source of truth for the dev
+# server, consumed by BOTH the CLI (scripts/dev_up.sh) and the IDE (the
+# JetBrains "Dev Stack" run config and the VS Code "dev: *" tasks all point at
+# THIS file). Start it from either side and the other sees the same running
+# container, logs, and health — no drift between an IDE config and a shell
+# command. See docs/dev-container.md for the full rationale (ported from cc-be).
+#
+# Design notes
+# ------------
+# * `web` runs `ng serve` with HMR inside the image's `dev` stage. It is the
+#   same process as a native `yarn start`, just containerized so the toolchain
+#   (node 22 + the exact locked dependencies) is identical on every machine and
+#   in CI.
+#
+# * The repo is bind-mounted at /app so editing a file on the host hot-reloads
+#   inside the container. node_modules and .angular are shadowed by anonymous
+#   volumes so the host's macOS/arm artifacts (esbuild, native addons, stale
+#   cache) can't leak in over the image's Linux build and break the dev server.
+#   The /app/node_modules anonymous volume is ESSENTIAL — without it the bind
+#   mount hides the image's installed deps and `ng` won't start.
+#
+# * Polling (--poll + *_POLLING env) is required because macOS bind-mount file
+#   events don't reliably reach the Linux container's inotify; without it edits
+#   don't trigger a rebuild.
+#
+# * No `container_name` — so parallel checkouts / an IDE run and a CLI run don't
+#   collide on a fixed name. Compose derives names from the project instead.
+#
+# CI parity
+# ---------
+# CI builds the SAME Dockerfile (the `build` stage) and runs lint/test/build
+# against the source baked into the image — it does NOT bind-mount, because the
+# Gitea runner is Docker-in-Docker and its daemon can't see the runner's
+# filesystem. Same image + toolchain as here; only source delivery differs
+# (bake vs bind-mount). See docs/dev-container.md.
+
+x-web-base: &web-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: dev
+  image: cc-fe-dev:latest
+  # --- Dev-container hardening (a compromised dependency runs HERE) -----------
+  # Drop every Linux capability and block privilege escalation. Combined with
+  # the read-only source mount below, the no-secrets environment, and the fact
+  # that no Docker socket is mounted, a malicious dependency is boxed into this
+  # repo's source (read-only) and the container's own ephemeral filesystem. It
+  # cannot reach the host home dir, SSH keys, cloud creds, or other projects —
+  # all of which a native `yarn start` WOULD expose.
+  cap_drop:
+    - ALL
+  security_opt:
+    - "no-new-privileges:true"
+  environment: &web-env
+    NODE_ENV: development
+    # Force polling so the Linux container notices host (macOS) file edits.
+    # --poll on the CLI covers Angular's watcher; these cover any chokidar /
+    # watchpack sub-watchers in the toolchain.
+    CHOKIDAR_USEPOLLING: "true"
+    CHOKIDAR_INTERVAL: "2000"
+    WATCHPACK_POLLING: "true"
+  volumes:
+    # READ-ONLY source: host edits still hot-reload (the HOST writes the file;
+    # the container only READS it over the mount), but a compromised dependency
+    # CANNOT write malware back into the repo or install a malicious git hook —
+    # the exact vector of the 2025-10 / 2026-02 config-injection incident.
+    # (Run code generators / `ng generate` on the host or via a one-off
+    # `docker compose run --rm -v "$PWD:/app" web <cmd>` when you need writes.)
+    - .:/app:ro
+    # RW anonymous volumes: preserve the image's Linux build over the bind mount
+    # AND give the toolchain the only writable paths it needs (vite/esbuild dep
+    # cache + Angular build cache). They override the read-only mount here.
+    - /app/node_modules
+    - /app/.angular
+    # Hide git history + hooks from the container entirely — `ng serve` never
+    # needs them, and this stops a malicious dep from mining ~40 MB of history
+    # for old secrets or tampering with hooks. (Empty throwaway volume.)
+    - /app/.git
+  working_dir: /app
+  restart: unless-stopped
+
+services:
+  web:
+    <<: *web-base
+    # ng serve listening on all interfaces (reachable through the port map),
+    # polling the bind mount for changes, HMR on. (Angular 21's application
+    # builder permits localhost by default; if you need to reach the server by
+    # a non-localhost hostname, add `--allowed-hosts <host>`.)
+    command: >
+      node_modules/.bin/ng serve
+      --host 0.0.0.0
+      --port 4200
+      --poll 2000
+      --hmr
+    ports:
+      - "4200:4200"
+    healthcheck:
+      # The dev server answers on / once the first compile finishes. Generous
+      # start_period because the initial cold compile of the full app can take
+      # 30-90s before the first response. Use 127.0.0.1 (not localhost): the
+      # server binds IPv4 0.0.0.0, but inside Alpine `localhost` resolves to the
+      # IPv6 ::1 loopback first, so a localhost probe gets "connection refused".
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4200/"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 90s
