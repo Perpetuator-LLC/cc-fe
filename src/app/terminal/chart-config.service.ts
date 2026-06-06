@@ -550,7 +550,18 @@ export class ChartConfigService {
     // Y-axis configuration
     const yAxes = showVolume
       ? [
-          { type: 'value' as const, scale: true, gridIndex: 0, splitNumber: 4 },
+          {
+            type: 'value' as const,
+            scale: true,
+            gridIndex: 0,
+            splitNumber: 4,
+            // Pad price labels to 2 decimals so the axis gutter is a consistent
+            // width and the crosshair price box sits over the labels instead of
+            // overlapping the chart.
+            axisLabel: { formatter: (value: number) => value.toFixed(2) },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            axisPointer: { label: { formatter: (params: any) => Number(params.value).toFixed(2) } },
+          },
           {
             type: 'value' as const,
             gridIndex: 1,
@@ -561,7 +572,17 @@ export class ChartConfigService {
             },
           },
         ]
-      : [{ type: 'value' as const, scale: true }];
+      : [
+          {
+            type: 'value' as const,
+            scale: true,
+            // Pad price labels to 2 decimals (consistent gutter width; crosshair
+            // price box stays over the labels, not over the chart).
+            axisLabel: { formatter: (value: number) => value.toFixed(2) },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            axisPointer: { label: { formatter: (params: any) => Number(params.value).toFixed(2) } },
+          },
+        ];
 
     // Series configuration - use explicit array type to allow push()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
