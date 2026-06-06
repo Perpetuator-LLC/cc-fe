@@ -2789,7 +2789,7 @@ export class WatchlistTabComponent implements OnInit, OnDestroy {
 
       // wheelDelta > 0 = scroll up = zoom IN (smaller span).
       const zoomIn = (e.wheelDelta ?? 0) > 0;
-      const factor = zoomIn ? 1 / 1.15 : 1.15;
+      const factor = zoomIn ? 1 / 1.3 : 1.3; // ~30% per notch — bump if still slow
       const newSpan = Math.min(Math.max(span * factor, minSpan), 100);
       const newStart = Math.max(0, 100 - newSpan);
 
