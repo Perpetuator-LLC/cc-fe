@@ -20,9 +20,11 @@
       <div class="top-header">
         <div class="title">
           <h2>{{ article.title }}</h2>
-          <p [hidden]="!article.blog">
-            <a [routerLink]="blogLinkPath">{{ article.blog.name }}</a>
-          </p>
+          @if (article.blog) {
+            <p>
+              <a [routerLink]="blogLinkPath">{{ article.blog.name }}</a>
+            </p>
+          }
         </div>
         <div class="buttons">
           <button
