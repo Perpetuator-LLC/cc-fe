@@ -1,4 +1,401 @@
 /* Copyright (c) 2025-2026 Perpetuator LLC */
+
 :host {
   display: contents;
+}
+
+// Side-sheet shell — width is driven inline via appDynamicStyle
+.news-detail-section {
+  position: relative;
+
+  overflow: hidden;
+  display: none;
+  flex: 0 0 auto;
+
+  box-sizing: border-box;
+  width: 0;
+
+  transition: width 0.3s ease-in-out;
+
+  &.newsDetailSelectedSection {
+    display: block;
+  }
+
+  @media screen and (width <= 576px) {
+    position: fixed;
+    z-index: 555;
+    top: 0;
+    right: 0;
+
+    width: 90%;
+    height: 100vh;
+  }
+}
+
+.resize-handle {
+  cursor: col-resize;
+
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 6px;
+
+  background-color: transparent;
+
+  transition: background-color 0.2s ease;
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 2px;
+    height: 40px;
+    border-radius: 4px;
+
+    background-color: var(--md-sys-color-outline);
+
+    transition: background-color 0.2s ease;
+  }
+
+  &:hover,
+  &.resizing {
+    background-color: var(--md-sys-color-primary);
+  }
+
+  &:hover::before,
+  &.resizing::before {
+    background-color: var(--md-sys-color-primary);
+  }
+}
+
+.news-details {
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 20px 24px 32px;
+  border-left: 1px solid var(--md-sys-color-outline);
+
+  color: var(--md-sys-color-on-surface);
+
+  background-color: var(--md-sys-color-surface-container-low);
+
+  h3 {
+    margin: 0 0 12px;
+
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  p {
+    max-width: 100%;
+
+    font-size: 16px;
+    font-weight: 400;
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+    line-height: 1.6;
+    color: var(--md-sys-color-on-surface);
+    overflow-wrap: break-word;
+  }
+
+  .news-description,
+  .news-description * {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  .news-description img {
+    float: left;
+
+    width: auto;
+    max-width: 200px;
+    height: auto;
+    max-height: 200px;
+    margin-right: 16px;
+    margin-bottom: 16px;
+  }
+
+  button {
+    flex-shrink: 0;
+
+    min-width: fit-content;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    padding: 8px 16px;
+    border-radius: 8px;
+
+    font-weight: 600;
+    white-space: nowrap;
+
+    &.regenerate-summary-btn {
+      margin-left: 8px;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+    }
+
+    & + button {
+      margin-left: 8px;
+    }
+  }
+
+  mat-divider {
+    margin: 24px 0;
+  }
+
+  @media screen and (width <= 576px) {
+    padding: 16px;
+  }
+}
+
+.description-title {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+
+  .cross-icon {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+
+    span {
+      cursor: pointer;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+
+      color: var(--md-sys-color-on-surface-variant);
+
+      transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
+
+      &:hover {
+        color: var(--md-sys-color-on-surface);
+        background-color: var(--md-sys-color-surface-container-high);
+      }
+    }
+  }
+
+  .title a.external-link {
+    display: block;
+
+    font-size: 20px;
+    font-weight: 600;
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
+    line-height: 1.3;
+    color: var(--md-sys-color-primary);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+  }
+
+  .source {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      color: var(--md-sys-color-secondary);
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--md-sys-color-on-surface-variant);
+    }
+  }
+
+  .read-btn {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+
+    margin-top: 16px;
+    margin-bottom: 0;
+    padding: 8px 16px;
+    border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 35%, transparent);
+
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+
+    background: color-mix(in srgb, var(--md-sys-color-primary) 8%, var(--md-sys-color-surface-container));
+
+    &:hover {
+      border-color: var(--md-sys-color-primary);
+    }
+  }
+}
+
+// Flattened selectors to reduce specificity
+.description-title .title a.external-link:hover {
+  text-decoration: underline;
+}
+
+.description-title .source p strong {
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+// Categories and tags
+.metadata-section {
+  margin: 24px 0;
+}
+
+.categories-container,
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-badge {
+  display: inline-block;
+
+  padding: 4px 12px;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-tertiary) 30%, transparent);
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-tertiary);
+  white-space: nowrap;
+
+  background: color-mix(in srgb, var(--md-sys-color-tertiary) 14%, transparent);
+}
+
+.news-tag {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 4px 12px;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+// Semantic tag color classes, applied dynamically through ngClass. The matching
+// class-name strings are generated by getTagClass() in this component, so the
+// unused-SCSS checker can verify them statically.
+
+// Political tags
+.tag-political-democratic {
+  color: var(--md-extended-color-info-on-color);
+  background: var(--md-extended-color-info-color);
+}
+
+.tag-political-republican {
+  color: var(--md-sys-color-on-error);
+  background: var(--md-sys-color-error);
+}
+
+.tag-political-neutral {
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-container-high);
+}
+
+// Financial sentiment tags
+.tag-sentiment-bullish {
+  color: var(--md-extended-color-success-on-color);
+  background: var(--md-extended-color-success-color);
+}
+
+.tag-sentiment-bearish {
+  color: var(--md-sys-color-on-error);
+  background: var(--md-sys-color-error);
+}
+
+.tag-sentiment-neutral {
+  color: var(--md-extended-color-warning-on-color);
+  background: var(--md-extended-color-warning-color);
+}
+
+// Tone tags
+.tag-tone-urgent {
+  color: var(--md-sys-color-on-error);
+  background: var(--md-sys-color-error);
+}
+
+.tag-tone-calm {
+  color: var(--md-extended-color-info-on-color);
+  background: var(--md-extended-color-info-color);
+}
+
+.tag-tone-analytical {
+  color: var(--md-sys-color-on-tertiary);
+  background: var(--md-sys-color-tertiary);
+}
+
+.tag-tone-sensational {
+  color: var(--md-sys-color-on-secondary);
+  background: var(--md-sys-color-secondary);
+}
+
+// Content type tags
+.tag-content-breaking {
+  color: var(--md-sys-color-on-error);
+  background: var(--md-sys-color-error);
+}
+
+.tag-content-analysis {
+  color: var(--md-sys-color-on-primary);
+  background: var(--md-sys-color-primary);
+}
+
+.tag-content-opinion {
+  color: var(--md-sys-color-on-tertiary);
+  background: var(--md-sys-color-tertiary);
+}
+
+.tag-content-data {
+  color: var(--md-sys-color-on-secondary);
+  background: var(--md-sys-color-secondary);
+}
+
+// Default tag
+.tag-default {
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container-high);
+}
+
+@media screen and (width <= 576px) {
+  .category-badge,
+  .news-tag {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
 }

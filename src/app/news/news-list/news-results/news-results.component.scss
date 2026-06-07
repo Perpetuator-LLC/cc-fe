@@ -1,4 +1,44 @@
 /* Copyright (c) 2025-2026 Perpetuator LLC */
+
 :host {
   display: contents;
+}
+
+.news-container {
+  display: flex;
+  flex-direction: column;
+
+  mat-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+}
+
+// Empty / placeholder states ("No news found", "Select a podcast…")
+mat-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 32px auto;
+  padding: 32px 24px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+
+  background: var(--md-sys-color-surface-container);
+  box-shadow: none;
+
+  mat-card-header {
+    padding: 0;
+  }
+
+  p {
+    margin: 0;
+
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
+  }
 }
