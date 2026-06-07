@@ -1,0 +1,132 @@
+/* Copyright (c) 2026 Perpetuator LLC */
+
+:host {
+  display: inline-flex;
+}
+
+.chip {
+  --chip-accent: var(--md-sys-color-on-surface-variant);
+  --chip-background-strength: 24%;
+  --chip-border-strength: 38%;
+  --chip-text: var(--md-sys-color-on-surface-variant);
+
+  cursor: pointer;
+
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+
+  box-sizing: border-box;
+  min-height: 24px;
+  padding: 4px 12px;
+  border: 1px solid color-mix(in srgb, var(--chip-accent) var(--chip-border-strength), transparent);
+  border-radius: 999px;
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--chip-text);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  white-space: nowrap;
+
+  background: color-mix(in srgb, var(--chip-accent) var(--chip-background-strength), transparent);
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &.primary {
+    --chip-accent: var(--p-primary);
+    --chip-text: var(--p-primary-bright);
+  }
+
+  &.secondary {
+    --chip-accent: var(--md-sys-color-secondary);
+    --chip-text: var(--md-sys-color-secondary);
+  }
+
+  &.tertiary {
+    --chip-accent: var(--p-tertiary);
+    --chip-text: var(--p-tertiary);
+  }
+
+  &.success {
+    --chip-accent: var(--md-extended-color-success-color);
+    --chip-background-strength: 20%;
+    --chip-text: var(--md-extended-color-success-color);
+  }
+
+  &.warning {
+    --chip-accent: var(--md-extended-color-warning-color);
+    --chip-background-strength: 20%;
+    --chip-text: var(--md-extended-color-warning-color);
+  }
+
+  &.error {
+    --chip-accent: var(--md-sys-color-error);
+    --chip-background-strength: 20%;
+    --chip-text: var(--md-sys-color-error);
+  }
+
+  &.info {
+    --chip-accent: var(--md-extended-color-info-color);
+    --chip-background-strength: 20%;
+    --chip-text: var(--md-extended-color-info-color);
+  }
+
+  &.surface {
+    --chip-accent: var(--md-sys-color-outline);
+    --chip-background-strength: 100%;
+    --chip-border-strength: 100%;
+    --chip-text: var(--md-sys-color-on-surface-variant);
+
+    cursor: default;
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  &:is(button) {
+    appearance: none;
+  }
+
+  &:is(button):hover:not(:disabled),
+  &:is(button):focus-visible:not(:disabled) {
+    --chip-background-strength: 34%;
+    --chip-border-strength: 55%;
+
+    color: var(--chip-text);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--chip-accent) 16%, transparent);
+  }
+
+  &:is(button):focus-visible {
+    outline: 2px solid var(--chip-accent);
+    outline-offset: 2px;
+  }
+
+  &:is(button):disabled,
+  &.disabled {
+    cursor: not-allowed;
+
+    border-color: var(--md-sys-color-outline-variant);
+
+    color: var(--md-sys-color-on-surface-variant);
+
+    background: var(--md-sys-color-surface-container);
+    box-shadow: none;
+  }
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,45 @@
+<!-- Copyright (c) 2026 Perpetuator LLC -->
+@if (clickable) {
+  <button
+    mat-button
+    type="button"
+    class="chip"
+    [class.primary]="variant === 'primary'"
+    [class.secondary]="variant === 'secondary'"
+    [class.tertiary]="variant === 'tertiary'"
+    [class.success]="variant === 'success'"
+    [class.warning]="variant === 'warning'"
+    [class.error]="variant === 'error'"
+    [class.info]="variant === 'info'"
+    [class.surface]="variant === 'surface'"
+    [disabled]="disabled"
+    [attr.aria-label]="ariaLabel || null"
+    [matTooltip]="tooltip"
+    (click)="onClick()"
+  >
+    <ng-container [ngTemplateOutlet]="chipContent" />
+  </button>
+} @else {
+  <span
+    class="chip"
+    [class.primary]="variant === 'primary'"
+    [class.secondary]="variant === 'secondary'"
+    [class.tertiary]="variant === 'tertiary'"
+    [class.success]="variant === 'success'"
+    [class.warning]="variant === 'warning'"
+    [class.error]="variant === 'error'"
+    [class.info]="variant === 'info'"
+    [class.surface]="variant === 'surface'"
+    [class.disabled]="disabled"
+    [matTooltip]="tooltip"
+  >
+    <ng-container [ngTemplateOutlet]="chipContent" />
+  </span>
+}
+
+<ng-template #chipContent>
+  @if (icon) {
+    <mat-icon>{{ icon }}</mat-icon>
+  }
+  <span class="chip-label">{{ label }}</span>
+</ng-template>

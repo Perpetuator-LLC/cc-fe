@@ -27,39 +27,34 @@
     <!-- Symbol metadata chips - clickable to navigate to system watchlists -->
     <div class="symbol-metadata">
       @if (exchange) {
-        <button
-          mat-button
-          class="metadata-chip exchange"
-          (click)="onMetadataClick('exchange', exchange)"
-          [matTooltip]="'View all ' + exchange + ' stocks'"
-        >
-          {{ exchange }}
-        </button>
+        <app-chip
+          [label]="exchange"
+          variant="tertiary"
+          [tooltip]="'View all ' + exchange + ' stocks'"
+          [ariaLabel]="'View all ' + exchange + ' stocks'"
+          (chipClick)="onMetadataClick('exchange', exchange)"
+        />
       }
       @if (sector) {
-        <button
-          mat-button
-          class="metadata-chip sector"
-          (click)="onMetadataClick('sector', sector)"
-          [matTooltip]="'View all ' + sector + ' stocks'"
-        >
-          {{ sector }}
-        </button>
+        <app-chip
+          [label]="sector"
+          variant="primary"
+          [tooltip]="'View all ' + sector + ' stocks'"
+          [ariaLabel]="'View all ' + sector + ' stocks'"
+          (chipClick)="onMetadataClick('sector', sector)"
+        />
       }
       @if (industry) {
-        <button
-          mat-button
-          class="metadata-chip industry"
-          (click)="onMetadataClick('industry', industry)"
-          [matTooltip]="'View all ' + industry + ' stocks'"
-        >
-          {{ industry }}
-        </button>
+        <app-chip
+          [label]="industry"
+          variant="secondary"
+          [tooltip]="'View all ' + industry + ' stocks'"
+          [ariaLabel]="'View all ' + industry + ' stocks'"
+          (chipClick)="onMetadataClick('industry', industry)"
+        />
       }
       @if (showMarketCap) {
-        <span class="metadata-chip market-cap" matTooltip="Market Capitalization">
-          {{ marketCap }}
-        </span>
+        <app-chip [label]="marketCap" variant="surface" [clickable]="false" tooltip="Market Capitalization" />
       }
     </div>
   </div>
