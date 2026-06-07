@@ -1,3 +1,11 @@
+# Copyright (c) 2026 Perpetuator LLC
+#
+# Block pushing the obfuscated dropper to ANY remote. The original infection
+# reached origin/main because push was unguarded — this closes that gap.
+# Pure grep, runs before any node tooling.
+ROOT="$(git rev-parse --show-toplevel)"
+bash "$ROOT/scripts/scan-for-malware.sh" || exit 1
+
 # Load NVM in non-interactive shell
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -11,7 +19,7 @@ fi
 # yarn audit exit codes are bitmasks (4=moderate, 8=high, 16=critical), so we grep output instead
 AUDIT_OUTPUT=$(yarn audit 2>&1) || true
 if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
-  echo "❌ High or Critical CVEs found — run 'yarn audit' to see details. Push blocked."
+  echo "High or Critical CVEs found — run 'yarn audit' to see details. Push blocked."
   exit 1
 fi
 
@@ -23,4 +31,3 @@ yarn lint:md3 --strict
 yarn lint:scss:unused:strict
 
 npm test
-

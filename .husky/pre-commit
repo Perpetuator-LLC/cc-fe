@@ -1,4 +1,27 @@
-# Refuses commits re-introducing the obfuscated payload injected into
-# eslint.config.js / commitlint.config.js during the 2025-10 / 2026-02 incident.
-added_lines=$(git diff --cached -U0 | grep '^+[^+]' || true)
-if printf '%s' "$added_lines" | grep -qFe "
+# Copyright (c) 2026 Perpetuator LLC
+#
+# Whole-tree malware scan FIRST — before any node/eslint runs. Prevention
+# mechanism for the eslint.config.js supply-chain attack: this replaces the
+# old staged-diff-only guard, which missed the payload when it rode forward in
+# already-committed history (the actual recurrence vector). The scan is pure
+# grep, so it is safe even on an infected checkout.
+ROOT="$(git rev-parse --show-toplevel)"
+bash "$ROOT/scripts/scan-for-malware.sh" || exit 1
+
+# Load NVM in non-interactive shell
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Use the Node version from .nvmrc
+if command -v nvm >/dev/null 2>&1; then
+  nvm use
+fi
+
+# Secret scanning — requires: brew install gitleaks
+if command -v gitleaks &> /dev/null; then
+  gitleaks protect --staged -v
+else
+  echo "WARNING: gitleaks not found — secret scanning skipped. Run: brew install gitleaks"
+fi
+
+npx lint-staged
