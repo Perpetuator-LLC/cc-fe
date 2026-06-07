@@ -1,5 +1,12 @@
 <!-- Copyright (c) 2026 Perpetuator LLC -->
-<button mat-flat-button class="action-button" color="primary" [disabled]="disabled || loading" (click)="onClick()">
+<button
+  mat-flat-button
+  class="action-button"
+  [ngClass]="variant"
+  color="primary"
+  [disabled]="disabled || loading"
+  (click)="onClick()"
+>
   <span class="button-content">
     @if (loading) {
       <mat-spinner diameter="18" />

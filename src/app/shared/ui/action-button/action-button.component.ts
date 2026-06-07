@@ -5,6 +5,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+export type ActionButtonVariant =
+  | 'primary'
+  | 'neutral'
+  | 'secondary'
+  | 'tertiary'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'ghost';
+
 @Component({
   selector: 'app-action-button',
   standalone: true,
@@ -16,6 +26,8 @@ export class ActionButtonComponent {
   @Input() disabled = false;
   @Input() icon = 'play_arrow';
   @Input() loading = false;
+  /** Color variant. Defaults to 'primary'. */
+  @Input() variant: ActionButtonVariant = 'primary';
 
   @Output() actionClick = new EventEmitter<void>();
 

@@ -5,23 +5,27 @@
 }
 
 .action-button {
+  // Accent drives the tint/border; text drives the label + icon color.
+  // Variants below just remap these two; default is primary.
+  --ab-accent: var(--p-primary);
+  --ab-text: var(--p-primary-bright);
   --mdc-filled-button-container-color: var(--md-sys-color-surface-container);
-  --mdc-filled-button-label-text-color: var(--p-primary-bright);
-  --mat-filled-button-state-layer-color: var(--p-primary-bright);
-  --mat-filled-button-ripple-color: color-mix(in srgb, var(--p-primary) 16%, transparent);
+  --mdc-filled-button-label-text-color: var(--ab-text);
+  --mat-filled-button-state-layer-color: var(--ab-text);
+  --mat-filled-button-ripple-color: color-mix(in srgb, var(--ab-accent) 16%, transparent);
 
   padding-right: 12px;
   padding-left: 6px;
-  border: 1px solid color-mix(in srgb, var(--p-primary) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ab-accent) 35%, transparent);
   border-radius: 12px;
 
-  color: var(--p-primary-bright);
+  color: var(--ab-text);
 
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--p-primary) 14%, transparent),
-      color-mix(in srgb, var(--p-primary) 4%, transparent)
+      color-mix(in srgb, var(--ab-accent) 14%, transparent),
+      color-mix(in srgb, var(--ab-accent) 4%, transparent)
     ),
     var(--md-sys-color-surface-container);
 
@@ -36,17 +40,71 @@
   }
 
   &:hover:not(:disabled) {
-    border-color: var(--p-primary);
+    border-color: var(--ab-accent);
     background:
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--p-primary) 20%, transparent),
-        color-mix(in srgb, var(--p-primary) 8%, transparent)
+        color-mix(in srgb, var(--ab-accent) 20%, transparent),
+        color-mix(in srgb, var(--ab-accent) 8%, transparent)
       ),
       var(--md-sys-color-surface-container);
   }
 
-  // Disabled: drop the primary accent for a clearly-muted neutral look.
+  // Accent variants — remap the accent/text tokens; base styles do the rest.
+  &.secondary {
+    --ab-accent: var(--md-sys-color-secondary);
+    --ab-text: var(--md-sys-color-secondary);
+  }
+
+  &.tertiary {
+    --ab-accent: var(--md-sys-color-tertiary);
+    --ab-text: var(--md-sys-color-tertiary);
+  }
+
+  &.success {
+    --ab-accent: var(--md-extended-color-success-color);
+    --ab-text: var(--md-extended-color-success-color);
+  }
+
+  &.warning {
+    --ab-accent: var(--md-extended-color-warning-color);
+    --ab-text: var(--md-extended-color-warning-color);
+  }
+
+  &.danger {
+    --ab-accent: var(--md-sys-color-error);
+    --ab-text: var(--md-sys-color-error);
+  }
+
+  // Neutral — muted surface, no accent tint.
+  &.neutral {
+    --ab-accent: var(--md-sys-color-on-surface);
+    --ab-text: var(--md-sys-color-on-surface);
+
+    border-color: var(--md-sys-color-outline-variant);
+    background: var(--md-sys-color-surface-container-high);
+
+    &:hover:not(:disabled) {
+      border-color: var(--md-sys-color-outline);
+      background: var(--md-sys-color-surface-container-highest);
+    }
+  }
+
+  // Ghost — transparent, no border until hover.
+  &.ghost {
+    --ab-accent: var(--md-sys-color-on-surface);
+    --ab-text: var(--md-sys-color-on-surface);
+
+    border-color: transparent;
+    background: transparent;
+
+    &:hover:not(:disabled) {
+      border-color: transparent;
+      background: var(--md-sys-color-surface-container-high);
+    }
+  }
+
+  // Disabled — overrides every variant (declared last to win on equal specificity).
   &:disabled {
     --mdc-filled-button-container-color: var(--md-sys-color-surface-container);
     --mdc-filled-button-label-text-color: var(--md-sys-color-on-surface-variant);
@@ -54,8 +112,6 @@
     cursor: not-allowed;
     border-color: var(--md-sys-color-outline);
     color: var(--md-sys-color-on-surface-variant);
-
-    // opacity: 0.75;
     background: var(--md-sys-color-surface-container);
   }
 }
