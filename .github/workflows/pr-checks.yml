@@ -44,7 +44,7 @@ permissions:
 
 jobs:
   audit:
-    name: Audit (high/critical CVE scan)
+    name: Audit (CVEs + install-script supply-chain)
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft != true
     steps:
@@ -56,6 +56,16 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: yarn
+
+      - name: Install dependencies (no lifecycle scripts — safe even if a dep is malicious)
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Supply-chain guard — block un-reviewed install scripts
+        # Goes beyond `yarn audit` (published CVEs only): catches a dependency that
+        # executes code at INSTALL time (preinstall/postinstall) — the Lazarus /
+        # compromised-axios vector — even with no CVE and full obfuscation. New
+        # install-script packages must be reviewed into .allowed-install-scripts.json.
+        run: node scripts/check-install-scripts.cjs
 
       - name: Yarn audit (block on high/critical only)
         run: |
