@@ -231,24 +231,12 @@
     }
   }
 
-  .read-btn {
-    display: inline-flex;
-    gap: 8px;
-    align-items: center;
-
+  // Read More uses the shared app-action-button (neutral variant). This just
+  // resets the wrapping anchor so it doesn't add link underline/spacing.
+  .read-more-link {
+    display: inline-block;
     margin-top: 16px;
-    margin-bottom: 0;
-    padding: 8px 16px;
-    border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 35%, transparent);
-
-    font-weight: 600;
-    color: var(--md-sys-color-primary);
-
-    background: color-mix(in srgb, var(--md-sys-color-primary) 8%, var(--md-sys-color-surface-container));
-
-    &:hover {
-      border-color: var(--md-sys-color-primary);
-    }
+    text-decoration: none;
   }
 }
 

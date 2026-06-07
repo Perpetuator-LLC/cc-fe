@@ -32,10 +32,15 @@
             <mat-icon>graphic_eq</mat-icon>
             <p><strong>Source:</strong> {{ selectedNewsDetail.source }}</p>
           </div>
-          <a [href]="selectedNewsDetail.url" target="_blank" [matTooltip]="sourceTooltip" matTooltipPosition="above">
-            <button mat-raised-button color="primary" type="button" class="read-btn">
-              Read More <mat-icon>arrow_right</mat-icon>
-            </button>
+          <a
+            class="read-more-link"
+            [href]="selectedNewsDetail.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            [matTooltip]="sourceTooltip"
+            matTooltipPosition="above"
+          >
+            <app-action-button variant="secondary" icon="open_in_new">Read More</app-action-button>
           </a>
         </div>
 

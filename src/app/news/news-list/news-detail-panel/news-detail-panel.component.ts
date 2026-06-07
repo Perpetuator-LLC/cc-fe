@@ -7,6 +7,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { SafeHtml } from '@angular/platform-browser';
 import { DynamicStyleDirective } from '../../../shared/dynamic-style.directive';
+import { ActionButtonComponent } from '../../../shared/ui/action-button/action-button.component';
 import { IncludesPipe } from '../../../shared/pipes';
 import { UserService } from '../../../user/user.service';
 import { NewsResult } from '../../news.service';
@@ -29,7 +30,16 @@ export interface NewsDisplayTag {
 @Component({
   selector: 'app-news-detail-panel',
   standalone: true,
-  imports: [NgClass, MatButton, MatDivider, MatIcon, MatTooltip, DynamicStyleDirective, IncludesPipe],
+  imports: [
+    NgClass,
+    MatButton,
+    MatDivider,
+    MatIcon,
+    MatTooltip,
+    DynamicStyleDirective,
+    ActionButtonComponent,
+    IncludesPipe,
+  ],
   templateUrl: './news-detail-panel.component.html',
   styleUrl: './news-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
