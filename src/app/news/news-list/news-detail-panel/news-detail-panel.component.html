@@ -75,9 +75,9 @@
         <p class="news-description" [innerHTML]="selectedNewsDetail.description || 'No description provided'"></p>
         <mat-divider />
         <h3>AI Summary</h3>
-        <button mat-flat-button color="primary" type="button" (click)="onProcessNews(selectedNewsDetail.uuid)">
+        <app-action-button (actionClick)="onProcessNews(selectedNewsDetail.uuid)" variant="primary" icon="news">
           Process News
-        </button>
+        </app-action-button>
         @if (userService.userDetails()?.permissions | includes: 'api.change_news') {
           <button
             mat-stroked-button
