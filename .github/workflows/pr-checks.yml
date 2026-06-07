@@ -44,7 +44,10 @@ permissions:
 
 jobs:
   audit:
-    name: Audit (CVEs + install-script supply-chain)
+    # NOTE: this exact name is a REQUIRED status check in main's branch protection.
+    # Renaming it orphans the required check (it waits forever for the old name).
+    # If you rename, also update the required-check list in repo Settings → Rules.
+    name: Audit (high/critical CVE scan)
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft != true
     steps:
