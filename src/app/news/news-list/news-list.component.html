@@ -61,32 +61,34 @@
             [value]="selectedHours"
             (valueChange)="onHoursSelectChange($event)"
           />
-          <div class="select-btn desktop">
-            <mat-checkbox
-              class="select-all-checkbox"
-              [checked]="allFilteredSelected"
-              [indeterminate]="someFilteredSelected"
-              (change)="toggleSelectAll()"
+          <div class="controls-actions">
+            <div class="select-btn desktop">
+              <mat-checkbox
+                class="select-all-checkbox"
+                [checked]="allFilteredSelected"
+                [indeterminate]="someFilteredSelected"
+                (change)="toggleSelectAll()"
+              >
+                {{ selectAllLabel }}
+              </mat-checkbox>
+            </div>
+            <app-action-button
+              icon="graphic_eq"
+              [disabled]="noNewsSelected"
+              (actionClick)="createEpisodeAudioChainFromSelected()"
+              matTooltip="Creates episode with full audio generation from selected news"
             >
-              {{ selectAllLabel }}
-            </mat-checkbox>
+              Create Episode & Audio
+            </app-action-button>
+            <app-action-button
+              icon="newspaper"
+              [disabled]="noNewsSelected"
+              (actionClick)="createEpisodeChainFromSelected()"
+              matTooltip="Creates an AI-generated episode using selected news articles"
+            >
+              Create Episode
+            </app-action-button>
           </div>
-          <app-action-button
-            icon="graphic_eq"
-            [disabled]="noNewsSelected"
-            (actionClick)="createEpisodeAudioChainFromSelected()"
-            matTooltip="Creates episode with full audio generation from selected news"
-          >
-            Create Episode & Audio
-          </app-action-button>
-          <app-action-button
-            icon="newspaper"
-            [disabled]="noNewsSelected"
-            (actionClick)="createEpisodeChainFromSelected()"
-            matTooltip="Creates an AI-generated episode using selected news articles"
-          >
-            Create Episode
-          </app-action-button>
         </div>
       </mat-card-content>
     </mat-card>

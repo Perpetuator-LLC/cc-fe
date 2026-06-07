@@ -39,6 +39,7 @@
 
     .select-right-podcasts {
       display: flex;
+      flex: 1 1 auto;
       flex-wrap: wrap;
       gap: 8px;
       row-gap: 8px;
@@ -99,6 +100,22 @@
       app-labeled-select.time-field {
         width: 134px;
         max-width: 100%;
+      }
+
+      // Right-aligned action cluster (Select all + buttons). margin-left:auto
+      // pushes it to the far right of the controls row.
+      .controls-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+
+        margin-left: auto;
+
+        @media screen and (width <= 576px) {
+          width: 100%;
+          margin-left: 0;
+        }
       }
 
       @media screen and (width <= 576px) {
@@ -334,20 +351,22 @@
   height: calc(100vh - 128px);
 }
 
-// Select all button
+// Select all button — sized to match the adjacent action buttons so the right
+// cluster reads as one cohesive set.
 .select-btn {
   display: flex;
   gap: 8px;
   align-items: center;
 
-  padding: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 8px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 8px;
+  border-radius: 12px;
 
   background: var(--md-sys-color-surface-container);
 
   .select-all-checkbox {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--md-sys-color-on-surface);
   }
