@@ -45,6 +45,19 @@
       ),
       var(--md-sys-color-surface-container);
   }
+
+  // Disabled: drop the primary accent for a clearly-muted neutral look.
+  &:disabled {
+    --mdc-filled-button-container-color: var(--md-sys-color-surface-container);
+    --mdc-filled-button-label-text-color: var(--md-sys-color-on-surface-variant);
+
+    cursor: not-allowed;
+    border-color: var(--md-sys-color-outline);
+    color: var(--md-sys-color-on-surface-variant);
+
+    // opacity: 0.75;
+    background: var(--md-sys-color-surface-container);
+  }
 }
 
 .button-content {

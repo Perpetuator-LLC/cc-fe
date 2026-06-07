@@ -2080,3 +2080,15 @@ html body {
 body.light .website-logo img {
   filter: invert(1);
 }
+
+// ============================================================================
+// News controls row alignment
+// ============================================================================
+// Collapse the empty form-field subscript (reserved hint/error space) on the
+// news controls so the labeled-selects line up vertically with the adjacent
+// "Select all" checkbox and action buttons. Same pattern as .chart-controls.
+// Must live globally: Material form-field internals aren't reachable through
+// component view encapsulation, and deep selectors are disallowed.
+.select-right-podcasts .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}

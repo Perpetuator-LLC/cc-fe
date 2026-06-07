@@ -26,6 +26,7 @@ import { NewsDetailPanelComponent } from './news-detail-panel/news-detail-panel.
 import { SelectPodcastFormComponent } from './select-podcast-form/select-podcast-form.component';
 import { NewsResultsComponent } from './news-results/news-results.component';
 import { LabeledSelectComponent, LabeledSelectOption } from '../../shared/labeled-select/labeled-select.component';
+import { ActionButtonComponent } from '../../shared/ui/action-button/action-button.component';
 
 /** Static time-window options for the news toolbar. */
 const TIME_OPTIONS: LabeledSelectOption[] = [
@@ -61,6 +62,7 @@ export interface SidePanelAccordianData {
     SelectPodcastFormComponent,
     NewsResultsComponent,
     LabeledSelectComponent,
+    ActionButtonComponent,
   ],
   templateUrl: './news-list.component.html',
   styleUrl: './news-list.component.scss',
