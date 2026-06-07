@@ -47,8 +47,44 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Pre-publish gate. `yarn audit` sees the FULL dependency tree (incl. devDeps);
+  # the Trivy scan below only sees the runtime image, so a high/critical CVE in a
+  # devDependency is invisible to Trivy but caught here. The malware scan blocks
+  # publishing an image built from injected source. build-scan-publish `needs`
+  # this, so nothing reaches GHCR (and no Gitea deploy is dispatched) when it's
+  # red. Mirrors pr-checks.yml and the pre-push hook.
+  audit:
+    name: Audit (pre-publish CVE + malware gate)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Malware signature scan (pure grep, no install)
+        run: bash scripts/scan-for-malware.sh
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Yarn audit (block on high/critical only)
+        run: |
+          # yarn audit exit codes are bitmasks; grep the output instead.
+          set +e
+          AUDIT_OUTPUT=$(yarn audit 2>&1)
+          set -e
+          echo "$AUDIT_OUTPUT"
+          if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
+            echo "::error::High or Critical CVEs found — build/publish/deploy blocked."
+            exit 1
+          fi
+          echo "✅ No high or critical CVEs found."
+
   build-scan-publish:
     name: Build, Trivy scan, push to GHCR
+    needs: [audit]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -64,6 +64,29 @@ jobs:
             https://oauth2:${GITEA_TOKEN}@git.perpetuator.io/${{ github.repository }}.git \
             ${WORK_DIR}
 
+      # Defense-in-depth CVE gate — runs BEFORE the GHCR login and the
+      # Vault-credentialed container start, so a high/critical advisory in the
+      # deployed commit aborts the deploy while no secret is in scope and no
+      # container has run. Uses `yarn audit` (NOT `yarn install`) in a pinned
+      # node image, so the deploy host needs no toolchain and no dependency
+      # postinstall ever executes here. Re-checks the LIVE advisory DB, so a CVE
+      # disclosed AFTER merge aborts a re-deploy of the last-green image. Does
+      # not rely on GitHub branch protection. Mirrors pr-checks.yml.
+      - name: CVE gate (high/critical, before any secret is in scope)
+        run: |
+          WORK_DIR="/tmp/cc-fe-stage-checkout"
+          set +e
+          AUDIT_OUTPUT=$(/usr/bin/docker run --rm \
+            -v "${WORK_DIR}:/src:ro" -w /src \
+            node:22-alpine yarn audit 2>&1)
+          set -e
+          echo "$AUDIT_OUTPUT"
+          if echo "$AUDIT_OUTPUT" | grep -qE "^│ (high|critical)"; then
+            echo "::error::High or Critical CVE in the commit being deployed — deploy aborted BEFORE GHCR/Vault credentials are touched."
+            exit 1
+          fi
+          echo "✅ No high or critical CVEs — proceeding to deploy."
+
       - name: Sync compose file to deploy path
         run: |
           mkdir -p ${{ env.STAGE_PATH }}
