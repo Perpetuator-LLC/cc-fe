@@ -50,6 +50,7 @@
     "lint:scss:unused:strict": "node scripts/check-unused-scss.js --strict",
     "format:check": "prettier --check \"src/**/*.{ts,js,html,scss}\"",
     "lint:all": "yarn lint && yarn lint:scss && yarn lint:md3 && yarn lint:scss:unused:strict && yarn format:check",
+    "lint:docker": "docker compose run --rm --no-deps web yarn lint:all",
     "scss:track": "scripts/track-scss-size.sh",
     "css:analyze": "node scripts/analyze-css-size.js",
     "css:baseline": "yarn build && node scripts/analyze-css-size.js --baseline",
