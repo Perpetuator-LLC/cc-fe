@@ -63,9 +63,10 @@ echo "[*] scanning (this can take a while with --full)..."
 find "${roots[@]}" \
   \( -path /dev -o -path /proc -o -path /sys -o -path /Volumes \
      -o -path /System/Volumes -o -path /private/var/vm -o -path '*/.Trash' \
+     -o -name 'dropper-hunt-*.log' -o -name 'dropper-patterns.*' \
      -o -fstype devfs \) -prune -o -type f -print0 2>/dev/null \
 | xargs -0 -P "$JOBS" -n 64 grep -aoHFf "$PF" 2>/dev/null \
-| grep -vE '/(hunt-dropper\.sh|scan-for-malware\.sh|watch-file-writes\.sh|SECURITY-eslint-malware\.md):' \
+| grep -vE '/(hunt-dropper\.sh|scan-for-malware\.sh|scan-obfuscation\.sh|watch-file-writes\.sh|SECURITY-eslint-malware\.md):|/dropper-hunt[^/]*\.log:|/dropper-patterns\.[^/]*:' \
 | tee -a "$LOG"
 
 echo
