@@ -102,6 +102,7 @@ describe('WatchlistTabComponent', () => {
         'loadGicsIndustries',
         'loadExchanges',
         'addToWatchlist',
+        'createWatchlist',
       ],
       {
         searchHistory: signal(null),
@@ -580,6 +581,64 @@ describe('WatchlistTabComponent', () => {
       component.onWatchlistChange('recent');
       expect(component.selectedWatchlistId()).toBe('recent');
       expect(component.selectedSymbol()).toBeNull();
+    });
+  });
+
+  describe('chart settings and create-watchlist form', () => {
+    it('renders markdown through the sanitizer', () => {
+      expect(component.markdownToHtml('# Hello')).toBeTruthy();
+    });
+
+    it('retries the chart only when a symbol is selected', () => {
+      mockTerminalService.execute.calls.reset();
+      component.selectedSymbol.set(null);
+      component.retryChart();
+      expect(mockTerminalService.execute).not.toHaveBeenCalled();
+
+      component.selectedSymbol.set('AAPL');
+      component.currentCommand.set('CHART');
+      component.retryChart();
+      expect(mockTerminalService.execute).toHaveBeenCalled();
+    });
+
+    it('applies each chart setting and persists preferences', () => {
+      mockChartPreferencesService.updatePreference.calls.reset();
+      component.selectedSymbol.set(null); // avoid a chart rebuild
+      component.onChartSettingChange({ setting: 'showExtendedHours', value: true });
+      expect(component.showExtendedHours()).toBeTrue();
+      component.onChartSettingChange({ setting: 'showVolume', value: false });
+      expect(component.showVolume()).toBeFalse();
+      component.onChartSettingChange({ setting: 'adjustForDividends', value: true });
+      expect(component.showDividendsReinvested()).toBeTrue();
+      component.onChartSettingChange({ setting: 'lockToRight', value: false });
+      expect(component.lockToRight()).toBeFalse();
+      expect(mockChartPreferencesService.updatePreference).toHaveBeenCalled();
+
+      component.onLockToRightChange(true);
+      expect(component.lockToRight()).toBeTrue();
+    });
+
+    it('toggles the create form and clears drafts on close', () => {
+      component.toggleCreateForm();
+      expect(component.showCreateForm()).toBeTrue();
+      component.newWatchlistName = 'My List';
+      component.toggleCreateForm();
+      expect(component.showCreateForm()).toBeFalse();
+      expect(component.newWatchlistName).toBe('');
+    });
+
+    it('creates a watchlist only with a non-blank name and closes the form', () => {
+      mockWatchlistService.createWatchlist.and.returnValue(of({ success: true, message: 'ok' }));
+      component.newWatchlistName = '   ';
+      component.createWatchlist();
+      expect(mockWatchlistService.createWatchlist).not.toHaveBeenCalled();
+
+      component.showCreateForm.set(true);
+      component.newWatchlistName = 'Tech Picks';
+      component.newWatchlistDescription = ' chips ';
+      component.createWatchlist();
+      expect(mockWatchlistService.createWatchlist).toHaveBeenCalledWith('Tech Picks', 'chips');
+      expect(component.showCreateForm()).toBeFalse();
     });
   });
 });
