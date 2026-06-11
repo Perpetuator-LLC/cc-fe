@@ -77,7 +77,11 @@ WORKDIR /app
 # curl + jq are used by docker-entrypoint.sh to fetch runtime config from
 # OpenBao/Vault when VAULT_ADDR is set. wget stays for the healthcheck.
 # --no-cache keeps the layer small (no apk cache file written).
-RUN apk add --no-cache curl jq
+# apk upgrade pulls the patched OpenSSL (CVE-2026-45447 fixed in 3.5.7-r0);
+# the upstream node:22-alpine image still ships 3.5.6-r0 as of 2026-06-11.
+# Drop the explicit upgrade once Renovate bumps the digest to a base whose
+# alpine layer ships openssl >=3.5.7-r0.
+RUN apk upgrade --no-cache libcrypto3 libssl3 && apk add --no-cache curl jq
 
 # Copy only the built output (Express server is self-contained)
 COPY --from=build /app/dist/capital-copilot-fe ./
