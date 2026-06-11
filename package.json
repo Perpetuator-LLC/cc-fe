@@ -3,7 +3,9 @@
   "version": "0.32.0",
   "description": "Capital Copilot's Front-End",
   "resolutions": {
-    "minimatch": ">=10.2.3",
+    "**/editorconfig/minimatch": "^9.0.7",
+    "**/grunt/minimatch": "^3.1.4",
+    "**/globule/minimatch": "^3.1.4",
     "handlebars": ">=4.7.9",
     "flatted": ">=3.4.2",
     "node-forge": ">=1.4.0",
@@ -33,8 +35,7 @@
     "yaml": ">=2.8.3",
     "follow-redirects": ">=1.16.0",
     "postcss": ">=8.5.10",
-    "ip-address": ">=10.1.1",
-    "brace-expansion": ">=5.0.6"
+    "ip-address": ">=10.1.1"
   },
   "scripts": {
     "ng": "ng",

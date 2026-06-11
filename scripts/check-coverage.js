@@ -10,10 +10,12 @@
 //   yarn test:coverage --browsers=ChromeHeadless            # headless (CI)
 //
 // NOTE: implemented as a wrapper that parses karma-coverage's text-summary
-// instead of a karma.conf.js with coverageReporter.check, because the
-// security resolution `minimatch >= 10.2.3` in package.json breaks Karma 6
-// whenever a config *file* is supplied (Karma excludes the config file via a
-// minimatch call signature removed in minimatch v10).
+// instead of a karma.conf.js with coverageReporter.check. A blanket
+// `minimatch >= 10.2.3` resolution used to break Karma 6 whenever a config
+// *file* was supplied; that is fixed (path-scoped resolutions now keep
+// karma's minimatch on the callable, audit-clean 3.1.x line), but the
+// wrapper stays: it is builder- and karma-version-agnostic, keeps the
+// minimums in one place, and survives a future migration off Karma.
 
 'use strict';
 
