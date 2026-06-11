@@ -62,8 +62,6 @@ h2[mat-dialog-title] {
   color: var(--md-sys-color-on-surface);
   text-align: left;
 
-  background: var(--md-sys-color-surface-container);
-
   transition: all 0.2s ease;
 
   &:not(:disabled):hover {

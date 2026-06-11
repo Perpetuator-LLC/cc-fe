@@ -110,10 +110,7 @@ body {
 
   .create-pulse-dialog-panel.mat-mdc-dialog-panel,
   .schedule-dialog-panel.mat-mdc-dialog-panel {
-    @include customTheme.dark-theme-vars();
-
     .mdc-dialog__surface {
-      border: 1px solid var(--md-sys-color-outline-variant);
       color: var(--md-sys-color-on-surface);
       background: var(--md-sys-color-surface-container-low);
     }
@@ -790,6 +787,14 @@ body .toolbar-container {
 // Global button border radius - smaller corners for all Material buttons
 // Uses all MDC custom properties to ensure proper override
 :root {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--md-sys-color-surface-container-low),
+      subhead-color: var(--md-sys-color-on-surface),
+      supporting-text-color: var(--md-sys-color-on-surface-variant),
+    )
+  );
+
   // Form field sizing overrides (Material recommended approach)
   @include mat.form-field-overrides(
     (
@@ -844,6 +849,10 @@ body .toolbar-container {
 
   // Extended FAB
   --mdc-extended-fab-container-shape: 8px;
+
+  .mat-mdc-dialog-panel .mdc-dialog__surface {
+    border: 1px solid var(--md-sys-color-outline-variant);
+  }
 }
 
 // Apply to all button types with direct border-radius as fallback
