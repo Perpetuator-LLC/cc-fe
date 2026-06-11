@@ -281,6 +281,7 @@ export class PulsesListComponent extends RelayPaginatorBase<PulseConfigWithDispl
   createPulseConfig(): void {
     const dialogRef = this.dialog.open(CreatePulseDialogComponent, {
       width: '500px',
+      panelClass: 'schedule-dialog-panel',
     });
 
     dialogRef.afterClosed().subscribe((result) => {

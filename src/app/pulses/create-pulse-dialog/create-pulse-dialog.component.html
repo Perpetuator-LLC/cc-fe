@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026 Perpetuator LLC -->
 <div class="dialog-header" mat-dialog-title>
   <h2>Generate Pulse</h2>
-  <button mat-icon-button (click)="dialogRef.close()">
+  <button class="close-btn" mat-icon-button (click)="dialogRef.close()" aria-label="Close">
     <mat-icon>close</mat-icon>
   </button>
 </div>
@@ -9,7 +9,7 @@
   <form [formGroup]="pulseForm" (ngSubmit)="onSubmit()">
     <mat-form-field>
       <mat-label>Title (optional)</mat-label>
-      <input matInput formControlName="title" placeholder="Leave blank to auto-generate from description" />
+      <input matInput formControlName="title" placeholder="Give your Pulse a name" />
       <mat-hint>Auto-generated if left blank</mat-hint>
       @if (titleError) {
         <mat-error>{{ titleError }}</mat-error>
@@ -32,26 +32,53 @@
     </mat-form-field>
 
     <div class="notification-section">
-      <h3>Notifications</h3>
-      <div class="notification-option">
+      <div class="panel-head">
+        <mat-icon class="panel-icon">notifications</mat-icon>
+        <span class="panel-title">Notifications</span>
+      </div>
+
+      <div class="notif-row">
+        <span class="notif-icon">
+          <mat-icon>sms</mat-icon>
+        </span>
+        <div class="notif-text">
+          <span class="notif-title">Notify me via SMS</span>
+          <span class="notif-sub">Get a text when your Pulse is ready</span>
+        </div>
         <mat-checkbox
           formControlName="smsNotificationEnabled"
+          aria-label="Notify me via SMS when ready"
           [matTooltip]="
             !phoneVerified
               ? 'Verify your phone number in Settings to enable SMS notifications'
               : 'Receive an SMS when your pulse is ready'
           "
-        >
-          Notify me via SMS when ready
-        </mat-checkbox>
-        @if (!loadingPreferences && !phoneVerified) {
-          <a routerLink="/user" class="verify-link" (click)="dialogRef.close()">
-            <mat-icon>phone</mat-icon>
-            Verify phone number
-          </a>
-        }
+        />
+      </div>
+
+      <div class="notif-row">
+        <span class="notif-icon">
+          <mat-icon>phone</mat-icon>
+        </span>
+        <div class="notif-text">
+          <span class="notif-title">Phone number</span>
+          <span class="notif-sub">
+            @if (loadingPreferences) {
+              Checking…
+            } @else if (phoneVerified) {
+              Verified
+            } @else {
+              Not verified yet
+            }
+          </span>
+        </div>
         @if (loadingPreferences) {
-          <mat-spinner diameter="16" />
+          <mat-spinner diameter="20" />
+        } @else if (!phoneVerified) {
+          <a routerLink="/user" class="btn-verify" (click)="dialogRef.close()">
+            <mat-icon>check_circle</mat-icon>
+            Verify
+          </a>
         }
       </div>
     </div>
@@ -59,17 +86,13 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button class="cancel-btn" mat-button (click)="dialogRef.close()">Cancel</button>
-  <button
+  <app-action-button
     class="generate-btn"
-    mat-flat-button
-    color="primary"
-    (click)="onSubmit()"
+    icon="auto_awesome"
     [disabled]="!pulseForm.valid || isSubmitting"
+    [loading]="isSubmitting"
+    (actionClick)="onSubmit()"
   >
-    @if (isSubmitting) {
-      <mat-spinner diameter="20" />
-    } @else {
-      Generate Pulse
-    }
-  </button>
+    Generate Pulse
+  </app-action-button>
 </mat-dialog-actions>

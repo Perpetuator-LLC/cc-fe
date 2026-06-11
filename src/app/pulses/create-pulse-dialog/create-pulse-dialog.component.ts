@@ -16,6 +16,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
 import { A11yModule } from '@angular/cdk/a11y';
 import { DialogDraftService } from '../../shared/services/dialog-draft.service';
+import { ActionButtonComponent } from '../../shared/ui/action-button/action-button.component';
 
 interface PulseDraft {
   description: string;
@@ -42,6 +43,7 @@ interface PulseDraft {
     MatTooltip,
     RouterLink,
     A11yModule,
+    ActionButtonComponent,
   ],
   templateUrl: './create-pulse-dialog.component.html',
   styleUrl: './create-pulse-dialog.component.scss',
