@@ -28,7 +28,21 @@ describe('ExportAccountDialogComponent', () => {
 
   it('closes with the typed confirmation on export', () => {
     fixture.componentInstance.exportConfirmation = 'hunter2';
+    fixture.detectChanges(); // the confirm button is disabled until a confirmation is typed
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.delete-btn')?.click();
     expect(close).toHaveBeenCalledWith('hunter2');
+  });
+
+  it('keeps the confirm button disabled until a confirmation is typed', () => {
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.delete-btn')!;
+    expect(button.disabled).toBeTrue();
+
+    fixture.componentInstance.exportConfirmation = 'hunter2';
+    fixture.detectChanges();
+    expect(button.disabled).toBeFalse();
+
+    fixture.componentInstance.exportConfirmation = '';
+    fixture.detectChanges();
+    expect(button.disabled).toBeTrue();
   });
 });
