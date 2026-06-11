@@ -36,6 +36,10 @@
 # filesystem. Same image + toolchain as here; only source delivery differs
 # (bake vs bind-mount). See docs/dev-container.md.
 
+# Pin the Compose project name: CLI, IDE run configs, and agents all resolve
+# to ONE stack even when compose is invoked with -f from another directory.
+name: cc-fe
+
 x-web-base: &web-base
   build:
     context: .
