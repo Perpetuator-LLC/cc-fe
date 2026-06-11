@@ -108,6 +108,7 @@ body {
     backdrop-filter: blur(4px);
   }
 
+  .create-pulse-dialog-panel.mat-mdc-dialog-panel,
   .schedule-dialog-panel.mat-mdc-dialog-panel {
     @include customTheme.dark-theme-vars();
 
