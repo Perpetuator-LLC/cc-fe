@@ -37,6 +37,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { LoadingService } from '../../layout/loading.service';
 import { RelayPaginatorBase } from '../../utils/relay-paginator';
 import { LabeledSelectComponent, LabeledSelectOption } from '../../shared/labeled-select/labeled-select.component';
+import { ActionButtonComponent } from '../../shared/ui/action-button/action-button.component';
+import { PillComponent, PillVariant } from '../../shared/ui/pill/pill.component';
 
 export interface ColumnOption {
   id: string;
@@ -82,6 +84,8 @@ type PulseConfigWithDisplay = PulseConfig & PulseDisplay;
     FormsModule,
     MatMenuItem,
     LabeledSelectComponent,
+    ActionButtonComponent,
+    PillComponent,
   ],
   templateUrl: './pulses-list.component.html',
   styleUrls: ['./pulses-list.component.scss'],
@@ -271,6 +275,14 @@ export class PulsesListComponent extends RelayPaginatorBase<PulseConfigWithDispl
       default:
         return frequency;
     }
+  }
+
+  protected activeStatusLabel(config: PulseConfig): string {
+    return config.isActive ? 'Active' : 'Inactive';
+  }
+
+  protected activeStatusVariant(config: PulseConfig): PillVariant {
+    return config.isActive ? 'success' : 'surface';
   }
 
   ngOnDestroy() {

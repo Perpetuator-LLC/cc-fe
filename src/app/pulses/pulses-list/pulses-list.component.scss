@@ -56,17 +56,6 @@
     gap: 8px;
     align-items: center;
 
-    button[mat-button] {
-      font-weight: 500;
-      color: var(--md-sys-color-on-surface);
-
-      mat-icon {
-        width: 24px;
-        height: 24px;
-        font-size: 24px;
-      }
-    }
-
     button[mat-icon-button] {
       display: flex;
       align-items: center;
@@ -109,44 +98,6 @@
       overflow: auto;
       display: block;
       white-space: nowrap;
-    }
-  }
-
-  .status-badge {
-    &.enable {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      width: 90px;
-      height: 16px;
-      padding: 4px 8px;
-      border: 1px solid var(--md-extended-color-success-color);
-      border-radius: 4px;
-
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--md-extended-color-success-color);
-
-      background-color: var(--md-extended-color-success-color-container);
-    }
-
-    &.disable {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      width: 90px;
-      height: 16px;
-      padding: 4px 8px;
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: 4px;
-
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--md-sys-color-on-surface-variant);
-
-      background-color: var(--md-sys-color-surface-container-high);
     }
   }
 
@@ -259,26 +210,6 @@
         display: flex;
         gap: 8px;
         align-items: center;
-      }
-
-      .sms-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-
-        width: 28px;
-        height: 28px;
-        border-radius: 4px;
-
-        color: var(--md-sys-color-primary);
-
-        background-color: var(--md-sys-color-primary-container);
-
-        mat-icon {
-          width: 16px;
-          height: 16px;
-          font-size: 16px;
-        }
       }
     }
 

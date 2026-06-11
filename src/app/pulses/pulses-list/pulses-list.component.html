@@ -13,10 +13,7 @@
       <span>{{ pulseConfigs.length }} configurations</span>
     </div>
     <div class="header-actions">
-      <button mat-button color="secondary" type="button" (click)="createPulseConfig()">
-        <mat-icon>add</mat-icon>
-        <span>Create Pulse</span>
-      </button>
+      <app-action-button icon="add" (actionClick)="createPulseConfig()">Create Pulse</app-action-button>
     </div>
   </mat-card-content>
 </mat-card>
@@ -41,10 +38,9 @@
     </div>
 
     <div class="view-toggles">
-      <button mat-button [matMenuTriggerFor]="columnMenu">
-        <mat-icon>view_column</mat-icon>
+      <app-action-button icon="view_column" variant="neutral" [matMenuTriggerFor]="columnMenu">
         Manage Columns
-      </button>
+      </app-action-button>
       <mat-menu #columnMenu="matMenu" class="column-menu">
         <div class="column-menu-content">
           @for (column of allColumns; track column.id) {
@@ -145,9 +141,12 @@
           <ng-container matColumnDef="isActive">
             <th mat-header-cell *matHeaderCellDef>Active</th>
             <td mat-cell *matCellDef="let config">
-              <span class="status-badge" [class.enable]="config.isActive" [class.disable]="!config.isActive">
-                {{ config.isActive ? 'Active' : 'Inactive' }}
-              </span>
+              <app-pill
+                [label]="activeStatusLabel(config)"
+                [variant]="activeStatusVariant(config)"
+                shape="square"
+                size="large"
+              />
             </td>
           </ng-container>
 
@@ -155,10 +154,14 @@
           <ng-container matColumnDef="generate">
             <th mat-header-cell *matHeaderCellDef>Generate</th>
             <td mat-cell *matCellDef="let config">
-              <button mat-button color="primary" (click)="generatePulse(config.uuid)" matTooltip="Generate now">
-                <mat-icon>play_arrow</mat-icon>
+              <app-action-button
+                icon="play_arrow"
+                matTooltip="Generate now"
+                (click)="$event.stopPropagation()"
+                (actionClick)="generatePulse(config.uuid)"
+              >
                 Generate
-              </button>
+              </app-action-button>
             </td>
           </ng-container>
 
@@ -195,13 +198,21 @@
                   <mat-icon class="pulse-icon">vital_signs</mat-icon>
                   <div class="header-badges">
                     @if (config.smsNotificationEnabled) {
-                      <span class="sms-badge" matTooltip="SMS notification enabled">
-                        <mat-icon>sms</mat-icon>
-                      </span>
+                      <app-pill
+                        label="SMS"
+                        variant="primary"
+                        icon="sms"
+                        shape="square"
+                        size="large"
+                        matTooltip="SMS notification enabled"
+                      />
                     }
-                    <span class="status-badge" [class.enable]="config.isActive" [class.disable]="!config.isActive">
-                      {{ config.isActive ? 'Active' : 'Inactive' }}
-                    </span>
+                    <app-pill
+                      [label]="activeStatusLabel(config)"
+                      [variant]="activeStatusVariant(config)"
+                      shape="square"
+                      size="large"
+                    />
                   </div>
                 </div>
                 <h4>{{ config.name }}</h4>
