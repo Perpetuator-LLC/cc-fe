@@ -46,6 +46,7 @@
     "watch": "ng build --watch --configuration development",
     "prepare": "husky install",
     "test": "ng test --watch=false",
+    "test:coverage": "node scripts/check-coverage.js",
     "serve:ssr:capital-copilot-fe": "node dist/capital-copilot-fe/server/server.mjs",
     "lint": "ng lint",
     "lint:scss": "stylelint \"**/*.scss\"",

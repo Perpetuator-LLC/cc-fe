@@ -30,4 +30,6 @@ fi
 yarn lint:md3 --strict
 yarn lint:scss:unused:strict
 
-npm test
+# Full suite with the coverage ratchet (scripts/check-coverage.js minimums) —
+# mirrors the CI test job, which runs the same script headless.
+npm run test:coverage

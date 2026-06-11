@@ -18,6 +18,7 @@
 - `yarn build:prod` — production build with GraphQL docs
 - `yarn test` — unit tests (no watch)
 - `yarn test --include='**/foo.spec.ts'` — single file test
+- `yarn test:coverage` — unit tests + coverage ratchet (scripts/check-coverage.js minimums; raise them as coverage grows, never lower)
 - `yarn lint` — ESLint (TS + HTML)
 - `yarn lint:scss` — Stylelint
 - `yarn lint:all` — all linters + format check

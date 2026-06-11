@@ -137,7 +137,10 @@ jobs:
         run: |
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           echo "CHROME_BIN=$CHROME_BIN"
-          yarn test -- --browsers=ChromeHeadless --watch=false --progress=false
+          # Coverage ratchet: scripts/check-coverage.js runs the suite with
+          # --code-coverage and fails if global coverage drops below the
+          # committed minimums.
+          yarn test:coverage --browsers=ChromeHeadless --progress=false
 
   build:
     name: Build (dev configuration)
