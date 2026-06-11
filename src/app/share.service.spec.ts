@@ -180,17 +180,25 @@ describe('ShareService', () => {
   });
 
   describe('nativeShare / canNativeShare', () => {
-    // navigator.share is a read-only own property in many Chrome builds, so
-    // Object.defineProperty / delete don't reliably toggle it across runs.
-    // These tests stay environment-agnostic: they only check that the
-    // helpers run and return a boolean.
     it('canNativeShare returns a boolean', () => {
       expect(typeof service.canNativeShare()).toBe('boolean');
     });
 
-    it('nativeShare returns a boolean (resolves regardless of availability)', async () => {
-      const result = await service.nativeShare({ url: 'u', title: 't' });
-      expect(typeof result).toBe('boolean');
+    // Calling the real navigator.share in a headed browser opens the OS
+    // share sheet and never settles, so the spec used to time out outside
+    // headless runs. Spy on Navigator.prototype (configurable per spec)
+    // instead of redefining the instance property, which Chrome rejects.
+    it('nativeShare resolves true on success and false on cancel or no support', async () => {
+      if (!('share' in Navigator.prototype)) {
+        expect(await service.nativeShare({ url: 'u', title: 't' })).toBeFalse();
+        return;
+      }
+      const shareSpy = spyOn(Navigator.prototype, 'share').and.resolveTo(undefined);
+      expect(await service.nativeShare({ url: 'u', title: 't' })).toBeTrue();
+      expect(shareSpy).toHaveBeenCalledWith(jasmine.objectContaining({ url: 'u', title: 't' }));
+
+      shareSpy.and.rejectWith(new Error('user cancelled'));
+      expect(await service.nativeShare({ url: 'u', title: 't' })).toBeFalse();
     });
   });
 });
