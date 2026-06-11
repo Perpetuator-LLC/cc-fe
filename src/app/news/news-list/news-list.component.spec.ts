@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -8,7 +8,7 @@ import { provideMockApollo, provideMockOAuthService, provideMockToolbarService }
 import { PodcastsResult, PodcastsService } from '../../podcast/podcasts.service';
 import { RecentlyUsedPodcastsService } from '../../podcast/recently-used-podcasts.service';
 import { Job } from '../../jobs/job.service';
-import { NewsService } from '../news.service';
+import { NewsResult, NewsService } from '../news.service';
 
 describe('NewsComponent', () => {
   let component: NewsListComponent;
@@ -157,5 +157,103 @@ describe('NewsComponent', () => {
       expect(component.podcasts.length).toBe(2);
       expect(component.podcasts.find((p) => p.uuid === 'podcast-3')).toBeUndefined();
     }));
+  });
+
+  describe('selection and filter logic', () => {
+    function makeNews(title: string, source = 'Reuters'): NewsResult {
+      return { title, description: '', summary: '', source } as NewsResult;
+    }
+
+    function seedNews(...items: NewsResult[]): void {
+      component.news = { edges: items.map((node) => ({ node })) } as never;
+      component.filteredNews = items;
+    }
+
+    it('describes the select-all state from the filtered selection', () => {
+      const a = makeNews('Fed raises rates');
+      const b = makeNews('Earnings beat');
+      seedNews(a, b);
+      component.selectedNews = new Set();
+      expect(component.selectAllLabel).toBe('Select all');
+      expect(component.allFilteredSelected).toBeFalse();
+      expect(component.someFilteredSelected).toBeFalse();
+      expect(component.noNewsSelected).toBeTrue();
+
+      component.selectedNews = new Set([a]);
+      expect(component.someFilteredSelected).toBeTrue();
+
+      component.selectedNews = new Set([a, b]);
+      expect(component.allFilteredSelected).toBeTrue();
+      expect(component.selectAllLabel).toBe('Unselect all');
+      expect(component.noNewsSelected).toBeFalse();
+    });
+
+    it('derives the list mode from podcast, loading and data state', () => {
+      component.selectedPodcastUuid = null;
+      expect(component.newsListMode).toBe('noPodcast');
+
+      component.selectedPodcastUuid = 'pod-1';
+      component.loadingNews = true;
+      expect(component.newsListMode).toBe('hidden');
+
+      component.loadingNews = false;
+      component.news = null;
+      expect(component.newsListMode).toBe('noNews');
+
+      seedNews(makeNews('Anything'));
+      expect(component.newsListMode).toBe('list');
+      expect(component.hasAnyNewsLoaded).toBeTrue();
+    });
+
+    it('builds the empty message per loading and data state', () => {
+      component.loadingNews = true;
+      expect(component.emptyNewsMessage).toBeNull();
+
+      component.loadingNews = false;
+      component.news = null;
+      expect(component.emptyNewsMessage).toContain('Fetch News');
+
+      seedNews(makeNews('Something'));
+      expect(component.emptyNewsMessage).toContain('match the filter criteria');
+    });
+
+    it('filters by term, supports negation, and resets on empty input', () => {
+      const fed = makeNews('Fed raises rates');
+      const apple = makeNews('Apple earnings', 'Bloomberg');
+      seedNews(fed, apple);
+
+      component.applyFilter({ value: 'fed' } as unknown as EventTarget);
+      expect(component.filteredNews).toEqual([fed]);
+
+      component.applyFilter({ value: '- fed' } as unknown as EventTarget);
+      expect(component.filteredNews).toEqual([apple]);
+
+      component.applyFilter({ value: 'bloomberg' } as unknown as EventTarget);
+      expect(component.filteredNews).toEqual([apple]);
+
+      component.applyFilter({ value: '' } as unknown as EventTarget);
+      expect(component.filteredNews).toEqual([fed, apple]);
+    });
+
+    it('selects, unselects and toggles across the filtered list', () => {
+      const a = makeNews('One');
+      const b = makeNews('Two');
+      seedNews(a, b);
+
+      component.toggleSelectAll();
+      expect(component.selectedNews.size).toBe(2);
+      component.toggleSelectAll();
+      expect(component.selectedNews.size).toBe(0);
+
+      component.toggleSelection(a);
+      expect(component.selectedNews.has(a)).toBeTrue();
+      component.toggleSelection(a);
+      expect(component.selectedNews.has(a)).toBeFalse();
+
+      component.selectAll();
+      expect(component.selectedNews.size).toBe(2);
+      component.unselectAll();
+      expect(component.selectedNews.size).toBe(0);
+    });
   });
 });
