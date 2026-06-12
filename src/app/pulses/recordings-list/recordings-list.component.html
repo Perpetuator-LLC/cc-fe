@@ -82,40 +82,47 @@
           @for (recording of recordings; track recording.uuid) {
             <div
               class="recording-card"
+              [ngClass]="recording.statusClass"
               (click)="viewRecording(recording)"
               (keydown.enter)="viewRecording(recording)"
               tabindex="0"
               role="button"
             >
-              <div class="recording-header">
-                <div class="recording-title-section">
-                  <span class="recording-title">{{ recording.title }}</span>
-                  <span class="recording-config">{{ recording.configName }}</span>
+              <div class="recording-body">
+                <div class="recording-heading-text">
+                  <h3 class="recording-title">{{ recording.title }}</h3>
+                  <p class="recording-subtitle">{{ recording.configName }}</p>
                 </div>
-                <span class="status-badge" [class]="recording.statusClass">
-                  {{ recording.statusText }}
-                </span>
-              </div>
 
-              <div class="recording-meta">
-                <span class="meta-item">
-                  <mat-icon>timer</mat-icon>
-                  {{ recording.formattedDuration }}
-                </span>
-                <span class="meta-item">
-                  <mat-icon>notes</mat-icon>
-                  {{ recording.wordCount || 0 }} words
-                </span>
-                <span class="meta-item">
-                  <mat-icon>schedule</mat-icon>
-                  {{ recording.formattedTimeAgo }}
-                </span>
-                @if (recording.isValidated) {
-                  <span class="meta-item validated">
-                    <mat-icon>verified</mat-icon>
-                    Validated
+                <div class="recording-chips">
+                  <span class="chip">
+                    <mat-icon>timer</mat-icon>
+                    <span class="meta-value">{{ recording.formattedDuration }}</span>
                   </span>
-                }
+                  <span class="chip">
+                    <mat-icon>notes</mat-icon>
+                    <span class="meta-value">{{ recording.wordCount || 0 }}</span>
+                    words
+                  </span>
+                  <span class="chip">
+                    <mat-icon>schedule</mat-icon>
+                    {{ recording.formattedTimeAgo }}
+                  </span>
+                  @if (recording.isValidated) {
+                    <span class="chip chip--validated">
+                      <mat-icon>verified</mat-icon>
+                      Validated
+                    </span>
+                  } @else {
+                    <span class="chip chip--unvalidated">
+                      <mat-icon>warning</mat-icon>
+                      Not Validated
+                    </span>
+                  }
+                  <span class="status-pill" [ngClass]="recording.statusClass">
+                    {{ recording.statusText }}
+                  </span>
+                </div>
               </div>
 
               <div
