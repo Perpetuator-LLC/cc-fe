@@ -4,7 +4,6 @@ import { MatCard, MatCardContent } from '@angular/material/card';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import {
@@ -21,11 +20,12 @@ import { NewsService } from '../../news/news.service';
 import { JobService, Job } from '../../jobs/job.service';
 import { LoadingService } from '../../layout/loading.service';
 import { PodcastsResult } from '../../podcast/podcasts.service';
+import { ActionButtonComponent } from '../../shared/ui/action-button/action-button.component';
 
 @Component({
   selector: 'app-episodes-list',
   standalone: true,
-  imports: [MatButton, MatCard, MatIcon, MatCardContent, CommonModule, EpisodesTableComponent],
+  imports: [MatCard, MatIcon, MatCardContent, CommonModule, EpisodesTableComponent, ActionButtonComponent],
   templateUrl: './episodes-list.component.html',
   styleUrls: ['./episodes-list.component.scss'],
 })

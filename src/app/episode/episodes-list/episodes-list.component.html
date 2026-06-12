@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2025 Perpetuator LLC -->
+<!-- Copyright (c) 2025-2026 Perpetuator LLC -->
 <ng-template #toolbarTemplate>
   <span class="page-title"
     ><mat-icon>graphic_eq</mat-icon>Podcasts <span>> </span> <span class="page-title-secondary">Episodes</span></span
@@ -10,10 +10,9 @@
     <div class="title">
       <h3>All Episodes</h3>
     </div>
-    <button mat-button color="primary" type="button" (click)="openCreateEpisodeDialog()">
-      <mat-icon>add</mat-icon>
+    <app-action-button icon="add" variant="primary" (actionClick)="openCreateEpisodeDialog()">
       Create New Episode
-    </button>
+    </app-action-button>
   </mat-card-content>
 </mat-card>
 
