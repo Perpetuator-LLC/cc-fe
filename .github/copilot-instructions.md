@@ -588,6 +588,20 @@ button {
 
 ## MD3 Theming Architecture
 
+### Theme Cleanup Strategy
+The app has custom SCSS layered on top of Angular Material in many feature components. A theme change will not automatically fix those custom surfaces if components chose their own `surface-container-*`, border, or text tokens.
+
+Before editing a component-specific SCSS file for a color issue:
+1. Check whether the target is a real Material component. If yes, prefer Angular Material override mixins in `src/styles.scss` such as `mat.dialog-overrides`, `mat.form-field-overrides`, `mat.tabs-overrides`, etc.
+2. If the same custom surface pattern appears in multiple components, create or use shared app-level semantic tokens/mixins instead of changing each component separately.
+3. Only use local component SCSS when the styling is genuinely unique to that component.
+4. When a Material override token does not exist, a single global rule may be acceptable, but keep it centralized and documented. Do not duplicate it across dialog/card/form components.
+
+Surface token intent:
+- Dialog shell: use the centralized Material dialog override in `src/styles.scss`.
+- Repeated cards/panels: prefer shared app semantic tokens or mixins before choosing raw `--md-sys-color-surface-container-*` values locally.
+- Borders: use `var(--md-sys-color-outline-variant)` unless a stronger state color is required.
+
 ### Theme Definition (styles.scss - SINGLE SOURCE OF TRUTH)
 ```scss
 @use '@angular/material' as mat;
@@ -1213,4 +1227,3 @@ grep -r 'style="' src/app/**/*.html
 ```
 
 **Migration Status:** 83% Complete (Phase 1-3: ✅ Done | Phase 4-5: ⏳ In Progress)
-
