@@ -88,6 +88,7 @@ export class EpisodesListComponent implements OnInit, OnDestroy {
   openCreateEpisodeDialog() {
     const dialogRef = this.dialog.open(CreateEpisodeDialogComponent, {
       width: '600px',
+      panelClass: 'create-episode-dialog-panel',
       data: {
         podcasts: this.podcasts,
       },

@@ -211,8 +211,9 @@
     align-items: center;
     justify-content: space-between;
 
+    box-sizing: border-box;
     width: 100%;
-    min-width: 100%;
+    min-width: 0;
     padding: 16px 20px;
   }
 

@@ -146,6 +146,11 @@ body {
     background: color-mix(in srgb, var(--md-sys-color-scrim) 66%, transparent);
     backdrop-filter: blur(3px);
   }
+
+  .create-episode-dialog-panel .episode-type-btn .mdc-button__label {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 body.light {

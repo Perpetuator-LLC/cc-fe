@@ -45,6 +45,7 @@
         <div class="episode-type-list">
           <button
             mat-flat-button
+            type="button"
             class="episode-type-btn blank-type"
             [disabled]="!selectedPodcast"
             (click)="createEpisode('blank')"
@@ -63,6 +64,7 @@
 
           <button
             mat-flat-button
+            type="button"
             class="episode-type-btn news-type"
             [disabled]="!selectedPodcast"
             (click)="createEpisode('news')"
@@ -81,6 +83,7 @@
 
           <button
             mat-flat-button
+            type="button"
             class="episode-type-btn research-type"
             [disabled]="!selectedPodcast"
             (click)="createEpisode('research')"
