@@ -41,6 +41,12 @@
 
 // Filters Card
 .filters-card {
+  background: transparent;
+
+  mat-card-content {
+    padding: 0;
+  }
+
   .filters-row {
     display: flex;
     flex-wrap: wrap;
