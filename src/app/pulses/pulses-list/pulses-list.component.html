@@ -13,7 +13,9 @@
       <span>{{ pulseConfigs.length }} configurations</span>
     </div>
     <div class="header-actions">
-      <app-action-button icon="add" (actionClick)="createPulseConfig()">Create Pulse</app-action-button>
+      <app-action-button icon="launch" variant="tertiary" (actionClick)="createPulseConfig()"
+        >Create Pulse</app-action-button
+      >
     </div>
   </mat-card-content>
 </mat-card>
