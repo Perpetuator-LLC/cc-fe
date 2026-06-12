@@ -840,6 +840,23 @@ body .toolbar-container {
     )
   );
 
+  @include mat.slider-overrides(
+    (
+      active-track-color: var(--p-primary),
+      focus-handle-color: var(--p-primary),
+      focus-state-layer-color: color-mix(in srgb, var(--p-primary) 20%, transparent),
+      handle-color: var(--p-primary),
+      hover-handle-color: var(--p-primary),
+      hover-state-layer-color: color-mix(in srgb, var(--p-primary) 12%, transparent),
+      inactive-track-color: var(--md-sys-color-outline-variant),
+      label-container-color: var(--p-primary),
+      label-label-text-color: var(--p-on-primary),
+      ripple-color: var(--p-primary),
+      with-overlap-handle-outline-color: var(--p-on-primary),
+      with-tick-marks-active-container-color: var(--p-on-primary),
+    )
+  );
+
   @include mat.tabs-overrides(
     (
       active-indicator-color: var(--md-sys-color-primary),
