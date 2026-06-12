@@ -44,7 +44,7 @@
   .filters-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 8px;
     align-items: center;
 
     @include mixins.mobile() {
@@ -55,11 +55,15 @@
 
   .search-field {
     flex: 1;
-    min-width: 200px;
+    min-width: 300px;
+
+    @include mixins.mobile() {
+      min-width: 100%;
+    }
   }
 
   .filter-field {
-    min-width: 160px;
+    min-width: 216px;
 
     @include mixins.mobile() {
       width: 100%;
