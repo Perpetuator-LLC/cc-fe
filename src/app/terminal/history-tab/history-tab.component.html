@@ -2,7 +2,7 @@
 <div class="history-tab">
   <div class="history-controls">
     <div class="history-count">{{ rows.length }} of {{ totalCount }} commands</div>
-    <mat-slide-toggle [checked]="showDuplicates" (change)="showDuplicatesChange.emit($event.checked)" color="primary">
+    <mat-slide-toggle [checked]="showDuplicates" (change)="showDuplicatesChange.emit($event.checked)">
       Show all executions
     </mat-slide-toggle>
   </div>

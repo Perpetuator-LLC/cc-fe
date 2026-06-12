@@ -28,11 +28,7 @@
                 <p class="schedule-type">Scheduled Release</p>
               </div>
               <div class="schedule-actions">
-                <mat-slide-toggle
-                  [checked]="schedule.enabled"
-                  (change)="onToggle(schedule, $event.checked)"
-                  color="primary"
-                />
+                <mat-slide-toggle [checked]="schedule.enabled" (change)="onToggle(schedule, $event.checked)" />
                 <button mat-icon-button [matMenuTriggerFor]="scheduleMenu">
                   <mat-icon>more_vert</mat-icon>
                 </button>

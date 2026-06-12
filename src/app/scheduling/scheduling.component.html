@@ -75,11 +75,7 @@
         <ng-container matColumnDef="enabled">
           <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let schedule">
-            <mat-slide-toggle
-              [checked]="schedule.enabled"
-              (change)="toggleSchedule(schedule, $event.checked)"
-              color="primary"
-            />
+            <mat-slide-toggle [checked]="schedule.enabled" (change)="toggleSchedule(schedule, $event.checked)" />
           </td>
         </ng-container>
 
