@@ -1,50 +1,106 @@
 <!-- Copyright (c) 2025-2026 Perpetuator LLC -->
-<h2 mat-dialog-title>Create New Episode</h2>
-<mat-dialog-content>
-  <p class="dialog-description">Select a podcast to create an episode for:</p>
-  <mat-form-field class="full-width">
-    <mat-label>Select Podcast</mat-label>
-    <mat-select [(value)]="selectedPodcast" placeholder="Choose a podcast">
-      @for (podcast of data.podcasts; track podcast.uuid) {
-        <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+<mat-dialog-content class="episode-modal-body">
+  <div class="episode-flow">
+    <section class="flow-step" [class.step-complete]="selectedPodcast">
+      <div class="step-rail" aria-hidden="true">
+        <span class="step-number">
+          @if (selectedPodcast) {
+            <mat-icon>check</mat-icon>
+          } @else {
+            1
+          }
+        </span>
+        <span class="step-line" [class.active]="selectedPodcast"></span>
+      </div>
+      <div class="step-main">
+        <h3 class="step-label">Select podcast</h3>
+        <p class="step-caption">Choose which podcast this episode belongs to.</p>
 
-  <div class="episode-type-section">
-    <p class="section-label">Choose episode type:</p>
-    <div class="episode-type-buttons">
-      <button mat-flat-button class="episode-type-btn" [disabled]="!selectedPodcast" (click)="createEpisode('blank')">
-        <mat-icon>article</mat-icon>
-        <div class="btn-content">
-          <span class="btn-title">Blank Episode</span>
-          <span class="btn-description">Start with empty content</span>
-        </div>
-      </button>
+        <mat-form-field appearance="outline" class="podcast-field">
+          <mat-label>Select Podcast</mat-label>
+          <mat-select [(value)]="selectedPodcast" placeholder="Choose a podcast" aria-label="Select podcast">
+            @for (podcast of data.podcasts; track podcast.uuid) {
+              <mat-option [value]="podcast.uuid">{{ podcast.name }}</mat-option>
+            } @empty {
+              <mat-option disabled>No podcasts available</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </section>
 
-      <button mat-flat-button class="episode-type-btn" [disabled]="!selectedPodcast" (click)="createEpisode('news')">
-        <mat-icon>newspaper</mat-icon>
-        <div class="btn-content">
-          <span class="btn-title">News Episode</span>
-          <span class="btn-description">Create from latest news</span>
-        </div>
-      </button>
+    <section class="flow-step" [class.unlocked]="selectedPodcast">
+      <div class="step-rail" aria-hidden="true">
+        <span class="step-number" [class.locked]="!selectedPodcast">2</span>
+      </div>
+      <div class="step-main">
+        <h3 class="step-label">Choose episode type</h3>
+        @if (!selectedPodcast) {
+          <p class="lock-hint" aria-live="polite">
+            <mat-icon>lock</mat-icon>
+            Select a podcast above to choose a type.
+          </p>
+        }
 
-      <button
-        mat-flat-button
-        class="episode-type-btn"
-        [disabled]="!selectedPodcast"
-        (click)="createEpisode('research')"
-      >
-        <mat-icon>science</mat-icon>
-        <div class="btn-content">
-          <span class="btn-title">Research Episode</span>
-          <span class="btn-description">Create from research topic</span>
+        <div class="episode-type-list">
+          <button
+            mat-flat-button
+            class="episode-type-btn blank-type"
+            [disabled]="!selectedPodcast"
+            (click)="createEpisode('blank')"
+          >
+            <span class="episode-type-inner">
+              <span class="type-icon">
+                <mat-icon>article</mat-icon>
+              </span>
+              <span class="btn-content">
+                <span class="btn-title">Blank Episode</span>
+                <span class="btn-description">Start with empty content</span>
+              </span>
+              <mat-icon class="go-icon">arrow_forward</mat-icon>
+            </span>
+          </button>
+
+          <button
+            mat-flat-button
+            class="episode-type-btn news-type"
+            [disabled]="!selectedPodcast"
+            (click)="createEpisode('news')"
+          >
+            <span class="episode-type-inner">
+              <span class="type-icon">
+                <mat-icon>newspaper</mat-icon>
+              </span>
+              <span class="btn-content">
+                <span class="btn-title">News Episode</span>
+                <span class="btn-description">Create from latest news</span>
+              </span>
+              <mat-icon class="go-icon">arrow_forward</mat-icon>
+            </span>
+          </button>
+
+          <button
+            mat-flat-button
+            class="episode-type-btn research-type"
+            [disabled]="!selectedPodcast"
+            (click)="createEpisode('research')"
+          >
+            <span class="episode-type-inner">
+              <span class="type-icon">
+                <mat-icon>science</mat-icon>
+              </span>
+              <span class="btn-content">
+                <span class="btn-title">Research Episode</span>
+                <span class="btn-description">Create from research topic</span>
+              </span>
+              <mat-icon class="go-icon">arrow_forward</mat-icon>
+            </span>
+          </button>
         </div>
-      </button>
-    </div>
+      </div>
+    </section>
   </div>
 </mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
+<mat-dialog-actions align="end" class="episode-modal-actions">
+  <button mat-button type="button" class="cancel-btn" (click)="onCancel()">Cancel</button>
 </mat-dialog-actions>
