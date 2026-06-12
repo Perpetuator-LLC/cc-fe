@@ -827,6 +827,19 @@ body .toolbar-container {
     )
   );
 
+  @include mat.checkbox-overrides(
+    (
+      selected-checkmark-color: var(--p-on-primary),
+      selected-focus-icon-color: var(--md-sys-color-primary),
+      selected-focus-state-layer-color: var(--md-sys-color-primary),
+      selected-hover-icon-color: var(--md-sys-color-primary),
+      selected-hover-state-layer-color: var(--md-sys-color-primary),
+      selected-icon-color: var(--md-sys-color-primary),
+      selected-pressed-icon-color: var(--md-sys-color-primary),
+      selected-pressed-state-layer-color: var(--md-sys-color-primary),
+    )
+  );
+
   @include mat.tabs-overrides(
     (
       active-indicator-color: var(--md-sys-color-primary),
