@@ -13,8 +13,8 @@ html {
   @include mat.all-component-themes(customTheme.$dark-theme);
   @include customTheme.dark-theme-vars();
 
-  // App-wide themed filled form fields (blue label, soft border, no underline,
-  // surface-container background). Outline-appearance fields are unaffected.
+  // App-wide themed form fields (blue label, soft border, no underline where
+  // applicable, surface-container-low background).
   @include mixins.themed-form-fields();
 }
 
@@ -800,6 +800,16 @@ body .toolbar-container {
     (
       container-height: 48px,
       container-vertical-padding: 12px,
+      filled-container-color: var(--md-sys-color-surface-container-low),
+      filled-focus-label-text-color: var(--md-sys-color-primary),
+      filled-hover-label-text-color: var(--md-sys-color-primary),
+      filled-label-text-color: var(--md-sys-color-primary),
+      outlined-focus-label-text-color: var(--md-sys-color-primary),
+      outlined-focus-outline-color: var(--md-sys-color-primary),
+      outlined-hover-label-text-color: var(--md-sys-color-primary),
+      outlined-hover-outline-color: var(--md-sys-color-primary),
+      outlined-label-text-color: var(--md-sys-color-primary),
+      outlined-outline-color: var(--md-sys-color-primary),
       filled-with-label-container-padding-top: 20px,
       filled-with-label-container-padding-bottom: 0,
     )

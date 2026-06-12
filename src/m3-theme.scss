@@ -121,7 +121,7 @@ $dark-theme: mat.define-theme(
 
 @mixin dark-theme-vars {
   --p-primary: #3b82f6;
-  --p-primary-bright: #60a5fa;
+  --p-primary-bright: #3b82f6;
   --p-on-primary: #ffffff;
   --p-secondary: #22d3ee;
   --p-on-secondary: #001f25;
@@ -147,7 +147,7 @@ $dark-theme: mat.define-theme(
   --p-outline: #2f4159;
   --p-outline-variant: #25344a;
 
-  --md-sys-color-primary: var(--p-primary-bright);
+  --md-sys-color-primary: var(--p-primary);
   --md-sys-color-on-primary: #{get-color($primary-palette, 20)};
   --md-sys-color-primary-container: #{get-color($primary-palette, 30)};
   --md-sys-color-on-primary-container: #{get-color($primary-palette, 90)};
@@ -205,8 +205,8 @@ $dark-theme: mat.define-theme(
 }
 
 @mixin light-theme-vars {
-  --p-primary: #2563eb;
-  --p-primary-bright: #2563eb;
+  --p-primary: #3b82f6;
+  --p-primary-bright: #3b82f6;
   --p-on-primary: #ffffff;
   --p-secondary: #0d9488;
   --p-on-secondary: #ffffff;
