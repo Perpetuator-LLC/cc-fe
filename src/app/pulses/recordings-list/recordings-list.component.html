@@ -9,10 +9,7 @@
           <span class="count">{{ totalCount }} total</span>
         </div>
         <div class="header-actions">
-          <button mat-flat-button color="primary" (click)="createRecording()">
-            <mat-icon>mic</mat-icon>
-            Create Recording
-          </button>
+          <app-action-button (actionClick)="createRecording()"> Create Recording </app-action-button>
         </div>
       </div>
     </mat-card-content>
@@ -129,13 +126,14 @@
                 role="group"
               >
                 @if (recording.audioUrl && (recording.status === 'READY' || recording.status === 'DELIVERED')) {
-                  <button mat-flat-button color="primary" (click)="playRecording(recording)">
-                    <mat-icon>play_arrow</mat-icon>
+                  <app-action-button
+                    icon="play_arrow"
+                    variant="tertiary"
+                    [time]="recording.audioDurationSeconds ? recording.formattedDuration : null"
+                    (actionClick)="playRecording(recording)"
+                  >
                     Play
-                    @if (recording.audioDurationSeconds) {
-                      <span class="duration-hint">{{ recording.formattedDuration }}</span>
-                    }
-                  </button>
+                  </app-action-button>
                   <button mat-icon-button [matMenuTriggerFor]="recordingMenu" matTooltip="More options">
                     <mat-icon>more_vert</mat-icon>
                   </button>

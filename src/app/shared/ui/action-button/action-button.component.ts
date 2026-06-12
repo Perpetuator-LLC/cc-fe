@@ -26,6 +26,7 @@ export class ActionButtonComponent {
   @Input() disabled = false;
   @Input() icon = 'play_arrow';
   @Input() loading = false;
+  @Input() time: string | null = null;
   /** Color variant. Defaults to 'primary'. */
   @Input() variant: ActionButtonVariant = 'primary';
 

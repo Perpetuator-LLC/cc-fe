@@ -14,5 +14,8 @@
       <mat-icon>{{ icon }}</mat-icon>
     }
     <ng-content />
+    @if (time) {
+      <span class="button-time">{{ time }}</span>
+    }
   </span>
 </button>

@@ -31,6 +31,7 @@ import {
   CreateRecordingDialogData,
   CreateRecordingDialogResult,
 } from '../create-recording-dialog/create-recording-dialog.component';
+import { ActionButtonComponent } from '../../shared/ui/action-button/action-button.component';
 
 @Component({
   selector: 'app-recordings-list',
@@ -41,6 +42,7 @@ import {
     MatCardModule,
     MatIconModule,
     MatButtonModule,
+    ActionButtonComponent,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
