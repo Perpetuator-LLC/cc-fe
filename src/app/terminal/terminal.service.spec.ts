@@ -380,4 +380,87 @@ describe('TerminalService', () => {
       expect(service.commands$).toBeDefined();
     });
   });
+
+  describe('GraphQL loaders', () => {
+    it('fetchQuote unwraps the quote and falls back to null on errors', (done) => {
+      apollo.query.and.returnValue(of({ data: { quote: { symbol: 'AAPL' } } }) as never);
+      service.fetchQuote('AAPL').subscribe((result) => {
+        expect(result?.symbol).toBe('AAPL');
+
+        spyOn(console, 'warn');
+        apollo.query.and.returnValue(throwError(() => new Error('offline')));
+        service.fetchQuote('AAPL').subscribe((fallback) => {
+          expect(fallback).toBeNull();
+          done();
+        });
+      });
+    });
+
+    it('loadCommands caches results and recovers with an empty list', (done) => {
+      apollo.query.and.returnValue(of({ data: { commands: [{ name: 'CHART' }] } }) as never);
+      service.loadCommands('charting').subscribe((result) => {
+        expect(result.length).toBe(1);
+        expect(result[0].name).toBe('CHART');
+
+        apollo.query.and.returnValue(throwError(() => new Error('offline')));
+        service.loadCommands().subscribe((fallback) => {
+          expect(fallback).toEqual([]);
+          done();
+        });
+      });
+    });
+
+    it('getCommand unwraps a single command', (done) => {
+      apollo.query.and.returnValue(of({ data: { command: { name: 'HP' } } }) as never);
+      service.getCommand('HP').subscribe((command) => {
+        expect(command.name).toBe('HP');
+        done();
+      });
+    });
+
+    it('loadTerminalHints caches the first result and serves it thereafter', (done) => {
+      const hints = {
+        quickExamples: [],
+        placeholderText: 'p',
+        emptyStateMessage: 'e',
+        dashboardHint: '',
+        chartSuggestion: '',
+      };
+      apollo.query.and.returnValue(of({ data: { terminalHints: hints } }) as never);
+      service.loadTerminalHints().subscribe((first) => {
+        expect(first.placeholderText).toBe('p');
+        apollo.query.calls.reset();
+        service.loadTerminalHints().subscribe((cached) => {
+          expect(cached).toEqual(first);
+          expect(apollo.query).not.toHaveBeenCalled();
+          done();
+        });
+      });
+    });
+
+    it('loadTerminalHints falls back to safe defaults on failure', (done) => {
+      apollo.query.and.returnValue(throwError(() => new Error('offline')));
+      service.loadTerminalHints().subscribe((hints) => {
+        expect(hints.placeholderText).toContain('Type a command');
+        expect(hints.quickExamples).toEqual([]);
+        done();
+      });
+    });
+
+    it('loadTerminalHelp unwraps help and falls back on failure', (done) => {
+      apollo.query.and.returnValue(
+        of({ data: { terminalHelp: { overview: 'o', categories: [], aiNote: 'n' } } }) as never,
+      );
+      service.loadTerminalHelp().subscribe((result) => {
+        expect(result.overview).toBe('o');
+
+        apollo.query.and.returnValue(throwError(() => new Error('offline')));
+        service.loadTerminalHelp().subscribe((fallback) => {
+          expect(fallback.overview).toBe('');
+          expect(fallback.aiNote).toContain('natural language');
+          done();
+        });
+      });
+    });
+  });
 });

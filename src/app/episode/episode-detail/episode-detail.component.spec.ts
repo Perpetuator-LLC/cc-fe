@@ -3,17 +3,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule, FormArray, FormGroup, FormControl } from '@angular/forms';
 import { EpisodeDetailComponent } from './episode-detail.component';
 import { ActivatedRoute } from '@angular/router';
-import { EpisodeService } from '../episode.service';
+import { EpisodeService, EpisodeVersion } from '../episode.service';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MessageService } from '../../message.service';
-import { JobService } from '../../jobs/job.service';
+import { Job, JobService } from '../../jobs/job.service';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { SchedulingService } from '../../scheduling.service';
 import { LoadingService } from '../../layout/loading.service';
@@ -557,6 +557,146 @@ describe('EpisodeDetailComponent', () => {
 
       // Should NOT show live audio section (current matches live)
       expect(component.hasLiveAudioFromDifferentVersion).toBe(false);
+    });
+  });
+
+  describe('version and validation helpers', () => {
+    function makeVersion(over: Partial<EpisodeVersion> = {}): EpisodeVersion {
+      return {
+        uuid: 'v-1',
+        versionNumber: 1,
+        title: 'V1',
+        description: '',
+        content: 'one two three',
+        validatedCompliance: true,
+        validatedFacts: true,
+        validatedLength: true,
+        changeType: 'created',
+        ...over,
+      } as EpisodeVersion;
+    }
+
+    it('maps change types to labels and icons with fallbacks', () => {
+      expect(component.getChangeTypeLabel('created')).toBe('Created');
+      expect(component.getChangeTypeLabel('regenerated')).toBe('Regenerated');
+      expect(component.getChangeTypeLabel('mystery')).toBe('mystery');
+      expect(component.getChangeTypeIcon('validated')).toBe('verified');
+      expect(component.getChangeTypeIcon('edited')).toBe('edit');
+      expect(component.getChangeTypeIcon('mystery')).toBe('help');
+    });
+
+    it('summarizes version validation state', () => {
+      expect(component.isVersionFullyValidated(makeVersion())).toBeTrue();
+      const partial = makeVersion({ validatedFacts: false });
+      expect(component.isVersionFullyValidated(partial)).toBeFalse();
+      const tooltip = component.getValidationTooltip(partial);
+      expect(tooltip).toContain('Not Validated');
+      expect(tooltip).toContain('Facts: ✗');
+      expect(tooltip).toContain('Length: ✓');
+    });
+
+    it('resolves the current version validation from the form', () => {
+      component.episodeForm.get('currentVersionNumber')?.setValue(null);
+      expect(component.isCurrentVersionFullyValidated).toBeFalse();
+      expect(component.currentVersionValidationTooltip).toBe('No version information');
+
+      component.episodeForm.get('currentVersionNumber')?.setValue(2);
+      component.episodeForm.setControl('versions', new FormControl([makeVersion({ versionNumber: 1 })]));
+      expect(component.isCurrentVersionFullyValidated).toBeFalse();
+      expect(component.currentVersionValidationTooltip).toBe('Current version not found');
+
+      component.episodeForm.setControl('versions', new FormControl([makeVersion({ versionNumber: 2 })]));
+      expect(component.isCurrentVersionFullyValidated).toBeTrue();
+      expect(component.currentVersionValidationTooltip).toContain('Validated');
+    });
+
+    it('counts words and characters per version', () => {
+      const version = makeVersion({ content: 'alpha beta gamma' });
+      expect(component.getVersionWordCount(version)).toBe(3);
+      expect(component.getVersionCharCount(version)).toBe(16);
+    });
+
+    it('filters the current version out of history', () => {
+      component.episodeForm.get('currentVersionNumber')?.setValue(2);
+      component.episodeForm.setControl(
+        'versions',
+        new FormControl([makeVersion({ versionNumber: 1 }), makeVersion({ versionNumber: 2 })]),
+      );
+      const history = component.historyVersions;
+      expect(history.length).toBe(1);
+      expect(history[0].versionNumber).toBe(1);
+    });
+
+    it('formats job kinds through the shared label helper', () => {
+      expect(component.formatJobKind('PUBLISH_EPISODE_AUDIO').length).toBeGreaterThan(0);
+      expect(component.formatJobKind('SOME_NEW_KIND')).toBe('Some New Kind');
+    });
+  });
+
+  describe('audio and navigation guards', () => {
+    it('guards deactivation behind a confirm when there are unsaved changes', () => {
+      component.hasUnsavedChanges = false;
+      expect(component.canDeactivate()).toBeTrue();
+
+      component.hasUnsavedChanges = true;
+      const confirmSpy = spyOn(window, 'confirm').and.returnValue(false);
+      expect(component.canDeactivate()).toBeFalse();
+      confirmSpy.and.returnValue(true);
+      expect(component.canDeactivate()).toBeTrue();
+    });
+
+    it('disables audio generation for unsaved changes or generated audio', () => {
+      component.hasUnsavedChanges = true;
+      expect(component.isGenerateAudioDisabled).toBeTrue();
+
+      component.hasUnsavedChanges = false;
+      component.audioSrc = null;
+      expect(component.isGenerateAudioDisabled).toBeFalse();
+
+      component.audioSrc = 'https://cdn.test/a.mp3';
+      component.audioIsCustomUpload = true;
+      expect(component.isGenerateAudioDisabled).toBeFalse();
+
+      component.audioIsCustomUpload = false;
+      expect(component.isGenerateAudioDisabled).toBeTrue();
+    });
+
+    it('describes the update and generate buttons per state', () => {
+      component.hasUnsavedChanges = true;
+      expect(component.updateButtonTooltip).toBe('Save your changes');
+      expect(component.generateAudioTooltip).toContain('unsaved changes');
+
+      component.hasUnsavedChanges = false;
+      expect(component.updateButtonTooltip).toBe('No changes to save');
+      component.audioSrc = 'https://cdn.test/a.mp3';
+      component.audioIsCustomUpload = true;
+      expect(component.generateAudioTooltip).toContain('replace custom uploaded audio');
+      component.audioIsCustomUpload = false;
+      expect(component.generateAudioTooltip).toBe('Audio already exists for current version');
+      component.audioSrc = null;
+      expect(component.generateAudioTooltip).toBe('Generate audio for this episode');
+      expect(component.hasCurrentVersionAudio).toBeFalse();
+    });
+
+    it('switches between grid and list views', () => {
+      component.toggleView(true);
+      expect(component.isGridView).toBeTrue();
+      component.toggleView(false);
+      expect(component.isGridView).toBeFalse();
+    });
+
+    it('starts manual validation and reports success or failure', () => {
+      const episodeService = TestBed.inject(EpisodeService) as jasmine.SpyObj<EpisodeService>;
+      const jobService = TestBed.inject(JobService) as jasmine.SpyObj<JobService>;
+      const job = { uuid: 'job-1' } as Job;
+      episodeService.validateEpisodeManual.and.returnValue(of({ success: true, message: 'ok', job }));
+      component.validateEpisode();
+      expect(jobService.addJob).toHaveBeenCalledWith(job);
+      expect(messageService.success).toHaveBeenCalled();
+
+      episodeService.validateEpisodeManual.and.returnValue(throwError(() => new Error('backend down')));
+      component.validateEpisode();
+      expect(messageService.error).toHaveBeenCalledWith('Failed to start validation: backend down');
     });
   });
 });

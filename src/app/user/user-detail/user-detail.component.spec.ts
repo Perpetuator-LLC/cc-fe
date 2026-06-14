@@ -1,5 +1,6 @@
-// Copyright (c) 2025 Perpetuator LLC
+// Copyright (c) 2025-2026 Perpetuator LLC
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormControl, Validators } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -49,5 +50,40 @@ describe('UserDetailComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('passwordMatchValidator', () => {
+    it('flags a mismatch on the confirm control and returns the error', () => {
+      const form = component.changePasswordForm;
+      form.get('newPassword')?.setValue('password123');
+      form.get('confirmPassword')?.setValue('different');
+      const result = component.passwordMatchValidator(form);
+      expect(result).toEqual({ mismatch: true });
+      expect(form.get('confirmPassword')?.hasError('mismatch')).toBeTrue();
+    });
+
+    it('clears the error when the passwords match', () => {
+      const form = component.changePasswordForm;
+      form.get('newPassword')?.setValue('password123');
+      form.get('confirmPassword')?.setValue('password123');
+      expect(component.passwordMatchValidator(form)).toBeNull();
+      expect(form.get('confirmPassword')?.hasError('mismatch')).toBeFalse();
+    });
+  });
+
+  describe('phone-dependent SMS state', () => {
+    it('treats the phone as invalid and shows guidance while no valid control is set', () => {
+      expect(component.isPhoneNumberValid()).toBeFalse();
+      expect(component.getLowBalanceSmsTooltip()).toContain('add a valid phone number');
+    });
+
+    it('treats a non-empty valid phone control as valid with no tooltip', () => {
+      component.userDetailForm.addControl(
+        'phoneNumber',
+        new FormControl('+15551234567', Validators.pattern(/^\+?[1-9]\d{1,14}$/)),
+      );
+      expect(component.isPhoneNumberValid()).toBeTrue();
+      expect(component.getLowBalanceSmsTooltip()).toBe('');
+    });
   });
 });

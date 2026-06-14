@@ -10,8 +10,8 @@ import { BehaviorSubject, of, throwError } from 'rxjs';
 import { DeletePodcastDialogComponent } from './delete-podcast-dialog/delete-podcast-dialog.component';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient } from '@angular/common/http';
-import { TeamsService } from '../../team/teams.service';
-import { VoicesService } from '../voices.service';
+import { TeamsResult, TeamsService } from '../../team/teams.service';
+import { Voice, VoicesService } from '../voices.service';
 import { UserService } from '../../user/user.service';
 import { ToolbarService } from '../../layout/toolbar.service';
 import { Clipboard } from '@angular/cdk/clipboard';
@@ -314,6 +314,68 @@ describe('PodcastDetailComponentComponent', () => {
         expect(mockRouter.navigate).not.toHaveBeenCalled();
         done();
       }, 100);
+    });
+  });
+
+  describe('voice and team helpers', () => {
+    function makeVoice(over: Partial<Voice> = {}): Voice {
+      return {
+        uuid: 'voice-1',
+        displayName: 'Ava',
+        creditsPerMillionChar: 15000,
+        model: 'OPENAI_TTS_1',
+        ...over,
+      } as Voice;
+    }
+
+    it('builds the voice display name with CPM and tier fallbacks', () => {
+      const label = component.getVoiceDisplayName(makeVoice());
+      expect(label).toContain('Ava');
+      expect(label).toContain('(15 CPM)');
+      expect(component.getVoiceDisplayName(makeVoice({ displayName: null }))).toContain('Name not set');
+    });
+
+    it('compares voices and teams by uuid', () => {
+      expect(component.compareVoices(makeVoice(), makeVoice())).toBeTrue();
+      expect(component.compareVoices(makeVoice(), makeVoice({ uuid: 'other' }))).toBeFalse();
+      expect(component.compareVoices(null, makeVoice())).toBeFalse();
+
+      const team = { uuid: 't1' } as TeamsResult;
+      expect(component.compareTeams(team, { uuid: 't1' } as TeamsResult)).toBeTrue();
+      expect(component.compareTeams(team, { uuid: 't2' } as TeamsResult)).toBeFalse();
+      expect(component.compareTeams(null, team)).toBeFalse();
+    });
+
+    it('displays a voice or an empty string', () => {
+      expect(component.displayVoice(null)).toBe('');
+      expect(component.displayVoice(makeVoice())).toContain('Ava');
+    });
+
+    it('marks the selected voice from the form value', () => {
+      component.podcastForm.get('voice')?.setValue(makeVoice());
+      expect(component.isVoiceSelected(makeVoice())).toBeTrue();
+      expect(component.isVoiceSelected(makeVoice({ uuid: 'other' }))).toBeFalse();
+    });
+  });
+
+  describe('target words validation', () => {
+    it('derives the minimum from intro and outro word counts', () => {
+      component.podcastForm.patchValue({ intro: '', outro: '' });
+      const base = component.getMinimumTargetWords();
+      component.podcastForm.patchValue({ intro: 'hello there listeners', outro: 'bye now' });
+      expect(component.getMinimumTargetWords()).toBe(base + 5);
+    });
+
+    it('builds the right error message per validation failure', () => {
+      const control = component.podcastForm.get('intro')!;
+      control.setErrors(null);
+      expect(component.getTargetWordsError('intro')).toBeNull();
+
+      control.setErrors({ required: true });
+      expect(component.getTargetWordsError('intro')).toBe('Target words is required');
+
+      control.setErrors({ min: true });
+      expect(component.getTargetWordsError('intro')).toContain('Must be at least');
     });
   });
 });
