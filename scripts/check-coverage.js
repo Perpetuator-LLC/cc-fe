@@ -25,10 +25,10 @@ const { spawn } = require('node:child_process');
 // time it was last raised, so real regressions fail while run-to-run noise
 // does not. RAISE these as coverage grows — NEVER lower them.
 const COVERAGE_MINIMUMS = {
-  statements: 53.6,
-  branches: 42.5,
-  functions: 49.7,
-  lines: 54.2,
+  statements: 54.0,
+  branches: 42.7,
+  functions: 50.1,
+  lines: 54.6,
 };
 
 const ngBin = require.resolve('@angular/cli/bin/ng.js');
