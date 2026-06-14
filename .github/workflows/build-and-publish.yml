@@ -128,7 +128,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # ignore-error: a transient GHA cache backend error ("error writing
+          # layer blob: not_found", common since the cache v2 migration) must
+          # not fail the build — the layer cache is an optimization, not a
+          # build output. The image still builds, scans, and (for main) pushes.
+          cache-to: type=gha,mode=max,ignore-error=true
 
       - name: Resolve scan target tag
         id: scan-target
@@ -163,7 +167,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # ignore-error: a transient GHA cache backend error ("error writing
+          # layer blob: not_found", common since the cache v2 migration) must
+          # not fail the build — the layer cache is an optimization, not a
+          # build output. The image still builds, scans, and (for main) pushes.
+          cache-to: type=gha,mode=max,ignore-error=true
 
       # Kick off the Gitea staging deploy as soon as the image is published
       # on main. This replaces relying on Gitea's mirror-sync to fire push
