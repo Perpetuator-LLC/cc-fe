@@ -1,5 +1,5 @@
 // Copyright (c) 2025-2026 Perpetuator LLC
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { JobsWebSocketService } from './jobs-websocket.service';
 import { AuthService } from '../auth/auth.service';
 import { signal } from '@angular/core';
@@ -121,5 +121,73 @@ describe('JobsWebSocketService', () => {
       // Connection state should be disconnected
       expect(service.isConnected()).toBe(false);
     });
+  });
+
+  describe('query helpers', () => {
+    it('finds a job by uuid and filters by status', () => {
+      service.addJob(createMockJob({ uuid: 'a', status: 'PENDING' }));
+      service.addJob(createMockJob({ uuid: 'b', status: 'RUNNING' }));
+      service.addJob(createMockJob({ uuid: 'c', status: 'RUNNING' }));
+
+      expect(service.getJob('b')?.uuid).toBe('b');
+      expect(service.getJob('missing')).toBeUndefined();
+      expect(service.getJobsByStatus('RUNNING').map((j) => j.uuid)).toEqual(['c', 'b']);
+      expect(service.getJobsByStatus('PENDING').length).toBe(1);
+    });
+  });
+
+  describe('addOrUpdateJob via addJob', () => {
+    it('updates an existing job when the incoming update is newer', () => {
+      service.addJob(createMockJob({ uuid: 'a', status: 'PENDING', updatedAt: '2025-12-14T10:00:00Z' }));
+      service.addJob(createMockJob({ uuid: 'a', status: 'RUNNING', updatedAt: '2025-12-14T10:05:00Z' }));
+      expect(service.jobs().length).toBe(1);
+      expect(service.getJob('a')?.status).toBe('RUNNING');
+    });
+
+    it('skips a stale update that is older than the existing job', () => {
+      service.addJob(createMockJob({ uuid: 'a', status: 'RUNNING', updatedAt: '2025-12-14T10:05:00Z' }));
+      service.addJob(createMockJob({ uuid: 'a', status: 'PENDING', updatedAt: '2025-12-14T10:00:00Z' }));
+      expect(service.getJob('a')?.status).toBe('RUNNING');
+    });
+  });
+
+  describe('handleInitialJobs', () => {
+    it('keeps only active jobs and marks the connection live', () => {
+      service.handleInitialJobs([
+        createMockJob({ uuid: 'a', status: 'PENDING' }),
+        createMockJob({ uuid: 'b', status: 'COMPLETED' }),
+        createMockJob({ uuid: 'c', status: 'running' }),
+      ]);
+      expect(service.jobs().map((j) => j.uuid)).toEqual(['a', 'c']);
+      expect(service.isConnected()).toBeTrue();
+    });
+
+    it('ignores a non-array payload', () => {
+      service.addJob(createMockJob({ uuid: 'keep' }));
+      service.handleInitialJobs(null as unknown as Job[]);
+      expect(service.getJob('keep')).toBeTruthy();
+    });
+  });
+
+  describe('completion and failure handlers', () => {
+    it('adds a completed job, emits, and removes it after 5s', fakeAsync(() => {
+      const completed: string[] = [];
+      service.jobCompleted$.subscribe((j) => completed.push(j.uuid));
+      service.handleJobCompleted(createMockJob({ uuid: 'done', status: 'COMPLETED' }));
+      expect(service.getJob('done')).toBeTruthy();
+      expect(completed).toEqual(['done']);
+      tick(5000);
+      expect(service.getJob('done')).toBeUndefined();
+    }));
+
+    it('adds a failed job, emits, and removes it after 15s', fakeAsync(() => {
+      const failed: string[] = [];
+      service.jobFailed$.subscribe((j) => failed.push(j.uuid));
+      service.handleJobFailed(createMockJob({ uuid: 'bad', status: 'FAILED' }));
+      expect(service.getJob('bad')).toBeTruthy();
+      expect(failed).toEqual(['bad']);
+      tick(15000);
+      expect(service.getJob('bad')).toBeUndefined();
+    }));
   });
 });
