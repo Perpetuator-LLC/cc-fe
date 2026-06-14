@@ -574,18 +574,16 @@ export class TerminalBarComponent implements OnInit, OnDestroy {
           this.clearSuggestions();
         }
         return;
-      } else if (event.key === 'Tab' || event.key === ' ') {
-        // SPACE or TAB inserts the selected (or first) suggestion as a chip
+      } else if (event.key === 'Tab') {
+        // TAB inserts the selected (or first) suggestion as a chip.
+        // SPACE is intentionally NOT a commit key: it must type a literal space
+        // so multi-word company names (e.g. "constellation brands") can be
+        // searched. Commit a suggestion via Tab, Enter, or click instead.
         const idx = this.selectedSuggestionIndex();
         const suggestionToInsert = idx >= 0 ? this.suggestions()[idx] : this.suggestions()[0];
+        event.preventDefault();
         if (suggestionToInsert) {
-          event.preventDefault();
           this.addChipFromSuggestion(suggestionToInsert);
-          return;
-        }
-        // If no suggestion, let SPACE pass through normally
-        if (event.key === 'Tab') {
-          event.preventDefault();
         }
         return;
       } else if (event.key === 'Enter') {
