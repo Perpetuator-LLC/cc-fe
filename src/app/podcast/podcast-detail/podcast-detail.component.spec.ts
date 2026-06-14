@@ -378,4 +378,102 @@ describe('PodcastDetailComponentComponent', () => {
       expect(component.getTargetWordsError('intro')).toContain('Must be at least');
     });
   });
+
+  describe('telegram mode', () => {
+    it('clears the bot token when switching to the CC bot', () => {
+      component.podcastForm.patchValue({ tgBotToken: 'secret' });
+      component.onTelegramModeChange('cc_bot');
+      expect(component['telegramMode']).toBe('cc_bot');
+      expect(component.podcastForm.get('tgBotToken')?.value).toBeNull();
+    });
+
+    it('keeps the bot token in custom-bot mode', () => {
+      component.podcastForm.patchValue({ tgBotToken: 'secret' });
+      component.onTelegramModeChange('custom_bot');
+      expect(component['telegramMode']).toBe('custom_bot');
+      expect(component.podcastForm.get('tgBotToken')?.value).toBe('secret');
+    });
+
+    it('reports telegram connectivity from a Success response', () => {
+      component.podcastForm.patchValue({ tgResponse: 'Success. Connected.' });
+      expect(component.telegramConnected).toBeTrue();
+      component.podcastForm.patchValue({ tgResponse: 'Error: nope' });
+      expect(component.telegramConnected).toBeFalse();
+    });
+  });
+
+  describe('copy podcast url', () => {
+    it('errors when the url is empty', () => {
+      component.podcastForm.get('url')?.setValue('');
+      component.copyPodcastUrl();
+      expect(mockMessageService.error).toHaveBeenCalledWith('Podcast URL is empty');
+      expect(mockClipboard.copy).not.toHaveBeenCalled();
+    });
+
+    it('reports success or failure from the clipboard', () => {
+      component.podcastForm.get('url')?.setValue('https://pod.test/feed');
+      mockClipboard.copy.and.returnValue(true);
+      component.copyPodcastUrl();
+      expect(mockClipboard.copy).toHaveBeenCalledWith('https://pod.test/feed');
+      expect(mockMessageService.success).toHaveBeenCalledWith('Podcast URL copied to clipboard');
+
+      mockClipboard.copy.and.returnValue(false);
+      component.copyPodcastUrl();
+      expect(mockMessageService.error).toHaveBeenCalledWith('Failed to copy podcast URL');
+    });
+  });
+
+  describe('image and unsaved-change helpers', () => {
+    it('builds the display image url with a cache buster, or null', () => {
+      component.imageUrl = null;
+      component.thumbnailUrl = null;
+      expect(component.displayImageUrl).toBeNull();
+
+      component.thumbnailUrl = 'https://cdn.test/thumb.png';
+      component.imageCacheBuster = 42;
+      expect(component.displayImageUrl).toBe('https://cdn.test/thumb.png?t=42');
+
+      component.thumbnailUrl = 'https://cdn.test/thumb.png?v=1';
+      expect(component.displayImageUrl).toBe('https://cdn.test/thumb.png?v=1&t=42');
+      expect(component.hasPodcastImage).toBeTrue();
+    });
+
+    it('toggles the drag state on drag over and leave', () => {
+      const over = new DragEvent('dragover');
+      spyOn(over, 'preventDefault');
+      component.onImageDragOver(over);
+      expect(component.isDraggingImage).toBeTrue();
+      expect(over.preventDefault).toHaveBeenCalled();
+
+      component.onImageDragLeave(new DragEvent('dragleave'));
+      expect(component.isDraggingImage).toBeFalse();
+    });
+
+    it('gates episode creation on unsaved changes', () => {
+      component.podcastForm.markAsPristine();
+      expect(component.hasUnsavedChanges).toBeFalse();
+      expect(component.getEpisodeCreationButtonTooltip()).toBe('Create a new episode');
+      component.podcastForm.markAsDirty();
+      expect(component.hasUnsavedChanges).toBeTrue();
+      expect(component.getEpisodeCreationButtonTooltip()).toContain('save your changes');
+    });
+  });
+
+  describe('derived getters', () => {
+    it('builds the public share url only with a uuid and name', () => {
+      component.podcastForm.patchValue({ name: '' });
+      expect(component.publicShareUrl).toBe('');
+      component.podcastForm.get('uuid')?.setValue('pod-1');
+      component.podcastForm.patchValue({ name: 'My Show' });
+      expect(component.publicShareUrl).toBe('https://example.com/p/test-podcast-uuid');
+      expect(mockShareService.buildPodcastUrl).toHaveBeenCalledWith('pod-1', 'My Show');
+    });
+
+    it('falls back from description to prompt', () => {
+      component.podcastForm.patchValue({ description: '', prompt: 'the prompt' });
+      expect(component.podcastDescription).toBe('the prompt');
+      component.podcastForm.patchValue({ description: 'the description' });
+      expect(component.podcastDescription).toBe('the description');
+    });
+  });
 });
