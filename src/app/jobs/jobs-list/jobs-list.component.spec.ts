@@ -63,6 +63,22 @@ describe('JobsListComponent', () => {
       'getInterval',
       'getSymbol',
       'getExchange',
+      'hasEpisodeUuid',
+      'hasTopicUuid',
+      'hasPulseUuid',
+      'hasPulseConfigUuid',
+      'hasBlogUuid',
+      'hasArticleUuid',
+      'hasNewsUuids',
+      'hasSymbol',
+      'getEpisodeUuid',
+      'getTopicUuid',
+      'getPulseUuid',
+      'getPulseConfigUuid',
+      'getBlogUuid',
+      'getBlogName',
+      'getArticleUuid',
+      'getArticleTitle',
     ]);
     mockResearchService = jasmine.createSpyObj('ResearchService', ['getTopic']);
     mockLoadingService = jasmine.createSpyObj('LoadingService', ['show', 'hide']);
@@ -262,6 +278,70 @@ describe('JobsListComponent', () => {
       mockJobService.retryJobs.and.returnValue(of({ success: true, message: 'retried', jobs: [] as Job[] }));
       component.retryJob('job-1');
       expect(mockJobService.retryJobs).toHaveBeenCalledWith(['job-1']);
+    });
+  });
+
+  describe('entity has/get delegations', () => {
+    let job: Job;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(JobsListComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      job = { uuid: 'job-1' } as Job;
+    });
+
+    it('forwards every boolean has* query to JobDisplayService', () => {
+      const checks: [() => boolean, jasmine.Spy][] = [
+        [() => component.hasEpisodeUuid(job), mockJobDisplayService.hasEpisodeUuid],
+        [() => component.hasTopicUuid(job), mockJobDisplayService.hasTopicUuid],
+        [() => component.hasPulseUuid(job), mockJobDisplayService.hasPulseUuid],
+        [() => component.hasPulseConfigUuid(job), mockJobDisplayService.hasPulseConfigUuid],
+        [() => component.hasBlogUuid(job), mockJobDisplayService.hasBlogUuid],
+        [() => component.hasArticleUuid(job), mockJobDisplayService.hasArticleUuid],
+        [() => component.hasNewsUuids(job), mockJobDisplayService.hasNewsUuids],
+        [() => component.hasSymbol(job), mockJobDisplayService.hasSymbol],
+      ];
+      for (const [call, spy] of checks) {
+        spy.and.returnValue(true);
+        expect(call()).toBeTrue();
+        expect(spy).toHaveBeenCalledWith(job);
+      }
+    });
+
+    it('forwards every uuid get* query to JobDisplayService', () => {
+      const checks: [() => string | null, jasmine.Spy][] = [
+        [() => component.getEpisodeUuid(job), mockJobDisplayService.getEpisodeUuid],
+        [() => component.getTopicUuid(job), mockJobDisplayService.getTopicUuid],
+        [() => component.getPulseUuid(job), mockJobDisplayService.getPulseUuid],
+        [() => component.getPulseConfigUuid(job), mockJobDisplayService.getPulseConfigUuid],
+        [() => component.getBlogUuid(job), mockJobDisplayService.getBlogUuid],
+        [() => component.getArticleUuid(job), mockJobDisplayService.getArticleUuid],
+      ];
+      for (const [call, spy] of checks) {
+        spy.and.returnValue('id-1');
+        expect(call()).toBe('id-1');
+        expect(spy).toHaveBeenCalledWith(job);
+      }
+    });
+
+    it('falls back to generic blog/article titles', () => {
+      mockJobDisplayService.getBlogName.and.returnValue('');
+      mockJobDisplayService.getArticleTitle.and.returnValue('');
+      expect(component.getBlogName(job)).toBe('Blog');
+      expect(component.getArticleTitle(job)).toBe('Article');
+
+      mockJobDisplayService.getBlogName.and.returnValue('My Blog');
+      mockJobDisplayService.getArticleTitle.and.returnValue('My Article');
+      expect(component.getBlogName(job)).toBe('My Blog');
+      expect(component.getArticleTitle(job)).toBe('My Article');
+    });
+
+    it('forwards getSymbol and parseJobResult', () => {
+      mockJobDisplayService.getSymbol.and.returnValue('AAPL');
+      mockJobDisplayService.parseJobResult.and.returnValue({ message: 'ok' } as never);
+      expect(component.getSymbol(job)).toBe('AAPL');
+      expect(component.parseJobResult(job)).toEqual({ message: 'ok' } as never);
     });
   });
 });
